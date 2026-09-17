@@ -37,6 +37,28 @@ export type SocialLink = {
 
 export type NavLink = { label: string; href: string };
 
+/** Dominio por defecto mientras no haya uno real. PENDIENTE: dominio del hostal */
+const FALLBACK_URL = "https://www.enjoycomfortsansebastian.com";
+
+/**
+ * Resuelve la URL pública de forma tolerante.
+ *
+ * La variable de entorno puede llegar vacía (creada en Vercel sin valor), con
+ * espacios, o sin protocolo. Cualquiera de esas cosas rompía el build al
+ * construir `new URL(...)`, así que aquí se normaliza y, si no hay manera, se
+ * usa el dominio por defecto en vez de tumbar el despliegue.
+ */
+function resolveSiteUrl(value: string | undefined): string {
+  const raw = value?.trim();
+  if (!raw) return FALLBACK_URL;
+  const candidate = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    return new URL(candidate).origin;
+  } catch {
+    return FALLBACK_URL;
+  }
+}
+
 export const site = {
   /**
    * ¿Puede Google indexar la web?
@@ -49,7 +71,7 @@ export const site = {
   indexable: process.env.SITE_INDEXABLE === "true",
 
   /** Production URL, used for canonical URLs, sitemap and structured data */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.enjoycomfortsansebastian.com", // PENDIENTE: dominio real
+  url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
 
   brand: {
     name: "Enjoy Comfort San Sebastián",
