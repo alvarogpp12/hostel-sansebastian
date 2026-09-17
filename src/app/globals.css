@@ -1,0 +1,453 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Measured from the reference at 390 / 768 / 1440px.
+ * Brand colours and fonts are the only things you should need to touch
+ * when adapting the site for a client.
+ */
+@theme {
+  --color-beige: #edebe4;
+  --color-black: #000;
+  --color-white: #fff;
+
+  /* Tailwind v3 neutral scale (the reference was built with it) */
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-gray-50: #f9fafb;
+  --color-gray-500: #6b7280;
+  --color-red-400: #f87171;
+
+  --breakpoint-2xs: 375px;
+
+  --font-serif: var(--font-heading), "Iowan Old Style", "Apple Garamond", Baskerville, "Times New Roman", serif;
+  --font-caption: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: var(--font-karla), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+  --spacing-w: var(--space-w);
+}
+
+:root {
+  --space-w: 1rem;
+  --bg: var(--color-beige);
+  --c: var(--color-black);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --space-w: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --space-w: 3rem;
+  }
+}
+
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--c);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
+  }
+
+  @media (min-width: 1024px) {
+    html,
+    body {
+      scrollbar-width: none;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body.has-menu {
+      overflow: hidden;
+      touch-action: none;
+    }
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+@layer components {
+  .style-caption {
+    font-family: var(--font-caption);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  @media (min-width: 1024px) {
+    .style-caption {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+  }
+
+  .style-caption-xs,
+  .style-button {
+    font-family: var(--font-caption);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  @media not all and (min-width: 375px) {
+    .style-caption-xs,
+    .style-button {
+      font-size: 10px;
+    }
+  }
+
+  /* weight/opsz/tracking tuned so Newsreader matches TT Ramillas' colour and line breaks */
+  .style-heading {
+    font-family: var(--font-serif);
+    font-weight: 350;
+    font-variation-settings: "opsz" 72;
+    letter-spacing: 0.015em;
+    line-height: 1.25;
+  }
+
+  .style-button {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 1.5rem;
+    background-color: #000;
+    color: #fff;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .style-button svg {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  @media not all and (min-width: 375px) {
+    .style-button {
+      padding: 0.5rem 0.75rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .style-button:hover {
+      gap: 1rem;
+    }
+    .style-button:hover svg:not([role="status"]) {
+      transform: scale(1.25);
+    }
+  }
+
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Underlined links that "un-draw" on hover (menu + footer nav) */
+  .nested-underline a {
+    position: relative;
+    text-decoration: none;
+  }
+  .nested-underline a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(1);
+    transform-origin: left center;
+    transition: transform 0.2s ease;
+  }
+  .nested-underline a:hover::after,
+  .nested-underline a:focus-visible::after {
+    transform: scaleX(0);
+  }
+
+  @media (min-width: 1024px) {
+    .nested-arrow-animations a {
+      padding-left: 0;
+      transition: padding-left 0.2s ease;
+    }
+    .nested-arrow-animations a::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 13px;
+      height: 13px;
+      background-color: currentColor;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6'/%3E%3C/svg%3E")
+        no-repeat 50% / contain;
+      opacity: 0;
+      transform: translate(-150%, -50%);
+      transition:
+        transform 0.2s ease,
+        opacity 0.2s ease;
+    }
+    .nested-arrow-animations a:hover,
+    .nested-arrow-animations a:focus-visible {
+      padding-left: 1.5rem;
+    }
+    .nested-arrow-animations a:hover::before,
+    .nested-arrow-animations a:focus-visible::before {
+      opacity: 1;
+      transform: translateY(-50%);
+    }
+  }
+
+  .social-icon {
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background-color: var(--color-beige);
+    color: #000;
+  }
+  .social-icon svg {
+    will-change: transform;
+  }
+  .social-icon:hover svg {
+    animation: social-icon-slide-loop 0.6s ease-in-out forwards;
+  }
+
+  /* Floating-label form fields (contact form) */
+  .field {
+    position: relative;
+    padding: 0.75rem;
+    border: 1px solid var(--color-neutral-400);
+    border-radius: 0.375rem;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .field:has(:focus-visible) {
+    box-shadow: 0 0 0 2px var(--color-neutral-300);
+  }
+  @media (min-width: 1024px) {
+    .field:hover {
+      border-color: var(--color-neutral-700);
+    }
+  }
+  .field input,
+  .field textarea {
+    display: block;
+    width: 100%;
+    background: transparent;
+    outline: none;
+  }
+
+  .map-button {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(17 24 39 / 0.12);
+    border-radius: 9999px;
+    background-color: #fff;
+    box-shadow: 0 10px 20px rgb(0 0 0 / 0.08);
+  }
+  .map-button svg {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .map-button:hover svg {
+    transform: scale(1.25);
+  }
+
+  /* Hero slider progress bars */
+  .slider-pagination {
+    position: absolute;
+    right: var(--space-w);
+    bottom: var(--space-w);
+    z-index: 20;
+    display: flex;
+    width: 12rem;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  @media (min-width: 768px) {
+    .slider-pagination {
+      width: 24rem;
+      gap: 0.5rem;
+    }
+  }
+  .slider-bullet {
+    position: relative;
+    flex: 1 1 0%;
+    height: 3px;
+    overflow: hidden;
+    border-radius: 2px;
+    background-color: hsl(0 0% 100% / 0.275);
+    padding-block: 0;
+  }
+  .slider-bullet::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: #fff;
+    transform: scaleX(var(--timescale, 0));
+    transform-origin: left;
+  }
+
+  /* Accordion (business events page) */
+  .accordion-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.35s ease-in-out;
+  }
+  .accordion-content[data-open="true"] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Scroll reveal: hidden until GSAP picks the element up */
+  [data-effect] {
+    opacity: 0;
+  }
+  .no-js [data-effect],
+  [data-effect][data-revealed] {
+    opacity: 1;
+  }
+
+  /* Split-text line masks */
+  .split-line-mask {
+    overflow: clip;
+    display: block;
+  }
+
+  /* Custom scrollbar (desktop only) */
+  .scrollbar {
+    position: fixed;
+    top: 0;
+    right: 0.25rem;
+    bottom: 0;
+    z-index: 50;
+    padding: 0.25rem;
+    mix-blend-mode: difference;
+    transition: opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @media (max-width: 1023px) {
+    .scrollbar {
+      display: none;
+    }
+  }
+  .has-menu .scrollbar {
+    opacity: 0 !important;
+  }
+  .scrollbar-thumb {
+    position: absolute;
+    right: 0;
+    width: 1rem;
+    height: 1rem;
+    cursor: grab;
+    border: 1px solid hsl(60 9% 98% / 0.3);
+    border-radius: 9999px;
+    background-color: rgb(250 250 250 / 0.05);
+    backdrop-filter: blur(12px);
+    transition: background-color 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .scrollbar-thumb:hover {
+    background-color: rgb(248 250 252);
+  }
+  .lenis-scrolling .scrollbar-thumb {
+    background-color: rgb(250 250 250 / 0.4);
+  }
+
+  /* Cortinilla de entrada. El fundido va en CSS para que la web se vea
+     aunque el JavaScript falle: a los 7 s desaparece pase lo que pase. */
+  [data-intro] {
+    animation: ec-intro-out 0.45s ease 7s forwards;
+  }
+  /* Ya vista en esta visita: ni se pinta */
+  html[data-intro-visto] [data-intro] {
+    display: none;
+  }
+  [data-intro][data-leaving] {
+    animation: ec-intro-out 0.45s ease 0s forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-intro] {
+      animation-delay: 0.5s;
+    }
+  }
+}
+
+@keyframes ec-intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes social-icon-slide-loop {
+  0% {
+    transform: translateY(0);
+  }
+  45% {
+    transform: translateY(-160%);
+  }
+  46% {
+    transform: translateY(160%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Lenis recommended CSS */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-effect] {
+    opacity: 1 !important;
+  }
+}
