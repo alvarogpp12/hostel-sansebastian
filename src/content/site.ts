@@ -38,6 +38,16 @@ export type SocialLink = {
 export type NavLink = { label: string; href: string };
 
 export const site = {
+  /**
+   * ¿Puede Google indexar la web?
+   *
+   * Por defecto NO. Se activa poniendo la variable de entorno
+   * SITE_INDEXABLE=true en Vercel y volviendo a desplegar, cuando estén la
+   * dirección, el teléfono, el NIF y los precios reales. Indexar datos de
+   * relleno perjudica al hostal y tarda semanas en corregirse en Google.
+   */
+  indexable: process.env.SITE_INDEXABLE === "true",
+
   /** Production URL, used for canonical URLs, sitemap and structured data */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.enjoycomfortsansebastian.com", // PENDIENTE: dominio real
 

@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     images: [{ url: "/media/san-sebastian-bahia-la-concha.jpg", width: 2400, height: 1600, alt: "Bahía de La Concha, San Sebastián" }],
   },
   twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true },
+  robots: { index: site.indexable, follow: site.indexable },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
