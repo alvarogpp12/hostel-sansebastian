@@ -5,6 +5,7 @@ import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { site } from "@/content/site";
 import { LocalBusinessSchema } from "@/components/Schema";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 /*
  * Fuentes. Inter para los textos en versalita, Karla para el cuerpo y
@@ -66,6 +67,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Intro />
         <SmoothScroll>{children}</SmoothScroll>
         <LocalBusinessSchema />
+        <Analytics />
       </body>
     </html>
   );
