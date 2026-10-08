@@ -1,8 +1,9 @@
 # Enjoy Comfort San Sebastián — web
 
 Next.js 16 (App Router) + Tailwind CSS 4, lista para desplegar en Vercel.
-Hostal económico en San Sebastián: el objetivo de la web es que reservar cueste
-lo mínimo posible en clics, y posicionar para «hostal barato en San Sebastián».
+Pensión de una estrella en el centro de San Sebastián (Enjoy Comfort): el
+objetivo de la web es que reservar cueste lo mínimo posible en clics, y
+posicionar para «alojamiento céntrico en San Sebastián».
 
 ## Arrancar en local
 
@@ -15,9 +16,9 @@ npm run lint
 
 ## El embudo de reserva
 
-1. **Home**: foto de San Sebastián a pantalla completa con las tres cards de
+1. **Home**: foto de San Sebastián a pantalla completa con las cuatro cards de
    habitación encima (tipo · capacidad · «desde XX €/noche» · botón Reservar).
-2. Cada card lleva a `/reservar?habitacion=individual|doble|triple`.
+2. Cada card lleva a `/reservar?habitacion=doble|dos-camas|doble-privado|familiar`.
 3. El formulario llega **con la habitación ya marcada** y el nº de personas
    ajustado al máximo de esa habitación; solo hay que poner fechas y datos.
 4. En móvil las cards se deslizan en horizontal; en la lista de habitaciones
@@ -49,12 +50,12 @@ aparece en las cards, en la lista y en el schema de buscadores.
 
 ## SEO
 
-- `<h1>` de la home: «Hostal barato en San Sebastián», con el titular grande
+- `<h1>` de la home: «Tu alojamiento céntrico en San Sebastián», con el titular grande
   como texto de apoyo. La palabra clave aparece de forma natural en los textos,
   sin bloques de relleno ni texto oculto (Google penaliza ambas cosas).
 - Metadatos, canonical, Open Graph y keywords en `site.seo`; cada página tiene
   su propio título y descripción.
-- Datos estructurados (`src/components/Schema.tsx`): ficha `Hostel` con
+- Datos estructurados (`src/components/Schema.tsx`): ficha `LodgingBusiness` (una estrella) con
   dirección y servicios, y `FAQPage` con las preguntas de la home, que puede
   salir desplegada en los resultados de búsqueda.
 - `sitemap.xml` y `robots.txt` se generan solos.
@@ -152,7 +153,7 @@ se mantienen, y hay un botón para importar las reservas ya existentes.
 ### Antes de contratar, dos cosas por escrito
 
 1. **Chekin**: que confirme el envío automático al *Registro Hostelero de la
-   Ertzaintza* **para un hostal**. Aquí el parte de viajeros NO va a
+   Ertzaintza* **para una pensión**. Aquí el parte de viajeros NO va a
    SES.HOSPEDAJES: Euskadi tiene su propio sistema, y la documentación de Chekin
    en Beds24 habla de «las autoridades» sin nombrar Euskadi.
 2. **TicketBAI**: obligatorio en Gipuzkoa desde enero de 2024. Beds24 no lo
@@ -195,8 +196,8 @@ Para sustituir cualquiera, deja el mismo nombre de archivo o cambia la ruta en
 ## Pendiente de decidir
 
 - **Logo**: la marca (el trazo de la bahía) y el logotipo de texto son
-  provisionales; falta el logo real del hostal.
+  provisionales; falta el logo real del alojamiento.
 - **Tipografía de titulares**: Newsreader (libre). La referencia original usaba
   una fuente de pago; si se compra, se cambia en `src/app/layout.tsx`.
 - **Mapa**: iframe de Google Maps con la ciudad, porque aún no hay dirección
-  pública. Con la dirección real se centra en el hostal.
+  pública. Con la dirección real se centra en el alojamiento.

@@ -37,7 +37,7 @@ export type SocialLink = {
 
 export type NavLink = { label: string; href: string };
 
-/** Dominio por defecto mientras no haya uno real. PENDIENTE: dominio del hostal */
+/** Dominio por defecto mientras no haya uno real. PENDIENTE: dominio del alojamiento */
 const FALLBACK_URL = "https://www.enjoycomfortsansebastian.com";
 
 /**
@@ -66,7 +66,7 @@ export const site = {
    * Por defecto NO. Se activa poniendo la variable de entorno
    * SITE_INDEXABLE=true en Vercel y volviendo a desplegar, cuando estén la
    * dirección, el teléfono, el NIF y los precios reales. Indexar datos de
-   * relleno perjudica al hostal y tarda semanas en corregirse en Google.
+   * relleno perjudica al alojamiento y tarda semanas en corregirse en Google.
    */
   indexable: process.env.SITE_INDEXABLE === "true",
 
@@ -76,22 +76,23 @@ export const site = {
   brand: {
     name: "Enjoy Comfort San Sebastián",
     description:
-      "Tu hostal económico en San Sebastián. Habitaciones privadas individuales, dobles y triples con baño compartido.",
+      "Tu alojamiento céntrico en San Sebastián. Habitaciones dobles, de dos camas y familiares, con baño compartido o privado.",
     wordmark: { upright: "ENJOY", italic: "Comfort" },
     slogan: "Descansa a gusto. Disfruta de Donosti.",
   },
 
   seo: {
-    /** Main keyword target: "hostal barato San Sebastián" */
-    title: "Hostal económico en San Sebastián | Enjoy Comfort",
+    /** Main keyword target: "alojamiento céntrico San Sebastián" */
+    title: "Alojamiento céntrico en San Sebastián | Enjoy Comfort",
     description:
-      "Hostal económico en San Sebastián con habitaciones privadas individuales, dobles y triples y baños compartidos. Consulta disponibilidad para tus fechas.",
+      "Alojamiento céntrico en San Sebastián, junto a la playa de Gros y a pocos minutos de la Parte Vieja. Habitaciones dobles, de dos camas y familiares con baño compartido o privado.",
     keywords: [
-      "hostal económico San Sebastián",
-      "hostal barato San Sebastián",
-      "habitación económica en San Sebastián",
-      "alojamiento económico Donostia",
-      "habitaciones privadas San Sebastián",
+      "alojamiento céntrico San Sebastián",
+      "pensión en San Sebastián",
+      "alojamiento céntrico Donostia",
+      "alojamiento cerca de la playa de Gros",
+      "habitación familiar San Sebastián",
+      "habitación doble San Sebastián",
     ],
   },
 
@@ -174,7 +175,7 @@ export const site = {
     close: "Cerrar",
     book: "Consultar disponibilidad",
     perNight: "/noche",
-    footerIntro: "Tu hostal económico en San Sebastián. Habitaciones privadas individuales, dobles y triples con baño compartido.",
+    footerIntro: "Tu alojamiento céntrico en San Sebastián. Habitaciones dobles, de dos camas y familiares, con baño compartido o privado.",
     footerContactTitle: "¿Tienes alguna pregunta?",
     footerContactText: "Escríbenos y te ayudaremos a preparar tu estancia.",
     footerExplore: "Explora Enjoy Comfort",

@@ -6,7 +6,7 @@ import type { RoomId } from "./rooms";
  * La web NO gestiona disponibilidad ni cobros. Se encarga de elegir habitación,
  * fechas y personas, y entrega al huésped al motor de Beds24 con todo
  * preseleccionado. Beds24 pone disponibilidad real, channel manager de
- * Booking.com, cobro de la señal (con la cuenta de Stripe del hostal) y el
+ * Booking.com, cobro de la señal (con la cuenta de Stripe del alojamiento) y el
  * correo de confirmación.
  *
  * ── Qué hay que rellenar aquí cuando exista la cuenta ─────────────────────
@@ -23,9 +23,10 @@ export const booking = {
 
   /** Nuestro id de habitación → roomid de Beds24. PENDIENTE: ids reales */
   roomIds: {
-    individual: null,
     doble: null,
-    triple: null,
+    "dos-camas": null,
+    "doble-privado": null,
+    familiar: null,
   } as Record<RoomId, number | null>,
 
   /** Página de reserva de Beds24 (documentada en su wiki, Embedded Iframe) */
@@ -51,7 +52,7 @@ export const booking = {
   currency: "eur",
 
   /**
-   * Señal que se cobra al reservar. El resto se paga en el hostal.
+   * Señal que se cobra al reservar. El resto se paga en el alojamiento.
    * - "first-night": el precio de la primera noche (lo recomendado).
    * - "percent": un porcentaje del total, en `depositPercent`.
    * - "full": el importe completo.

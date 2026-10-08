@@ -38,7 +38,7 @@ export function BookingHero() {
           as="ul"
           effect="fade"
           delay={1.1}
-          className="-mx-w flex snap-x snap-mandatory gap-2 overflow-x-auto px-w pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0"
+          className="-mx-w flex snap-x snap-mandatory gap-2 overflow-x-auto px-w pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-2 lg:overflow-visible lg:px-0"
         >
           {rooms.map((room) => (
             <li key={room.id} className="w-[86%] shrink-0 snap-start sm:w-[48%] lg:w-auto">

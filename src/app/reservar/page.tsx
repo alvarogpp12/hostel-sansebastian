@@ -7,7 +7,7 @@ import { bookingPage } from "@/content/pages";
 export const metadata: Metadata = {
   title: "Reservar habitación en San Sebastián",
   description:
-    "Reserva online en nuestro hostal barato de San Sebastián: elige habitación y fechas, paga la señal y recibe la confirmación al instante. Reserva directa sin comisiones.",
+    "Reserva online en nuestro alojamiento céntrico de San Sebastián: elige habitación y fechas, paga la señal y recibe la confirmación al instante. Reserva directa sin comisiones.",
   alternates: { canonical: "/reservar" },
 };
 

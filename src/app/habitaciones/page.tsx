@@ -8,9 +8,9 @@ import { roomsPage } from "@/content/pages";
 import { rooms } from "@/content/rooms";
 
 export const metadata: Metadata = {
-  title: "Habitaciones baratas en San Sebastián",
+  title: "Habitaciones en el centro de San Sebastián",
   description:
-    "Habitaciones individuales, dobles y triples en un hostal barato de San Sebastián. Habitación privada, baño compartido y reserva directa sin comisiones.",
+    "Habitaciones dobles, de dos camas y familiares en el centro de San Sebastián, con baño compartido o privado. Reserva directa sin comisiones.",
   alternates: { canonical: "/habitaciones" },
 };
 
