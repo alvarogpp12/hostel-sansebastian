@@ -124,27 +124,21 @@ export const practical = {
 export const bookingPage = {
   title: "Reservar",
   formTitle: "Reserva tu habitación",
-  formIntro: "Elige habitación, fechas y personas, deja tus datos y paga la señal. Recibirás la confirmación por email al instante.",
+  formIntro:
+    "Elige habitación y fechas y consulta al momento la disponibilidad y el precio. La reserva se confirma en el acto, sin intermediarios ni comisiones.",
   fields: {
     room: "Habitación",
     checkIn: "Entrada",
     checkOut: "Salida",
-    guests: "Personas",
-    holder: "Datos de la reserva",
-    firstname: "Nombre",
-    lastname: "Apellidos",
-    email: "Email",
-    telephone: "Teléfono",
   },
   nights: (n: number) => (n === 1 ? "1 noche" : `${n} noches`),
-  submit: "Pagar y reservar",
-  sending: "Conectando con el pago…",
-  /** Nota bajo el resumen de precio */
-  priceNotice:
-    "Se paga ahora una señal y el resto en el alojamiento. El precio final, con impuestos, se confirma antes de pagar.",
-  /** Aviso bajo el botón: explica que el pago ocurre en el motor de reservas */
+  submit: "Ver disponibilidad y precio",
+  /** Aviso bajo el botón: explica que la reserva y el pago ocurren en el motor */
   engineNotice:
-    "Al continuar se comprueba la disponibilidad y se realiza el pago de forma segura. Al reservar aceptas las",
+    "Te mostramos la disponibilidad real para tus fechas. Los datos y el pago se completan de forma segura en nuestro sistema de reservas. Al reservar aceptas las",
+  engineTitle: "Sistema de reservas de Enjoy Comfort",
+  engineFallback: "¿No se carga el sistema de reservas?",
+  engineFallbackLink: "Ábrelo en una pestaña nueva",
   /** Se muestra mientras el motor de reservas no está configurado */
   notConfigured:
     "La reserva online estará disponible en cuanto activemos el sistema de reservas. Mientras tanto, escríbenos o llámanos y te confirmamos disponibilidad:",

@@ -19,8 +19,8 @@ npm run lint
 1. **Home**: foto de San Sebastián a pantalla completa con las cuatro cards de
    habitación encima (tipo · capacidad · «desde XX €/noche» · botón Reservar).
 2. Cada card lleva a `/reservar?habitacion=doble|dos-camas|doble-privado|familiar`.
-3. El formulario llega **con la habitación ya marcada** y el nº de personas
-   ajustado al máximo de esa habitación; solo hay que poner fechas y datos.
+3. El formulario llega **con la habitación ya marcada**; solo hay que poner
+   fechas y se abre el motor de Redforts con todo preseleccionado.
 4. En móvil las cards se deslizan en horizontal; en la lista de habitaciones
    cada una tiene su propio botón «Reservar» que salta el paso intermedio.
 
@@ -65,103 +65,47 @@ aparece en las cards, en la lista y en el schema de buscadores.
 **Para que esto funcione de verdad falta**: dominio real en `site.url`,
 dirección y teléfono (van al schema), y darlo de alta en Google Business Profile.
 
-## Reservas: Stripe (cobro) + Beds24 (inventario y canales)
+## Reservas: Redforts
 
-El huésped reserva y paga **dentro de la web**. El reparto de papeles:
+Redforts es el motor de reservas y el PMS: tiene la disponibilidad real, los
+precios, el channel manager (Booking.com y demás portales), el cobro y el
+correo de confirmación. La web no guarda ni cobra nada.
 
-- **La web**: elige habitación, fechas y personas, recoge los datos del titular
-  y lanza el pago. No toca ni un dato de tarjeta (lo hace la pantalla de Stripe).
-- **Stripe**: cobra la señal.
-- **Beds24**: tiene la disponibilidad real, sincroniza Booking.com y los demás
-  portales, guarda la reserva y manda la confirmación.
-- **Chekin**: al ver la reserva en Beds24, envía al huésped el registro de
-  viajeros para la policía.
+### Cómo funciona
 
-### El flujo, y por qué está en este orden
+1. En `/reservar` el huésped elige habitación y fechas (la habitación llega
+   marcada si viene de una card).
+2. Al pulsar «Ver disponibilidad y precio», debajo se abre el motor de Redforts
+   incrustado con esas fechas y esa habitación preseleccionadas. Ahí elige
+   tarifa, número de personas, deja sus datos y paga.
+3. El iframe se ajusta solo a la altura del motor (Redforts avisa con mensajes
+   `ohbe_<altura>`), y hay un enlace para abrirlo en una pestaña nueva por si
+   algún navegador lo bloquea.
 
-1. `POST /api/checkout` valida los datos y crea una sesión de Stripe Checkout.
-   El importe se **retiene**, no se cobra (`captureMethod: "manual"`).
-2. El huésped paga en la pantalla de Stripe y vuelve a `/reservar/confirmada`.
-3. `POST /api/stripe/webhook` recibe el aviso de Stripe y entonces:
-   comprueba en Beds24 que la habitación **sigue** libre, crea la reserva y solo
-   entonces cobra de verdad. Si ya no está, anula la retención y el huésped no
-   paga nada.
+La URL es la misma que monta el plugin oficial de Redforts para WordPress:
+`https://booking.redforts.com/es/iframe/{beCode}/?arrival=AAAA-MM-DD&departure=AAAA-MM-DD&acco={id}`.
 
-Ese orden existe por un motivo: entre que alguien rellena el formulario y paga
-pueden pasar minutos, y en ese hueco Booking.com puede vender la última cama.
-Cobrar primero y comprobar después significa devolver dinero (y Stripe no
-devuelve su comisión).
+### Para activarlo
 
-**Contrapartida de la retención**: Stripe no admite Bizum con pago retenido, así
-que en modo `"manual"` solo hay tarjeta. Si se prefiere ofrecer Bizum, cambiar
-`captureMethod` a `"automatic"` en `src/content/booking.ts` y asumir la
-devolución en el caso raro de que la habitación se haya vendido.
+En `src/content/booking.ts`:
 
-### Estado
+- `beCode`: el código del motor. En Redforts, Configuración > Motor de reservas
+  > Integración: es lo que va después de `/iframe/` en el enlace del motor.
+- `accoIds`: el id de cada tipo de habitación en Redforts. Si alguno se deja en
+  `null`, el motor abre mostrando todas las habitaciones.
 
-| Pieza | Estado |
-| --- | --- |
-| Formulario a pantalla partida | ✅ hecho |
-| Creación de la sesión de pago (`/api/checkout`) | ✅ hecho |
-| Página de vuelta (`/reservar/confirmada`) | ✅ hecho |
-| Webhook con verificación de firma | ✅ hecho |
-| Consultar disponibilidad en Beds24 | ⏳ falta la cuenta |
-| Crear la reserva en Beds24 y capturar el cobro | ⏳ falta la cuenta |
+Mientras `beCode` sea `null`, la web no enlaza al motor: enseña el teléfono y el
+email del alojamiento y explica que la reserva online aún no está activa.
 
-Los dos pendientes están marcados con `TODO(beds24)` en
-`src/app/api/stripe/webhook/route.ts`. No se pueden escribir a ciegas: hay que
-poder llamar a la API de verdad para probarlos.
+### A confirmar con Redforts
 
-**Mientras falte cualquiera de las dos piezas, no se cobra a nadie.**
-`/api/checkout` responde 503 y la web enseña el teléfono y el email en lugar del
-botón de pagar. No hay forma de que un huésped pague sin que su reserva se cree.
-
-### Poner Stripe en marcha
-
-1. Crear cuenta en Stripe y copiar `.env.example` a `.env.local` con la clave
-   **de prueba** (`sk_test_...`).
-2. Webhook en local:
-   ```bash
-   stripe listen --forward-to localhost:3000/api/stripe/webhook
-   ```
-   Copiar el `whsec_...` que imprime a `STRIPE_WEBHOOK_SECRET`.
-3. En producción, crear el endpoint en Stripe apuntando a
-   `https://TU-DOMINIO/api/stripe/webhook` con los eventos
-   `checkout.session.completed` y `checkout.session.expired`.
-4. Tarjeta de prueba: `4242 4242 4242 4242`, cualquier fecha futura y CVC.
-
-Comisión de Stripe en España: 1,5% + 0,25 € por cobro con tarjeta europea.
-
-### La señal
-
-Se configura en `src/content/booking.ts`: por defecto el precio de la primera
-noche (`depositType: "first-night"`). También admite un porcentaje o el importe
-completo. **Sin precios en `src/content/rooms.ts` no se puede cobrar**, así que
-las tarifas reales son un requisito previo.
-
-### Beds24: para activarlo
-
-En `src/content/booking.ts`: `propId` (SETTINGS > PROPERTIES) y los `roomIds`
-(SETTINGS > PROPERTIES > ROOMS). El token de la API se genera en
-SETTINGS > MARKETPLACE > API y va en `.env.local`.
-
-Verificado en su documentación: la conexión con Booking.com se pide desde el
-extranet de Booking (Cuenta > Proveedor de conectividad), es bidireccional
-marcando «Reservas» y «Tarifas y disponibilidad», el anuncio y las valoraciones
-se mantienen, y hay un botón para importar las reservas ya existentes.
-
-### Antes de contratar, dos cosas por escrito
-
-1. **Chekin**: que confirme el envío automático al *Registro Hostelero de la
-   Ertzaintza* **para una pensión**. Aquí el parte de viajeros NO va a
-   SES.HOSPEDAJES: Euskadi tiene su propio sistema, y la documentación de Chekin
-   en Beds24 habla de «las autoridades» sin nombrar Euskadi.
-2. **TicketBAI**: obligatorio en Gipuzkoa desde enero de 2024. Beds24 no lo
-   cubre. Confirmar que las facturas las emite la gestoría con software
-   homologado.
-
-El **impuesto turístico de Donostia** entra en vigor el 1 de enero de 2027 (por
-persona y noche, tope de 6 noches). Preguntar a Beds24 si lo soporta.
+1. **Registro de viajeros**: que envíe los partes al *Registro Hostelero de la
+   Ertzaintza* (Euskadi no usa SES.HOSPEDAJES).
+2. **TicketBAI**: obligatorio en Gipuzkoa desde enero de 2024.
+3. **Impuesto turístico de Donostia**: entra en vigor el 1 de enero de 2027 (por
+   persona y noche, tope de 6 noches).
+4. Que el idioma `es` del motor esté activado (si se quiere otro, se cambia
+   `lang` en `booking.ts`).
 
 ## Newsletter — requiere backend
 
@@ -177,8 +121,8 @@ Marcados con `PENDIENTE` en `src/content/site.ts`:
 - Email y teléfono reales.
 - Dominio definitivo.
 - Perfiles de redes sociales.
-- **Precios por tipo de habitación** (aquí para mostrarlos, y en Beds24 para cobrarlos).
-- Cuenta de Beds24 y de Chekin: `propId` y los `roomIds`.
+- **Precios por tipo de habitación** (aquí para mostrarlos, y en Redforts para cobrarlos).
+- Cuenta de Redforts: `beCode` y los `accoIds` (`src/content/booking.ts`).
 - Horarios de check-in/check-out, condiciones de pago y cancelación, idiomas
   de atención (`src/content/pages.ts`, sección Info práctica).
 - Textos legales de privacidad y términos.
