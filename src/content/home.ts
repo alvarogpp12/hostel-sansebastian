@@ -129,3 +129,11 @@ export const home = {
     ],
   },
 };
+
+/** Pantalla de "Próximamente" (ver `site.comingSoon`) */
+export const comingSoon = {
+  srTitle: "Enjoy Comfort San Sebastián: próximamente",
+  eyebrow: "Céntrico, cómodo y tranquilo",
+  title: "Estamos trabajando en nuestra nueva web",
+  text: "Muy pronto podrás conocer nuestras habitaciones y reservar online. ¡Te esperamos en Donosti!",
+};

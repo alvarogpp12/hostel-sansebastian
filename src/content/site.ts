@@ -37,8 +37,8 @@ export type SocialLink = {
 
 export type NavLink = { label: string; href: string };
 
-/** Dominio por defecto mientras no haya uno real. PENDIENTE: dominio del alojamiento */
-const FALLBACK_URL = "https://www.enjoycomfortsansebastian.com";
+/** Dominio por defecto si NEXT_PUBLIC_SITE_URL no está definida */
+const FALLBACK_URL = "https://enjoycomfort.com";
 
 /**
  * Resuelve la URL pública de forma tolerante.
@@ -69,6 +69,16 @@ export const site = {
    * relleno perjudica al alojamiento y tarda semanas en corregirse en Google.
    */
   indexable: process.env.SITE_INDEXABLE === "true",
+
+  /**
+   * Pantalla de "Próximamente".
+   *
+   * En producción (enjoycomfort.com) se ve SOLO esa pantalla hasta que se
+   * ponga la variable de entorno SITE_LAUNCHED=true en Vercel y se vuelva a
+   * desplegar. En local y en los despliegues de vista previa se ve la web
+   * completa, para poder seguir trabajando en ella.
+   */
+  comingSoon: process.env.VERCEL_ENV === "production" && process.env.SITE_LAUNCHED !== "true",
 
   /** Production URL, used for canonical URLs, sitemap and structured data */
   url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),

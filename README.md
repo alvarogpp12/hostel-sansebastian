@@ -14,6 +14,16 @@ npm run build && npm start   # build de producción
 npm run lint
 ```
 
+## Pantalla de «Próximamente»
+
+En producción (enjoycomfort.com) **solo se ve una pantalla de «Estamos
+trabajando en nuestra nueva web»** con el logo animado, en cualquier URL. En
+local y en las vistas previas de Vercel se ve la web completa.
+
+Para abrir la web: en Vercel > Settings > Environment Variables, añadir
+`SITE_LAUNCHED=true` en Production y volver a desplegar. Los textos de la
+pantalla están en `src/content/home.ts` (`comingSoon`).
+
 ## El embudo de reserva
 
 1. **Home**: foto de San Sebastián a pantalla completa con las cuatro cards de

@@ -391,9 +391,9 @@
   }
 
   /* Cortinilla de entrada. El fundido va en CSS para que la web se vea
-     aunque el JavaScript falle: a los 7 s desaparece pase lo que pase. */
+     aunque el JavaScript falle: a los 5,5 s desaparece pase lo que pase. */
   [data-intro] {
-    animation: ec-intro-out 0.45s ease 7s forwards;
+    animation: ec-intro-out 0.45s ease 5.5s forwards;
   }
   /* Ya vista en esta visita: ni se pinta */
   html[data-intro-visto] [data-intro] {
@@ -406,6 +406,23 @@
     [data-intro] {
       animation-delay: 0.5s;
     }
+  }
+
+  /* Pantalla de "Próximamente": el texto aparece cuando acaba el logo (3,6 s) */
+  [data-coming-soon-text] {
+    opacity: 0;
+    animation: ec-fade-in 0.8s ease 3.3s forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-coming-soon-text] {
+      animation-delay: 0s;
+    }
+  }
+}
+
+@keyframes ec-fade-in {
+  to {
+    opacity: 1;
   }
 }
 

@@ -14,17 +14,17 @@ import { Logo } from "@/components/brand/Logo";
  *    que al navegar entre páginas o al volver atrás no se repite.
  *  - **Se puede saltar.** Clic, tecla o rueda del ratón la cierran al instante.
  *  - **Nunca deja la web bloqueada.** Se cierra sola con una animación CSS
- *    aunque el JavaScript falle, y hay un tope de 7 s por si la carga se
+ *    aunque el JavaScript falle, y hay un tope de 5,5 s por si la carga se
  *    atasca. El contenido se renderiza debajo desde el principio: los
  *    buscadores lo ven igual y la cortinilla no entra en el HTML inicial.
  *  - **Movimiento reducido.** Quien lo tenga activado ve el logo quieto y la
  *    cortinilla dura medio segundo.
  */
 
-/** Duración de la animación del SVG, según las instrucciones de marca */
-const ANIMATION_MS = 5050;
+/** Duración de la animación del SVG (5,05 s de la marca, un 40 % más rápida) */
+const ANIMATION_MS = 3600;
 const FADE_MS = 450;
-const MAX_MS = 7000;
+const MAX_MS = 5500;
 const STORAGE_KEY = "ec-intro-visto";
 
 export function Intro() {
