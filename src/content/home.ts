@@ -5,16 +5,26 @@ export const home = {
   hero: {
     /** H1: lleva la palabra clave, en versalita sobre el titular grande */
     h1: "Tu alojamiento céntrico en San Sebastián",
-    title: ["Descansa a gusto.", "Disfruta de Donosti."],
+    title: ["Céntrico, cómodo", "y tranquilo."],
     slides: [media.city.bay, media.city.aerial, media.city.comb],
     cardsLabel: "Encuentra tu habitación",
   },
 
   intro: {
-    eyebrow: "Céntrico, cómodo y tranquilo",
-    paragraphs: [
-      "Ubicado en el barrio preferido por los donostiarras, Enjoy Comfort te ofrece distintos tipos de habitaciones para que puedas organizarte según con quién vayas. Aquí encontrarás un lugar céntrico, cómodo y tranquilo que te pondrá a tiro de piedra los principales atractivos de la ciudad.",
-    ],
+    eyebrow: "Bienvenido a Enjoy Comfort",
+    title: "A tiro de piedra de lo mejor de Donosti",
+    text: "Ubicado en el barrio preferido por los donostiarras, Enjoy Comfort te ofrece distintos tipos de habitaciones para que puedas organizarte según con quién vayas. Aquí encontrarás un lugar céntrico, cómodo y tranquilo que te pondrá a tiro de piedra los principales atractivos de la ciudad.",
+    link: { label: "Ver habitaciones", href: "/habitaciones" },
+    card: {
+      image: media.rooms.double[0],
+      title: "Lo que vas a encontrar",
+      items: [
+        { icon: "bed", text: "Cuatro tipos de habitación, de 1 a 4 personas" },
+        { icon: "shower", text: "Con baño compartido o privado" },
+        { icon: "waves", text: "Playa de Gros y Kursaal a un paseo" },
+        { icon: "marker", text: "Parte Vieja y centro a pocos minutos" },
+      ] satisfies { icon: IconName; text: string }[],
+    },
   },
 
   rooms: {

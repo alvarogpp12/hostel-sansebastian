@@ -78,7 +78,7 @@ export const site = {
     description:
       "Tu alojamiento céntrico en San Sebastián. Habitaciones dobles, de dos camas y familiares, con baño compartido o privado.",
     wordmark: { upright: "ENJOY", italic: "Comfort" },
-    slogan: "Descansa a gusto. Disfruta de Donosti.",
+    slogan: "Céntrico, cómodo y tranquilo.",
   },
 
   seo: {
