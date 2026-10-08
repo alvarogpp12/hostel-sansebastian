@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Arrow, Icon } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
 import { TransitionLink } from "@/components/TransitionLink";
-import { Frame } from "@/components/ui";
+import { ButtonLink, Frame } from "@/components/ui";
 import { home } from "@/content/home";
 import { hasPrice, priceLabel, rooms } from "@/content/rooms";
 import { site } from "@/content/site";
@@ -38,7 +38,7 @@ export function BookingHero() {
           as="ul"
           effect="fade"
           delay={1.1}
-          className="-mx-w flex snap-x snap-mandatory gap-2 overflow-x-auto px-w pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0"
+          className="-mx-w flex snap-x snap-mandatory gap-2 overflow-x-auto px-w pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-2 lg:overflow-visible lg:px-0"
         >
           {rooms.map((room) => (
             <li key={room.id} className="w-[86%] shrink-0 snap-start sm:w-[48%] lg:w-auto">
@@ -79,17 +79,42 @@ export function BookingHero() {
 }
 
 export function HomeIntro() {
-  const { eyebrow, paragraphs } = home.intro;
+  const { eyebrow, title, text, link, card } = home.intro;
   return (
-    <section className="px-w pt-24 pb-32">
-      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6">
-        <Reveal as="h2" effect="delayedSplit" className="style-caption text-center">
-          {eyebrow}
-        </Reveal>
-        <Reveal effect="delayedFade" className="style-heading grid gap-4 text-center text-lg !leading-snug 2xs:text-xl lg:text-3xl">
-          {paragraphs.map((p) => (
-            <p key={p.slice(0, 24)}>{p}</p>
-          ))}
+    <section className="px-w py-24 lg:py-32">
+      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-12 lg:gap-w">
+        <div className="grid gap-6 lg:col-span-6">
+          <Reveal as="p" effect="delayedSplit" className="style-caption">
+            {eyebrow}
+          </Reveal>
+          <Reveal as="h2" effect="delayedSplit" className="style-heading text-2xl !leading-tight lg:text-4xl">
+            {title}
+          </Reveal>
+          <Reveal as="p" effect="delayedFade" className="max-w-[52ch] text-base leading-relaxed lg:text-lg">
+            {text}
+          </Reveal>
+          <Reveal effect="delayedFade">
+            <ButtonLink href={link.href} icon="right" className="w-fit">
+              {link.label}
+            </ButtonLink>
+          </Reveal>
+        </div>
+
+        <Reveal effect="delayedFade" className="lg:col-span-5 lg:col-start-8">
+          <div className="grid gap-5 rounded-lg bg-white p-2 pb-6">
+            <Frame image={card.image} className="aspect-[4/3]" sizes="(min-width: 1024px) 40vw, 100vw" />
+            <div className="grid gap-4 px-4">
+              <h3 className="style-heading text-lg lg:text-xl">{card.title}</h3>
+              <ul className="grid gap-2.5">
+                {card.items.map((it) => (
+                  <li key={it.text} className="flex items-center gap-3 text-sm">
+                    <Icon name={it.icon} className="size-4 shrink-0" />
+                    <span>{it.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </Reveal>
       </div>
     </section>

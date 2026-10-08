@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Karla, Newsreader } from "next/font/google";
+import { ComingSoon } from "@/components/ComingSoon";
 import { Intro } from "@/components/Intro";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { site } from "@/content/site";
@@ -56,17 +57,25 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body>
-        {/* Se ejecuta antes de pintar el resto del body: si la cortinilla ya
-            se vio en esta visita, el CSS la oculta y no se ve ni un fotograma. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              'try{if(sessionStorage.getItem("ec-intro-visto")==="1")document.documentElement.dataset.introVisto="1"}catch(e){}',
-          }}
-        />
-        <Intro />
-        <SmoothScroll>{children}</SmoothScroll>
-        <LocalBusinessSchema />
+        {site.comingSoon ? (
+          // Web aún no abierta: solo la pantalla de "Próximamente", sin cabecera,
+          // pie ni cortinilla (el logo animado ya va en la propia pantalla).
+          <ComingSoon />
+        ) : (
+          <>
+            {/* Se ejecuta antes de pintar el resto del body: si la cortinilla ya
+                se vio en esta visita, el CSS la oculta y no se ve ni un fotograma. */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html:
+                  'try{if(sessionStorage.getItem("ec-intro-visto")==="1")document.documentElement.dataset.introVisto="1"}catch(e){}',
+              }}
+            />
+            <Intro />
+            <SmoothScroll>{children}</SmoothScroll>
+            <LocalBusinessSchema />
+          </>
+        )}
         <Analytics />
       </body>
     </html>

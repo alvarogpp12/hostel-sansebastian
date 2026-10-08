@@ -9,7 +9,7 @@ import { site } from "@/content/site";
 export const metadata: Metadata = {
   title: "Ubicación y qué ver en San Sebastián",
   description:
-    "Dónde estamos y qué ver en San Sebastián gastando poco: La Concha, el Peine del Viento, el monte Urgull y rutas de pintxos cerca de nuestro hostal barato.",
+    "Un alojamiento céntrico junto a la playa de Gros y a un paseo de la Parte Vieja. Qué ver cerca: La Concha, el Peine del Viento, el monte Urgull y rutas de pintxos.",
   alternates: { canonical: "/ubicacion" },
 };
 
@@ -22,8 +22,10 @@ export default function LocationPage() {
           <Reveal as="h1" effect="split" className="style-heading text-xl lg:text-3xl">
             {locationPage.title}
           </Reveal>
-          <Reveal as="p" effect="fade" delay={0.5} className="text-base leading-normal lg:max-w-[60ch]">
-            {locationPage.intro}
+          <Reveal effect="fade" delay={0.5} className="grid gap-4 text-base leading-normal lg:max-w-[60ch]">
+            {locationPage.intro.map((p) => (
+              <p key={p.slice(0, 24)}>{p}</p>
+            ))}
           </Reveal>
         </header>
 

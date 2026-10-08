@@ -5,7 +5,7 @@ import { site } from "@/content/site";
 /**
  * Datos estructurados para buscadores (schema.org).
  *
- * Refuerzan el posicionamiento de "hostal barato en San Sebastián" sin añadir
+ * Refuerzan el posicionamiento de "alojamiento céntrico en San Sebastián" sin añadir
  * texto visible. Los precios solo se publican cuando están confirmados
  * (`priceFrom !== null`): nunca se declara un precio inventado.
  */
@@ -23,11 +23,13 @@ export function LocalBusinessSchema() {
     <Json
       data={{
         "@context": "https://schema.org",
-        "@type": "Hostel",
+        // Pensión de una estrella: no es un hostel, así que va como alojamiento genérico
+        "@type": "LodgingBusiness",
         name: site.brand.name,
         description: site.seo.description,
         url: site.url,
         image: `${site.url}/media/habitacion-doble-1.jpg`,
+        starRating: { "@type": "Rating", ratingValue: 1 },
         email: site.contact.email,
         telephone: site.contact.phoneHref.replace("tel:", ""),
         address: {
@@ -43,7 +45,8 @@ export function LocalBusinessSchema() {
           : {}),
         amenityFeature: [
           { "@type": "LocationFeatureSpecification", name: "Habitación privada", value: true },
-          { "@type": "LocationFeatureSpecification", name: "Baño compartido", value: true },
+          { "@type": "LocationFeatureSpecification", name: "Habitaciones con baño privado", value: true },
+          { "@type": "LocationFeatureSpecification", name: "Habitaciones con baño compartido", value: true },
           { "@type": "LocationFeatureSpecification", name: "Wifi", value: true },
         ],
       }}

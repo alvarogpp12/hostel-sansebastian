@@ -8,26 +8,26 @@ export type ImageCard = { icon: IconName; title: string; text: string; image: Me
 /* Habitaciones                                                          */
 /* ------------------------------------------------------------------ */
 export const roomsPage = {
-  title: "Habitaciones baratas en San Sebastián",
+  title: "Habitaciones en el centro de San Sebastián",
   intro:
-    "Tres tipos de habitación privada, todas con baño compartido. Elige la que encaja con tu viaje, mira las fotos y reserva en un minuto.",
+    "Cuatro tipos de habitación privada, con baño compartido o privado. Elige la que encaja con tu viaje, mira las fotos y reserva en un minuto.",
   quickNav: [
     { label: "Habitaciones", href: "#habitaciones" },
-    { label: "Baños compartidos", href: "#banos" },
+    { label: "Baños", href: "#banos" },
     { label: "Qué incluye", href: "#que-incluye" },
   ],
   bathrooms: {
-    title: "Baños compartidos, siempre a punto",
-    text: "Compartir baño es parte de lo que nos permite mantener precios bajos, pero no renunciamos a la limpieza: se revisan y limpian a diario.",
+    title: "Baños siempre a punto",
+    text: "La doble y la de dos camas comparten baño; la doble con baño privado y la familiar tienen el suyo propio. Sean compartidos o privados, todos se revisan y limpian a diario.",
     image: media.bathrooms[1],
   },
   // VERIFICAR con el cliente
   included: {
     title: "Qué incluye",
-    text: "Lo básico para descansar bien, sin extras que encarezcan la noche:",
+    text: "Todo lo necesario para descansar bien:",
     items: [
       { icon: "bed", title: "Ropa de cama", text: "Sábanas limpias en cada estancia." },
-      { icon: "shower", title: "Baños compartidos", text: "Limpieza diaria." },
+      { icon: "shower", title: "Baño compartido o privado", text: "Según la habitación, con limpieza diaria." },
       { icon: "wifi", title: "Wifi", text: "Conexión en el alojamiento." },
       { icon: "key", title: "Habitación privada", text: "Solo para ti o tu grupo." },
     ] satisfies IconCard[],
@@ -39,17 +39,19 @@ export const roomsPage = {
 /* ------------------------------------------------------------------ */
 export const locationPage = {
   title: "Ubicación y qué ver en San Sebastián",
-  intro:
-    "Dormir barato en San Sebastián te deja presupuesto para lo importante: la ciudad. Estas son las visitas que recomendamos a nuestros huéspedes, casi todas gratis.",
+  intro: [
+    "Desde Enjoy Comfort llegarás en un plis plas a la playa de Gros para pegarte un chapuzón junto al Kursaal o surfearte unas olitas tan a gusto. Y después, darte un homenaje en algunos de los bares y tabernas de la zona para que descubras los encantos que te ofrece un barrio que te atrapará.",
+    "Llegar a la Parte Vieja o al centro te llevará menos de lo que canta un gallo y, para cuando llegues, lamentarás que no haya durado más el paseíto.",
+  ],
   places: {
-    title: "Qué ver sin gastar",
-    text: "Planes para disfrutar Donosti a pie y con poco dinero.",
+    title: "Qué ver cerca",
+    text: "Planes para disfrutar Donosti a pie desde el alojamiento.",
     items: [
-      { icon: "waves", title: "Playa de La Concha", text: "El símbolo de la ciudad. Paseo, baño y atardecer sin coste.", image: media.city.bay },
+      { icon: "waves", title: "Playa de La Concha", text: "El símbolo de la ciudad. Paseo, baño y atardecer frente a la isla.", image: media.city.bay },
       { icon: "eye", title: "Peine del Viento", text: "Al final de Ondarreta, las esculturas de Eduardo Chillida frente al mar.", image: media.city.comb },
       { icon: "mountain", title: "Vistas de la bahía", text: "Sube al monte Urgull andando para ver la ciudad desde arriba.", image: media.city.aerial },
-      { icon: "utensils", title: "Ruta de pintxos", text: "Elige bien la barra y cenar en la Parte Vieja sale mucho más barato de lo que parece.", image: media.city.pintxos },
-      { icon: "sun", title: "Olas en el paseo", text: "Los días de temporal, el mar rompe contra el paseo: un espectáculo gratis.", image: media.city.waves },
+      { icon: "utensils", title: "Ruta de pintxos", text: "De barra en barra por la Parte Vieja y por las tabernas del barrio.", image: media.city.pintxos },
+      { icon: "sun", title: "Olas en el paseo", text: "Los días de temporal, el mar rompe contra el paseo: todo un espectáculo.", image: media.city.waves },
     ] satisfies ImageCard[],
   },
   mapTitle: "Cómo llegar",
@@ -67,7 +69,7 @@ export const practical = {
       icon: "shower",
       title: "Habitaciones y baños",
       wide: true,
-      body: [{ type: "p", text: "Todas las habitaciones son privadas (individual, doble o triple) y los baños son compartidos." }],
+      body: [{ type: "p", text: "Todas las habitaciones son privadas. La doble y la de dos camas tienen baño compartido; la doble con baño privado tiene un baño exclusivo fuera de la habitación, y la familiar, baño privado." }],
     },
     {
       icon: "clock",
@@ -108,9 +110,10 @@ export const practical = {
     title: "Reserva en un minuto",
     text: "Elige el tipo de habitación, pon tus fechas y reserva al momento.",
     links: [
-      { label: "Individual", href: "/reservar?habitacion=individual" },
-      { label: "Doble / Dos camas", href: "/reservar?habitacion=doble" },
-      { label: "Triple", href: "/reservar?habitacion=triple" },
+      { label: "Doble", href: "/reservar?habitacion=doble" },
+      { label: "Dos camas", href: "/reservar?habitacion=dos-camas" },
+      { label: "Doble con baño privado", href: "/reservar?habitacion=doble-privado" },
+      { label: "Familiar", href: "/reservar?habitacion=familiar" },
     ],
   },
 };
@@ -121,27 +124,21 @@ export const practical = {
 export const bookingPage = {
   title: "Reservar",
   formTitle: "Reserva tu habitación",
-  formIntro: "Elige habitación, fechas y personas, deja tus datos y paga la señal. Recibirás la confirmación por email al instante.",
+  formIntro:
+    "Elige habitación y fechas y consulta al momento la disponibilidad y el precio. La reserva se confirma en el acto, sin intermediarios ni comisiones.",
   fields: {
     room: "Habitación",
     checkIn: "Entrada",
     checkOut: "Salida",
-    guests: "Personas",
-    holder: "Datos de la reserva",
-    firstname: "Nombre",
-    lastname: "Apellidos",
-    email: "Email",
-    telephone: "Teléfono",
   },
   nights: (n: number) => (n === 1 ? "1 noche" : `${n} noches`),
-  submit: "Pagar y reservar",
-  sending: "Conectando con el pago…",
-  /** Nota bajo el resumen de precio */
-  priceNotice:
-    "Se paga ahora una señal y el resto en el hostal. El precio final, con impuestos, se confirma antes de pagar.",
-  /** Aviso bajo el botón: explica que el pago ocurre en el motor de reservas */
+  submit: "Ver disponibilidad y precio",
+  /** Aviso bajo el botón: explica que la reserva y el pago ocurren en el motor */
   engineNotice:
-    "Al continuar se comprueba la disponibilidad y se realiza el pago de forma segura. Al reservar aceptas las",
+    "Te mostramos la disponibilidad real para tus fechas. Los datos y el pago se completan de forma segura en nuestro sistema de reservas. Al reservar aceptas las",
+  engineTitle: "Sistema de reservas de Enjoy Comfort",
+  engineFallback: "¿No se carga el sistema de reservas?",
+  engineFallbackLink: "Ábrelo en una pestaña nueva",
   /** Se muestra mientras el motor de reservas no está configurado */
   notConfigured:
     "La reserva online estará disponible en cuanto activemos el sistema de reservas. Mientras tanto, escríbenos o llámanos y te confirmamos disponibilidad:",

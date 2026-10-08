@@ -4,18 +4,27 @@ import type { IconName } from "./site";
 export const home = {
   hero: {
     /** H1: lleva la palabra clave, en versalita sobre el titular grande */
-    h1: "Tu hostal económico en San Sebastián",
-    title: ["Descansa a gusto.", "Disfruta de Donosti."],
+    h1: "Tu alojamiento céntrico en San Sebastián",
+    title: ["Céntrico, cómodo", "y tranquilo."],
     slides: [media.city.bay, media.city.aerial, media.city.comb],
     cardsLabel: "Encuentra tu habitación",
   },
 
   intro: {
-    eyebrow: "Una estancia sencilla, con lo que necesitas",
-    paragraphs: [
-      "Disfrutar de San Sebastián empieza por encontrar un alojamiento que encaje contigo y con tu presupuesto. En Enjoy Comfort te ofrecemos habitaciones privadas, espacios cuidados y atención cercana.",
-      "Los baños son compartidos con otros huéspedes; la habitación es exclusivamente para ti y para las personas que viajan contigo. Así puedes elegir un alojamiento económico sin renunciar a tener tu propio espacio.",
-    ],
+    eyebrow: "Bienvenido a Enjoy Comfort",
+    title: "A tiro de piedra de lo mejor de Donosti",
+    text: "Ubicado en el barrio preferido por los donostiarras, Enjoy Comfort te ofrece distintos tipos de habitaciones para que puedas organizarte según con quién vayas. Aquí encontrarás un lugar céntrico, cómodo y tranquilo que te pondrá a tiro de piedra los principales atractivos de la ciudad.",
+    link: { label: "Ver habitaciones", href: "/habitaciones" },
+    card: {
+      image: media.rooms.double[0],
+      title: "Lo que vas a encontrar",
+      items: [
+        { icon: "bed", text: "Cuatro tipos de habitación, de 1 a 4 personas" },
+        { icon: "shower", text: "Con baño compartido o privado" },
+        { icon: "waves", text: "Playa de Gros y Kursaal a un paseo" },
+        { icon: "marker", text: "Parte Vieja y centro a pocos minutos" },
+      ] satisfies { icon: IconName; text: string }[],
+    },
   },
 
   rooms: {
@@ -29,13 +38,13 @@ export const home = {
     items: [
       {
         icon: "key",
-        title: "Tu propia habitación",
-        text: "Aquí no compartes dormitorio con otros huéspedes. Tanto si vienes solo como acompañado, la habitación es de uso exclusivo para tu reserva.",
+        title: "Una habitación para cada viaje",
+        text: "Doble, de dos camas o familiar, con baño compartido o privado. Elige según con quién vengas: la habitación es de uso exclusivo para tu reserva.",
       },
       {
-        icon: "tag",
-        title: "Un alojamiento para cuidar tu presupuesto",
-        text: "Una estancia sencilla, con habitaciones de distintas capacidades para que encuentres la opción que encaje con tu viaje. Consulta el precio para tus fechas antes de reservar.",
+        icon: "marker",
+        title: "En pleno centro",
+        text: "En un plis plas estás en la playa de Gros y el Kursaal, y la Parte Vieja y el centro quedan a un corto paseo.",
       },
       {
         icon: "sparkle",
@@ -87,23 +96,23 @@ export const home = {
     items: [
       {
         q: "¿Qué tipo de alojamiento es Enjoy Comfort?",
-        a: "Enjoy Comfort es un hostal económico en San Sebastián con habitaciones privadas individuales, dobles y triples. Los baños son compartidos con otros huéspedes. Es una opción para quienes buscan un alojamiento sencillo, trato cercano y un dormitorio de uso exclusivo.",
+        a: "Enjoy Comfort es una pensión de una estrella en el centro de San Sebastián, a pocos minutos de la playa de Gros y de la Parte Vieja. Tenemos habitaciones dobles, de dos camas y familiares, con baño compartido o privado según la habitación.",
       },
       {
         q: "¿Las habitaciones son privadas?",
-        a: "Sí. Todas las habitaciones son privadas. Si reservas una individual, será solo para ti; si eliges una doble o una triple, la compartirás únicamente con tus acompañantes.",
+        a: "Sí. Todas las habitaciones son privadas: solo las compartirás con las personas que viajan contigo.",
       },
       {
         q: "¿Los baños son privados o compartidos?",
-        a: "Los baños son compartidos con otros huéspedes del alojamiento. Las habitaciones no disponen de baño privado.",
+        a: "Depende de la habitación. La doble y la de dos camas comparten baño con otros huéspedes. La doble con baño privado tiene un baño de uso exclusivo situado fuera de la habitación, y la familiar tiene baño privado.",
       },
       {
-        q: "¿Puedo solicitar una cama doble o dos camas individuales?",
-        a: "Sí. Al consultar una habitación para dos personas, indícanos qué distribución prefieres. Te confirmaremos si está disponible para las fechas de tu estancia.",
+        q: "¿Puedo elegir entre cama de matrimonio o dos camas?",
+        a: "Sí. Tenemos habitación doble con cama de matrimonio y habitación con dos camas individuales. Las dos se pueden reservar para una o dos personas.",
       },
       {
-        q: "¿Tenéis habitaciones para tres personas?",
-        a: "Sí. La habitación triple cuenta con tres camas individuales y es de uso privado para las personas incluidas en la reserva.",
+        q: "¿Tenéis habitaciones para familias?",
+        a: "Sí. La habitación familiar tiene dos camas de matrimonio y baño privado, y es de uso exclusivo para las personas incluidas en la reserva.",
       },
       {
         q: "¿Cuánto cuesta alojarse en Enjoy Comfort?",
@@ -119,4 +128,12 @@ export const home = {
       },
     ],
   },
+};
+
+/** Pantalla de "Próximamente" (ver `site.comingSoon`) */
+export const comingSoon = {
+  srTitle: "Enjoy Comfort San Sebastián: próximamente",
+  eyebrow: "Céntrico, cómodo y tranquilo",
+  title: "Estamos trabajando en nuestra nueva web",
+  text: "Muy pronto podrás conocer nuestras habitaciones y reservar online. ¡Te esperamos en Donosti!",
 };
