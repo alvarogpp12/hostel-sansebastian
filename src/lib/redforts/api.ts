@@ -45,6 +45,8 @@ export async function getItemList(req: ItemListRequest): Promise<ItemListRespons
   return res;
 }
 
+// REDFORTS-DUDA: la especificación dice "email o surname", pero el parámetro documentado es `name`
+// (nombre completo). Aquí solo se usa el email.
 export async function getReservation(req: ReservationDataRequest): Promise<ReservationDataResponse> {
   const res = await redforts<ReservationDataResponse>("reservation_data", req, { retry: true });
   await checkInventoryVersion(res.inventory_version);

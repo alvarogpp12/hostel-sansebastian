@@ -81,6 +81,10 @@ Redforts es el motor de reservas y el PMS: tiene la disponibilidad real, los
 precios, el channel manager (Booking.com y demás portales), el cobro y el
 correo de confirmación. La web no guarda ni cobra nada.
 
+> **Reserva nativa con la Booking API v5 + Stripe** (`BOOKING_PROVIDER=redforts`):
+> ver [`docs/redforts.md`](docs/redforts.md). Lo que sigue describe el flujo
+> `legacy` (iframe), que es el que hay por defecto.
+
 ### Cómo funciona
 
 1. En `/reservar` el huésped elige habitación y fechas (la habitación llega
