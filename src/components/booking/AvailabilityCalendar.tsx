@@ -118,7 +118,7 @@ export function AvailabilityCalendar({
   if (error) return <p className="border border-red-400 p-3 text-xs">{error}</p>;
 
   return (
-    <div className="grid gap-3" aria-busy={!cal}>
+    <div className="grid w-full max-w-md gap-3" aria-busy={!cal}>
       <div className="flex items-center justify-between">
         <button type="button" onClick={() => shift(-1)} disabled={month <= today.slice(0, 7)} className="px-2 py-1 disabled:opacity-30" aria-label="Mes anterior">
           ←
