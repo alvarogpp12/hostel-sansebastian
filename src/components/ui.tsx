@@ -53,18 +53,3 @@ export function ButtonLink({
     </TransitionLink>
   );
 }
-
-/** White card on beige, used by most content blocks */
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-lg bg-white ${className}`}>{children}</div>;
-}
-
-/** Beige→white fade between page bands */
-export function Fade({ direction = "up", className = "h-20" }: { direction?: "up" | "down"; className?: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`${className} ${direction === "up" ? "bg-gradient-to-t" : "bg-gradient-to-b"} from-beige to-white`}
-    />
-  );
-}

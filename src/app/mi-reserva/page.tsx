@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageIntro } from "@/components/sections/Page";
 import { MyReservation } from "./MyReservation";
 
 export const metadata: Metadata = {
@@ -8,12 +9,13 @@ export const metadata: Metadata = {
 
 export default function MyReservationPage() {
   return (
-    <main id="content" className="p-w pt-32">
-      <div className="rounded-lg bg-white p-6 lg:p-w lg:py-16">
-        <div className="mb-10 grid gap-2">
-          <h1 className="style-heading text-2xl lg:text-3xl">Mi reserva</h1>
-          <p className="max-w-[60ch]">Consulta tu reserva y añade extras con el número de reserva, la fecha de llegada y tu email.</p>
-        </div>
+    <main id="content" className="pb-16">
+      <PageIntro
+        eyebrow="Reserva directa"
+        title="Mi reserva"
+        intro={<p>Consulta tu reserva y añade extras con el número de reserva, la fecha de llegada y tu email.</p>}
+      />
+      <div className="mx-w rounded-lg bg-white p-5 lg:p-12">
         <MyReservation />
       </div>
     </main>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { StickyBookBar } from "@/components/booking/StickyBookBar";
 import { FaqSchema } from "@/components/Schema";
 import { BookingHero, HomeCity, HomeFaq, HomeFeatures, HomeRooms } from "@/components/sections/HomeSections";
+import { BookingBand } from "@/components/sections/Page";
 import { site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function HomePage() {
         <HomeFeatures />
         <HomeCity />
         <HomeFaq />
+        <BookingBand />
       </main>
       <StickyBookBar watch="reserva-rapida" />
       <FaqSchema />

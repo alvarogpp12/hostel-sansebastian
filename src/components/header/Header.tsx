@@ -199,7 +199,7 @@ export function Header() {
       {showBook && (
         <TransitionLink
           href="/reservar"
-          className="style-button fixed top-5 right-[calc(var(--space-w)+5.5rem)] z-50 !px-4 !py-2.5 lg:top-7 lg:right-[calc(var(--space-w)+7.5rem)] [body.has-menu_&]:invisible"
+          className="style-button fixed top-5 right-[calc(var(--space-w)+5.5rem)] z-50 !px-4 !py-2.5 ring-1 ring-white/30 lg:top-7 lg:right-[calc(var(--space-w)+7.5rem)] [body.has-menu_&]:invisible"
         >
           Reservar
         </TransitionLink>

@@ -162,10 +162,10 @@ export const site = {
 
   credit: null as { label: string; name: string; href: string } | null,
 
+  /** Bloque de reserva negro al final de las páginas */
   cta: {
     title: "Tu próxima escapada a Donosti empieza aquí",
-    text: "Ya tienes el destino. Ahora encuentra la habitación para disfrutarlo. Dinos cuándo quieres venir y cuántas personas viajáis: te confirmaremos las opciones disponibles para tu estancia en San Sebastián.",
-    button: { label: "Consultar disponibilidad", href: "/reservar" },
+    text: "Pon tus fechas y mira al momento qué habitaciones quedan libres y a qué precio.",
   },
 
   newsletter: {
@@ -180,7 +180,6 @@ export const site = {
   ui: {
     menu: "Menú",
     skipToContent: "Saltar al contenido",
-    quickNav: "Acceso rápido",
     openGallery: "Ver fotos",
     close: "Cerrar",
     book: "Consultar disponibilidad",

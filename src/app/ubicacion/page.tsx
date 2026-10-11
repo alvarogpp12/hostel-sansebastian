@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
+import { StickyBookBar } from "@/components/booking/StickyBookBar";
 import { ArrowOut } from "@/components/icons";
-import { Reveal } from "@/components/Reveal";
-import { Cta } from "@/components/sections/Cta";
-import { AmenityCards } from "@/components/sections/PageSections";
+import { BookingBand, ImageCards, PAGE_HERO_ID, PageHero, Section } from "@/components/sections/Page";
 import { locationPage } from "@/content/pages";
 import { site } from "@/content/site";
 
@@ -14,58 +13,47 @@ export const metadata: Metadata = {
 };
 
 export default function LocationPage() {
+  const { eyebrow, title, intro, image, quickNav, places, mapTitle, mapText, mapLink } = locationPage;
   const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(site.contact.mapQuery)}&z=13&output=embed`;
   return (
     <>
-      <main id="content">
-        <header className="grid gap-4 p-w pt-32 lg:pt-48">
-          <Reveal as="h1" effect="split" className="style-heading text-xl lg:text-3xl">
-            {locationPage.title}
-          </Reveal>
-          <Reveal effect="fade" delay={0.5} className="grid gap-4 text-base leading-normal lg:max-w-[60ch]">
-            {locationPage.intro.map((p) => (
-              <p key={p.slice(0, 24)}>{p}</p>
-            ))}
-          </Reveal>
-        </header>
+      <main id="content" className="pb-16">
+        <PageHero eyebrow={eyebrow} title={title} intro={intro} image={image} links={quickNav} />
 
-        <AmenityCards
-          id="que-ver"
-          title={locationPage.places.title}
-          text={locationPage.places.text}
-          items={locationPage.places.items}
-        />
+        <Section id="que-ver" title={places.title} text={places.text}>
+          <ImageCards items={places.items} />
+        </Section>
 
-        <section className="mx-auto my-14 grid max-w-4xl gap-6 px-w">
-          <Reveal as="h2" effect="delayedSplit" className="style-heading text-xl lg:text-3xl">
-            {locationPage.mapTitle}
-          </Reveal>
-          <Reveal as="p" effect="delayedFade" className="text-base leading-normal lg:max-w-[60ch]">
-            {locationPage.mapText}
-          </Reveal>
-          <Reveal effect="delayedFade" className="relative aspect-[6/4] w-full overflow-clip rounded-lg bg-neutral-200">
-            <iframe
-              title={`Mapa de ${site.contact.mapQuery}`}
-              src={mapSrc}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 size-full border-0 grayscale-[0.9] sepia-[0.15]"
-            />
-          </Reveal>
-          <Reveal effect="delayedFade">
-            <a
-              href={site.contact.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex w-fit items-center gap-2 transition-all lg:hover:gap-3"
-            >
-              <span className="style-caption !text-xs underline">Ver en Google Maps</span>
-              <ArrowOut />
-            </a>
-          </Reveal>
-        </section>
+        <Section id="como-llegar" title={mapTitle}>
+          <div className="grid overflow-clip rounded-lg bg-white lg:grid-cols-12">
+            <div className="grid content-center gap-4 p-6 lg:col-span-4 lg:p-10">
+              <p className="text-neutral-700 lg:text-lg">{mapText}</p>
+              <p className="text-sm text-neutral-500">{site.legal.addressLine}</p>
+              <a
+                href={site.contact.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="style-button min-h-12"
+              >
+                {mapLink}
+                <ArrowOut />
+              </a>
+            </div>
+            <div className="relative aspect-[4/3] bg-neutral-200 lg:col-span-8 lg:aspect-auto lg:min-h-[480px]">
+              <iframe
+                title={`Mapa de ${site.contact.mapQuery}`}
+                src={mapSrc}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="absolute inset-0 size-full border-0 grayscale-[0.9] sepia-[0.15]"
+              />
+            </div>
+          </div>
+        </Section>
+
+        <BookingBand />
       </main>
-      <Cta />
+      <StickyBookBar watch={PAGE_HERO_ID} />
     </>
   );
 }
