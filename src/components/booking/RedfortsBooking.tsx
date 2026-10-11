@@ -1,13 +1,19 @@
 "use client";
 
-import { useMemo, useState, useTransition, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { startCheckout } from "@/app/reservar/actions";
 import { ArrowOut } from "@/components/icons";
+import { useLenis } from "@/components/providers/SmoothScroll";
 import { TransitionLink } from "@/components/TransitionLink";
+import { booking } from "@/content/booking";
+import { roomById } from "@/content/rooms";
+import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
 import { site } from "@/content/site";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
+import { BookingSteps } from "./BookingSteps";
 
 /**
  * Reserva nativa con la Booking API de Redforts (BOOKING_PROVIDER=redforts):
@@ -17,6 +23,10 @@ import { AvailabilityCalendar } from "./AvailabilityCalendar";
  *   3. Datos del huésped generados desde `fields` del inventario.
  *   4. Pago con Stripe (Server Action). Los precios que se ven aquí son solo
  *      informativos: el servidor los vuelve a pedir a Redforts antes de cobrar.
+ *
+ * Si la URL trae fechas (?llegada=…&salida=…&adultos=…, desde el buscador de
+ * la home), busca nada más abrirse y salta directamente a las habitaciones.
+ * Con ?habitacion=… la habitación elegida en la home sale la primera.
  */
 
 type Results = { currency: string; promoTotal: number | null; combine: boolean; options: OfferedOption[] };
@@ -52,17 +62,35 @@ const AUTOCOMPLETE: Record<string, string> = {
 
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
-const nightsBetween = (a: string, b: string) => Math.round((Date.parse(b) - Date.parse(a)) / 86_400_000);
 
 export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
-  const [arrival, setArrival] = useState<string | null>(null);
-  const [departure, setDeparture] = useState<string | null>(null);
-  const [adults, setAdults] = useState(2);
+  const params = useSearchParams();
+  // Solo se renderiza en el navegador (useSearchParams bajo Suspense): "hoy" es el del huésped
+  const [initial] = useState(() => parseBookingSearch((k) => params.get(k), localToday()));
+  const [arrival, setArrival] = useState<string | null>(initial.arrival);
+  const [departure, setDeparture] = useState<string | null>(initial.departure);
+  const [adults, setAdults] = useState(initial.adults ?? 2);
   const [children, setChildren] = useState(0);
   const [promo, setPromo] = useState("");
+  const [showPromo, setShowPromo] = useState(false);
+
+  const lenis = useLenis();
+  const resultsRef = useRef<HTMLElement>(null);
+  const checkoutRef = useRef<HTMLFormElement>(null);
+  const scrollTo = (el: HTMLElement | null) => {
+    if (!el) return;
+    if (lenis) lenis.scrollTo(el, { offset: -96, duration: 0.8 });
+    else el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  /** Habitación elegida en la home → su id en Redforts, para enseñarla la primera */
+  const preferredAcco = useMemo(() => {
+    const room = roomById(initial.room);
+    return room ? booking.accoIds[room.id] : null;
+  }, [initial.room]);
 
   const [results, setResults] = useState<Results | null>(null);
-  const [searching, setSearching] = useState(false);
+  const [searching, setSearching] = useState(Boolean(initial.arrival && initial.departure));
   const [searchErrors, setSearchErrors] = useState<string[]>([]);
   /** Búsqueda con la que se obtuvieron los resultados (la que se manda al pagar) */
   const [lastSearch, setLastSearch] = useState<{ arrival: string; departure: string; adults: number; children: number; promo?: string } | null>(null);
@@ -87,6 +115,11 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     setSearchErrors([]);
     setSelection({});
     setCheckoutErrors([]);
+    await fetchResults(arrival, departure);
+  };
+
+  /** Consulta /availability; todo el estado se actualiza después del await */
+  const fetchResults = async (arrival: string, departure: string) => {
     const params = new URLSearchParams({ arrival, departure, adults: String(adults), children: String(children) });
     if (promo.trim()) params.set("promo", promo.trim());
     try {
@@ -99,12 +132,22 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       }
       setResults(json as Results);
       setLastSearch({ arrival, departure, adults, children, promo: promo.trim() || undefined });
+      // Espera a que se pinten los resultados antes de bajar hasta ellos
+      requestAnimationFrame(() => scrollTo(resultsRef.current));
     } catch {
       setSearchErrors(["No se pudo conectar con el sistema de reservas."]);
     } finally {
       setSearching(false);
     }
   };
+
+  // Llegada con fechas en la URL: `searching` ya empieza en true
+  const searchOnArrival = useEffectEvent(() => {
+    if (arrival && departure) void fetchResults(arrival, departure);
+  });
+  useEffect(() => {
+    if (initial.arrival && initial.departure) searchOnArrival();
+  }, [initial.arrival, initial.departure]);
 
   const chosen = useMemo(
     () =>
@@ -128,6 +171,8 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       else delete next[o.key];
       return next;
     });
+    // Con una sola habitación por reserva, elegir es el último paso: a los datos
+    if (qty > 0 && !results?.combine) requestAnimationFrame(() => scrollTo(checkoutRef.current));
   };
 
   const pay = (e: FormEvent) => {
@@ -157,11 +202,17 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
   const byAcco = useMemo(() => {
     const map = new Map<number, OfferedOption[]>();
     for (const o of results?.options ?? []) map.set(o.acco_id, [...(map.get(o.acco_id) ?? []), o]);
-    return [...map.entries()];
-  }, [results]);
+    const entries = [...map.entries()];
+    if (preferredAcco) entries.sort(([a], [b]) => Number(String(b) === preferredAcco) - Number(String(a) === preferredAcco));
+    return entries;
+  }, [results, preferredAcco]);
+
+  const step = breakdown ? 3 : results ? 2 : 1;
 
   return (
     <div className="grid gap-10">
+      <BookingSteps current={step} />
+
       {/* ── 1. Búsqueda ─────────────────────────────────────────────── */}
       <form onSubmit={search} className="grid items-start gap-w text-sm lg:grid-cols-2">
         <AvailabilityCalendar
@@ -181,7 +232,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             <label className="field">
               <span className="style-caption-xs block !font-light">Adultos</span>
               <select value={adults} onChange={(e) => setAdults(Number(e.target.value))} className="mt-1 w-full bg-transparent outline-none">
-                {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
+                {Array.from({ length: MAX_ADULTS }, (_, i) => i + 1).map((n) => (
                   <option key={n}>{n}</option>
                 ))}
               </select>
@@ -197,11 +248,17 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
               </label>
             )}
           </div>
-          <label className="field">
-            <span className="style-caption-xs block !font-light">Código promocional (opcional)</span>
-            <input value={promo} onChange={(e) => setPromo(e.target.value)} maxLength={40} className="mt-1 w-full" autoComplete="off" />
-          </label>
-          <button type="submit" disabled={!arrival || !departure || searching} className="style-button w-full justify-center disabled:opacity-60">
+          {showPromo ? (
+            <label className="field">
+              <span className="style-caption-xs block !font-light">Código promocional</span>
+              <input value={promo} onChange={(e) => setPromo(e.target.value)} maxLength={40} className="mt-1 w-full" autoComplete="off" autoFocus />
+            </label>
+          ) : (
+            <button type="button" onClick={() => setShowPromo(true)} className="w-fit text-xs underline">
+              ¿Tienes un código promocional?
+            </button>
+          )}
+          <button type="submit" disabled={!arrival || !departure || searching} className="style-button min-h-12 !w-full justify-center disabled:opacity-60">
             {searching ? "Buscando…" : "Ver disponibilidad y precios"}
             <ArrowOut />
           </button>
@@ -217,7 +274,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
 
       {/* ── 2. Opciones ─────────────────────────────────────────────── */}
       {results && (
-        <section aria-label="Habitaciones disponibles" className="grid gap-4">
+        <section ref={resultsRef} aria-label="Habitaciones disponibles" className="grid scroll-mt-24 gap-4">
           {results.options.length === 0 ? (
             <p className="border border-neutral-300 p-4">
               No hay habitaciones libres para esas fechas. Prueba con otras o escríbenos a{" "}
@@ -246,6 +303,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                 </div>
                 <div className="grid gap-3 p-2">
                   <div className="grid gap-1">
+                    {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-beige px-2.5 py-1">Tu elección</span>}
                     <h3 className="style-heading text-lg lg:text-xl">{acco?.name ?? `Alojamiento ${accoId}`}</h3>
                     {acco?.description && <p className="text-sm text-neutral-600">{acco.description}</p>}
                   </div>
@@ -320,7 +378,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
 
       {/* ── 3. Datos y pago ─────────────────────────────────────────── */}
       {breakdown && lastSearch && (
-        <form onSubmit={pay} className="grid gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-w">
+        <form ref={checkoutRef} onSubmit={pay} className="grid scroll-mt-24 gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-w">
           <fieldset className="grid content-start gap-2.5">
             <legend className="style-heading mb-4 text-xl">Tus datos</legend>
             {inventory.fields.map((f) => {

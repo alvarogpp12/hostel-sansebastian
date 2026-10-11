@@ -38,23 +38,27 @@ export default async function BookingPage() {
   const inventory = provider === "redforts" ? await loadInventory() : null;
 
   return (
-    <main id="content" className="p-w pt-32">
+    <main id="content" className="p-w pt-24 lg:pt-32">
       <div className="rounded-lg bg-white p-6 lg:p-w lg:py-16">
-        <div className="mb-10 grid gap-2">
+        <div className="mb-8 grid gap-2">
           <Reveal as="h1" effect="split" delay={0.2} className="style-heading text-2xl lg:text-3xl">
             {bookingPage.formTitle}
           </Reveal>
-          <Reveal as="p" effect="fade" delay={0.4} className="max-w-[60ch]">
+          <Reveal as="p" effect="fade" delay={0.2} className="max-w-[60ch] max-sm:sr-only">
             {bookingPage.formIntro}
           </Reveal>
         </div>
-        <Reveal effect="fade" delay={0.5}>
+        {/* Sin animación de entrada: el formulario tiene que poder usarse al instante */}
+        <div>
           {provider === "legacy" ? (
             <Suspense fallback={null}>
               <BookingForm />
             </Suspense>
           ) : inventory ? (
-            <RedfortsBooking inventory={inventory} />
+            // Lee las fechas de la URL (useSearchParams): necesita su Suspense
+            <Suspense fallback={null}>
+              <RedfortsBooking inventory={inventory} />
+            </Suspense>
           ) : (
             <div className="grid gap-3 border border-neutral-300 p-4 text-sm">
               <p>{bookingPage.notConfigured}</p>
@@ -68,7 +72,7 @@ export default async function BookingPage() {
               </div>
             </div>
           )}
-        </Reveal>
+        </div>
       </div>
     </main>
   );

@@ -1,168 +1,151 @@
-import Image from "next/image";
 import { Arrow, Icon } from "@/components/icons";
 import { Reveal } from "@/components/Reveal";
 import { TransitionLink } from "@/components/TransitionLink";
-import { ButtonLink, Frame } from "@/components/ui";
+import { Frame } from "@/components/ui";
+import { QuickSearch } from "@/components/booking/QuickSearch";
 import { home } from "@/content/home";
 import { hasPrice, priceLabel, rooms } from "@/content/rooms";
 import { site } from "@/content/site";
-import { HeroSlider } from "./HeroSlider";
+import { bookingHref } from "@/lib/booking-search";
 
 /**
- * Sales funnel hero: San Sebastián photo slider with the room booking cards
- * on top. Each card goes straight to the booking form with the room chosen.
+ * Hero del embudo: a la izquierda el titular, a la derecha la bahía y, encima
+ * de los dos, el buscador de fechas. Reservar empieza en el primer pantallazo.
  */
 export function BookingHero() {
-  const { h1, title, slides, cardsLabel } = home.hero;
+  const { h1, title, lead, image, trust } = home.hero;
   return (
-    <section className="relative isolate bg-neutral-900 text-white lg:flex lg:h-svh lg:min-h-[760px] lg:flex-col lg:justify-end">
-      <div className="absolute inset-x-0 top-0 -z-20 aspect-[5/7] max-h-[88svh] w-full lg:inset-0 lg:aspect-auto lg:max-h-none lg:size-full">
-        <HeroSlider slides={slides} priority paginationClassName="!bottom-auto !top-24 lg:!top-28" />
-        {/* Refuerza el contraste del titular sobre fotos claras (playa, arena) */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-2/3 bg-gradient-to-t from-neutral-900/85 via-neutral-900/45 to-transparent" />
+    <section className="px-w pt-24 lg:pt-32">
+      <div className="grid gap-5 lg:grid-cols-12 lg:gap-w">
+        <div className="flex flex-col justify-center gap-4 lg:col-span-5 lg:gap-6 lg:pb-24">
+          <Reveal as="h1" effect="fade" delay={0.3} className="style-caption text-neutral-600">
+            {h1}
+          </Reveal>
+          <Reveal as="p" effect="split" delay={0.3} className="style-heading text-3xl !leading-[1.05] sm:text-4xl xl:text-6xl">
+            {title[0]} <em>{title[1]}</em>
+          </Reveal>
+          <p className="max-w-[32ch] text-lg text-neutral-700 max-lg:hidden">{lead}</p>
+        </div>
+        <Frame
+          image={image}
+          priority
+          sizes="(min-width: 1024px) 58vw, 100vw"
+          className="aspect-[16/10] lg:col-span-7 lg:aspect-auto lg:min-h-[560px] xl:min-h-[640px]"
+        />
       </div>
 
-      <div className="flex min-h-[70svh] flex-col justify-end gap-2 p-w pt-32 lg:min-h-0 lg:pt-0">
-        <Reveal as="h1" effect="delayedFade" delay={0.85} className="style-caption">
-          {h1}
-        </Reveal>
-        <Reveal as="p" effect="delayedSplit" delay={0.85} className="style-heading text-2xl sm:text-3xl lg:text-4xl">
-          {title[0]} <br />
-          {title[1]}
-        </Reveal>
-      </div>
-
-      <div className="px-w pb-w lg:pt-6">
-        <p className="sr-only">{cardsLabel}</p>
-        <Reveal
-          as="ul"
-          effect="fade"
-          delay={1.1}
-          className="-mx-w flex snap-x snap-mandatory gap-2 overflow-x-auto px-w pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-2 lg:overflow-visible lg:px-0"
-        >
-          {rooms.map((room) => (
-            <li key={room.id} className="w-[86%] shrink-0 snap-start sm:w-[48%] lg:w-auto">
-              <TransitionLink
-                href={`/reservar?habitacion=${room.id}`}
-                className="group flex h-full gap-3 rounded-lg border border-neutral-300 bg-white p-2 text-black transition-colors duration-500 lg:hover:bg-neutral-100"
-              >
-                <div className="relative aspect-[5/6] w-24 shrink-0 overflow-clip rounded-lg bg-neutral-200 lg:aspect-square lg:w-32">
-                  <Image
-                    src={room.image.src}
-                    alt={room.image.alt}
-                    fill
-                    sizes="128px"
-                    className="object-cover transition-transform duration-500 lg:group-hover:scale-110"
-                  />
-                </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-1 p-1">
-                  <h2 className="style-heading text-lg leading-tight lg:text-xl">{room.short}</h2>
-                  <p className="style-caption-xs !font-light">{room.meta}</p>
-                  <p className="mt-auto flex flex-wrap items-end justify-between gap-x-2 gap-y-3 pt-2">
-                    <span className="style-heading text-lg whitespace-nowrap lg:text-xl">
-                      {priceLabel(room)}
-                      {hasPrice(room) && <span className="font-body text-xs tracking-normal">{site.ui.perNight}</span>}
-                    </span>
-                    <span className="style-button !px-3 !py-2 max-lg:ml-auto group-hover:gap-3">
-                      {site.ui.book}
-                      <Arrow />
-                    </span>
-                  </p>
-                </div>
-              </TransitionLink>
+      <div id="reserva-rapida" className="relative z-10 -mt-8 sm:px-4 lg:-mt-20 lg:px-0">
+        <QuickSearch className="lg:max-w-5xl" />
+        <ul className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-1 text-xs text-neutral-700 lg:mt-4 lg:justify-start lg:px-2 lg:text-sm">
+          {trust.map((t) => (
+            <li key={t} className="flex items-center gap-2">
+              <Check />
+              {t}
             </li>
           ))}
-        </Reveal>
+        </ul>
       </div>
     </section>
   );
 }
 
-export function HomeIntro() {
-  const { eyebrow, title, text, link, card } = home.intro;
+function Check() {
   return (
-    <section className="px-w py-24 lg:py-32">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-12 lg:gap-w">
-        <div className="grid gap-6 lg:col-span-6">
-          <Reveal as="p" effect="delayedSplit" className="style-caption">
-            {eyebrow}
-          </Reveal>
-          <Reveal as="h2" effect="delayedSplit" className="style-heading text-2xl !leading-tight lg:text-4xl">
-            {title}
-          </Reveal>
-          <Reveal as="p" effect="delayedFade" className="max-w-[52ch] text-base leading-relaxed lg:text-lg">
-            {text}
-          </Reveal>
-          <Reveal effect="delayedFade">
-            <ButtonLink href={link.href} icon="right" className="w-fit">
-              {link.label}
-            </ButtonLink>
-          </Reveal>
-        </div>
+    <svg viewBox="0 0 24 24" className="size-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
 
-        <Reveal effect="delayedFade" className="lg:col-span-5 lg:col-start-8">
-          <div className="grid gap-5 rounded-lg bg-white p-2 pb-6">
-            <Frame image={card.image} className="aspect-[4/3]" sizes="(min-width: 1024px) 40vw, 100vw" />
-            <div className="grid gap-4 px-4">
-              <h3 className="style-heading text-lg lg:text-xl">{card.title}</h3>
-              <ul className="grid gap-2.5">
-                {card.items.map((it) => (
-                  <li key={it.text} className="flex items-center gap-3 text-sm">
-                    <Icon name={it.icon} className="size-4 shrink-0" />
-                    <span>{it.text}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+/**
+ * Habitaciones en filas comparables: foto, qué incluye y, a la derecha, precio
+ * y botón de reservar con la habitación ya elegida.
+ */
+export function HomeRooms() {
+  const { eyebrow, title, text } = home.rooms;
+  return (
+    <section id="habitaciones" className="px-w pt-20 lg:pt-32">
+      <div className="mb-6 grid gap-2 lg:mb-8">
+        <Reveal as="p" effect="delayedSplit" className="style-caption">
+          {eyebrow}
         </Reveal>
+        <Reveal as="h2" effect="delayedFade" className="style-heading text-xl lg:text-3xl">
+          {title}
+        </Reveal>
+        <p className="max-w-[72ch]">{text}</p>
       </div>
+      <ul className="grid gap-3">
+        {rooms.map((room) => (
+          <li key={room.id}>
+            <article className="group grid overflow-clip rounded-lg bg-white md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[22rem_1fr_17rem]">
+              <Frame
+                image={room.image}
+                sizes="(min-width: 1024px) 22rem, (min-width: 768px) 18rem, 100vw"
+                className="aspect-[16/10] !rounded-none md:row-span-2 md:aspect-auto md:min-h-60 lg:row-span-1"
+                imgClassName="transition-transform duration-700 lg:group-hover:scale-105"
+              />
+              <div className="grid content-center gap-3 p-5 lg:p-8">
+                <p className="style-caption-xs !font-light">{room.meta}</p>
+                <h3 className="style-heading text-xl lg:text-2xl">{room.name}</h3>
+                <p className="text-sm text-neutral-700 lg:text-base">{room.cardText}</p>
+                <ul className="flex flex-wrap gap-x-5 gap-y-1.5 pt-1">
+                  {room.specs.map((s) => (
+                    <li key={s.text} className="flex items-center gap-2 text-xs lg:text-sm">
+                      <Icon name={s.icon} className="size-4 shrink-0" />
+                      {s.text}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 p-5 lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-center lg:border-t-0 lg:border-l lg:p-7">
+                <p className="grid">
+                  <span className="style-heading text-xl whitespace-nowrap lg:text-2xl">
+                    {priceLabel(room)}
+                    {hasPrice(room) && <span className="font-body text-xs tracking-normal">{site.ui.perNight}</span>}
+                  </span>
+                  {hasPrice(room) && <span className="text-xs text-neutral-500">Precio final al elegir fechas</span>}
+                </p>
+                <div className="grid gap-2 lg:w-full">
+                  <TransitionLink
+                    href={bookingHref({ room: room.id })}
+                    className="style-button min-h-12 justify-center lg:!w-full"
+                  >
+                    Reservar esta
+                    <Arrow />
+                  </TransitionLink>
+                  <TransitionLink href="/habitaciones" className="text-center text-xs underline max-lg:hidden">
+                    Ver fotos y detalles
+                  </TransitionLink>
+                </div>
+              </div>
+            </article>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
-export function RoomsHeading() {
-  return (
-    <div className="grid gap-2 bg-white px-w pt-16 lg:pt-24">
-      <Reveal as="p" effect="delayedSplit" className="style-caption">
-        {home.rooms.eyebrow}
-      </Reveal>
-      <Reveal as="h2" effect="delayedFade" className="style-heading text-xl lg:text-3xl">
-        {home.rooms.title}
-      </Reveal>
-      <Reveal as="p" effect="delayedFade" className="max-w-[72ch]">
-        {home.rooms.text}
-      </Reveal>
-    </div>
-  );
-}
-
+/** Tres razones en una franja, sin tarjetas: se leen de un vistazo */
 export function HomeFeatures() {
   const { title, items } = home.features;
   return (
-    <section id="por-que-elegirnos" className="p-w">
-      <div className="grid gap-12 rounded-lg bg-white p-6 lg:p-w">
-        <Reveal as="h2" effect="delayedSplit" className="style-heading text-xl lg:text-3xl">
-          {title}
-        </Reveal>
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-w">
-          {items.map((f) => (
-            <div key={f.title} className="grid h-fit gap-2">
-              <Reveal effect="delayedFade" className="h-[0.5px] w-full bg-current" />
-              <div className="flex items-center gap-2">
-                <Reveal effect="delayedFade" className="flex">
-                  <Icon name={f.icon} className="size-4" />
-                </Reveal>
-                <Reveal as="h3" effect="delayedSplit" className="style-heading text-base">
-                  {f.title}
-                </Reveal>
-              </div>
-              <Reveal as="p" effect="delayedFade" className="text-sm">
-                {f.text}
-              </Reveal>
+    <section id="por-que-elegirnos" className="px-w pt-20 lg:pt-32">
+      <h2 className="sr-only">{title}</h2>
+      <div className="grid border-t border-black md:grid-cols-3">
+        {items.map((f, i) => (
+          <Reveal
+            key={f.title}
+            effect="delayedFade"
+            className={`grid content-start gap-2 py-6 md:px-8 md:pb-0 ${i === 0 ? "md:pl-0" : "border-neutral-300 max-md:border-t md:border-l"}`}
+          >
+            <div className="flex items-center gap-2">
+              <Icon name={f.icon} className="size-4" />
+              <h3 className="style-heading text-lg lg:text-xl">{f.title}</h3>
             </div>
-          ))}
-        </div>
+            <p className="text-sm text-neutral-700 lg:text-base">{f.text}</p>
+          </Reveal>
+        ))}
       </div>
     </section>
   );
@@ -171,7 +154,7 @@ export function HomeFeatures() {
 export function HomeCity() {
   const { eyebrow, title, items } = home.city;
   return (
-    <section className="p-w max-lg:py-8">
+    <section className="p-w pt-20 lg:pt-32">
       <div className="grid gap-w lg:gap-6">
         <div className="flex items-end justify-between gap-4">
           <div className="grid gap-2">

@@ -6,25 +6,10 @@ export const home = {
     /** H1: lleva la palabra clave, en versalita sobre el titular grande */
     h1: "Tu alojamiento céntrico en San Sebastián",
     title: ["Céntrico, cómodo", "y tranquilo."],
-    slides: [media.city.bay, media.city.aerial, media.city.comb],
-    cardsLabel: "Encuentra tu habitación",
-  },
-
-  intro: {
-    eyebrow: "Bienvenido a Enjoy Comfort",
-    title: "A tiro de piedra de lo mejor de Donosti",
-    text: "Ubicado en el barrio preferido por los donostiarras, Enjoy Comfort te ofrece distintos tipos de habitaciones para que puedas organizarte según con quién vayas. Aquí encontrarás un lugar céntrico, cómodo y tranquilo que te pondrá a tiro de piedra los principales atractivos de la ciudad.",
-    link: { label: "Ver habitaciones", href: "/habitaciones" },
-    card: {
-      image: media.rooms.double[0],
-      title: "Lo que vas a encontrar",
-      items: [
-        { icon: "bed", text: "Cuatro tipos de habitación, de 1 a 4 personas" },
-        { icon: "shower", text: "Con baño compartido o privado" },
-        { icon: "waves", text: "Playa de Gros y Kursaal a un paseo" },
-        { icon: "marker", text: "Parte Vieja y centro a pocos minutos" },
-      ] satisfies { icon: IconName; text: string }[],
-    },
+    lead: "Elige tus fechas y mira al momento qué habitaciones quedan libres. Reservas en un minuto, directamente con nosotros.",
+    image: media.city.bay,
+    /** Debajo del buscador: lo que hace fiable reservar aquí */
+    trust: ["Reserva directa, sin comisiones", "Confirmación al momento", "Pago seguro"],
   },
 
   rooms: {
@@ -47,19 +32,9 @@ export const home = {
         text: "En un plis plas estás en la playa de Gros y el Kursaal, y la Parte Vieja y el centro quedan a un corto paseo.",
       },
       {
-        icon: "sparkle",
-        title: "Espacios cuidados",
-        text: "Un entorno acogedor para descansar y recuperar fuerzas después de un día recorriendo San Sebastián.",
-      },
-      {
         icon: "globe",
         title: "Contacto directo con nosotros",
         text: "Consulta disponibilidad, plantea tus dudas y prepara tu llegada hablando con Enjoy Comfort. Te ayudamos a elegir entre las opciones disponibles.",
-      },
-      {
-        icon: "heart",
-        title: "Trato cercano",
-        text: "Cada viaje tiene sus preguntas. Estamos aquí para orientarte sobre tu estancia y ayudarte a disfrutar de la ciudad.",
       },
     ] satisfies { icon: IconName; title: string; text: string }[],
   },
@@ -120,7 +95,7 @@ export const home = {
       },
       {
         q: "¿Cómo puedo reservar?",
-        a: "Utiliza el formulario de la web para indicarnos las fechas, el número de personas y la habitación que te interesa. Te confirmaremos la disponibilidad, el precio y los pasos para completar la reserva.",
+        a: "Elige tus fechas en el buscador de la web, escoge la habitación y completa la reserva online. Verás la disponibilidad y el precio al momento, y la confirmación te llega por email.",
       },
       {
         q: "¿Dónde puedo consultar la información para mi llegada?",
