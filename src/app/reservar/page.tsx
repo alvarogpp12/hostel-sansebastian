@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Reveal } from "@/components/Reveal";
 import { RedfortsBooking } from "@/components/booking/RedfortsBooking";
 import { BookingForm } from "@/components/sections/BookingForm";
+import { PageIntro } from "@/components/sections/Page";
 import { bookingProvider } from "@/content/booking";
 import { bookingPage } from "@/content/pages";
 import { site } from "@/content/site";
@@ -38,16 +38,13 @@ export default async function BookingPage() {
   const inventory = provider === "redforts" ? await loadInventory() : null;
 
   return (
-    <main id="content" className="p-w pt-24 lg:pt-32">
-      <div className="rounded-lg bg-white p-6 lg:p-w lg:py-16">
-        <div className="mb-8 grid gap-2">
-          <Reveal as="h1" effect="split" delay={0.2} className="style-heading text-2xl lg:text-3xl">
-            {bookingPage.formTitle}
-          </Reveal>
-          <Reveal as="p" effect="fade" delay={0.2} className="max-w-[60ch] max-sm:sr-only">
-            {bookingPage.formIntro}
-          </Reveal>
-        </div>
+    <main id="content" className="pb-16">
+      <PageIntro
+        eyebrow="Reserva directa"
+        title={bookingPage.formTitle}
+        intro={<p className="max-sm:sr-only">{bookingPage.formIntro}</p>}
+      />
+      <div className="mx-w rounded-lg bg-white p-5 lg:p-12">
         {/* Sin animación de entrada: el formulario tiene que poder usarse al instante */}
         <div>
           {provider === "legacy" ? (

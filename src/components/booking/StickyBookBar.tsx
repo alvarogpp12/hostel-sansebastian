@@ -9,19 +9,29 @@ import { site } from "@/content/site";
  * Barra de reserva que aparece cuando el buscador del hero sale de pantalla
  * por arriba: en el móvil, fija abajo a todo el ancho; en escritorio, una
  * píldora centrada. Así el botón de reservar no se pierde nunca de vista.
+ * Se esconde al llegar al bloque de reserva del final (ya tiene su buscador)
+ * para no tapar ese bloque ni el pie.
  */
 export function StickyBookBar({ watch }: { watch: string }) {
-  const [visible, setVisible] = useState(false);
+  const [pastTop, setPastTop] = useState(false);
+  const [atEnd, setAtEnd] = useState(false);
 
   useEffect(() => {
     const target = document.getElementById(watch);
-    if (!target) return;
-    const io = new IntersectionObserver(([entry]) => {
-      setVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    const band = document.querySelector("[data-booking-band]");
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        const above = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        if (entry.target === target) setPastTop(above);
+        else setAtEnd(entry.isIntersecting || above);
+      }
     });
-    io.observe(target);
+    if (target) io.observe(target);
+    if (band) io.observe(band);
     return () => io.disconnect();
   }, [watch]);
+
+  const visible = pastTop && !atEnd;
 
   return (
     <div

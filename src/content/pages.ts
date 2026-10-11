@@ -8,7 +8,9 @@ export type ImageCard = { icon: IconName; title: string; text: string; image: Me
 /* Habitaciones                                                          */
 /* ------------------------------------------------------------------ */
 export const roomsPage = {
+  eyebrow: "Habitaciones",
   title: "Habitaciones en el centro de San Sebastián",
+  image: media.rooms.twin[0],
   intro:
     "Cuatro tipos de habitación privada, con baño compartido o privado. Elige la que encaja con tu viaje, mira las fotos y reserva en un minuto.",
   quickNav: [
@@ -17,7 +19,8 @@ export const roomsPage = {
     { label: "Qué incluye", href: "#que-incluye" },
   ],
   bathrooms: {
-    title: "Baños siempre a punto",
+    title: "Baños",
+    subtitle: "Baños siempre a punto",
     text: "La doble y la de dos camas comparten baño; la doble con baño privado y la familiar tienen el suyo propio. Sean compartidos o privados, todos se revisan y limpian a diario.",
     image: media.bathrooms[1],
   },
@@ -38,7 +41,13 @@ export const roomsPage = {
 /* Ubicación y qué ver                                                    */
 /* ------------------------------------------------------------------ */
 export const locationPage = {
+  eyebrow: "Gros, San Sebastián",
   title: "Ubicación y qué ver en San Sebastián",
+  image: media.city.aerial,
+  quickNav: [
+    { label: "Qué ver cerca", href: "#que-ver" },
+    { label: "Cómo llegar", href: "#como-llegar" },
+  ],
   intro: [
     "Desde Enjoy Comfort llegarás en un plis plas a la playa de Gros para pegarte un chapuzón junto al Kursaal o surfearte unas olitas tan a gusto. Y después, darte un homenaje en algunos de los bares y tabernas de la zona para que descubras los encantos que te ofrece un barrio que te atrapará.",
     "Llegar a la Parte Vieja o al centro te llevará menos de lo que canta un gallo y, para cuando llegues, lamentarás que no haya durado más el paseíto.",
@@ -56,13 +65,17 @@ export const locationPage = {
   },
   mapTitle: "Cómo llegar",
   mapText: "Te enviamos la dirección exacta y las indicaciones al confirmar tu reserva.", // PENDIENTE: dirección pública
+  mapLink: "Ver en Google Maps",
 };
 
 /* ------------------------------------------------------------------ */
 /* Info práctica                                                          */
 /* ------------------------------------------------------------------ */
 export const practical = {
+  eyebrow: "Antes de llegar",
   title: "Información práctica",
+  intro: "Lo que conviene saber para preparar tu estancia: habitaciones, horarios, pago y cómo llegar.",
+  image: media.detail,
   // PENDIENTE: todos los datos concretos deben confirmarse con el cliente
   cards: [
     {
@@ -83,7 +96,7 @@ export const practical = {
       icon: "creditCard",
       title: "Pago y cancelación",
       body: [
-        { type: "p", text: "Te indicamos las condiciones de pago y cancelación al confirmar la disponibilidad." },
+        { type: "p", text: "Verás las condiciones de pago y cancelación de cada tarifa antes de pagar." },
         { type: "em", text: "Condiciones pendientes de confirmar por el alojamiento." },
       ],
     },
@@ -106,16 +119,6 @@ export const practical = {
     wide?: boolean;
     body: ({ type: "p"; text: string } | { type: "em"; text: string } | { type: "ul"; items: string[] })[];
   }[],
-  services: {
-    title: "Reserva en un minuto",
-    text: "Elige el tipo de habitación, pon tus fechas y reserva al momento.",
-    links: [
-      { label: "Doble", href: "/reservar?habitacion=doble" },
-      { label: "Dos camas", href: "/reservar?habitacion=dos-camas" },
-      { label: "Doble con baño privado", href: "/reservar?habitacion=doble-privado" },
-      { label: "Familiar", href: "/reservar?habitacion=familiar" },
-    ],
-  },
 };
 
 /* ------------------------------------------------------------------ */

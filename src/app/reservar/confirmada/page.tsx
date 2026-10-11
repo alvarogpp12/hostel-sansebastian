@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AutoRefresh } from "@/components/booking/AutoRefresh";
+import { PageIntro } from "@/components/sections/Page";
 import { ButtonLink } from "@/components/ui";
 import { site } from "@/content/site";
 import { getBookingBySession, isDatabaseConfigured, type BookingRow } from "@/lib/bookings";
@@ -91,11 +92,11 @@ export default async function BookingResultPage({ searchParams }: { searchParams
   }
 
   return (
-    <main id="content" className="p-w pt-32">
+    <main id="content" className="pb-16">
       {refresh && <AutoRefresh />}
-      <div className="mx-auto grid max-w-2xl gap-6 rounded-lg bg-white p-6 lg:p-w lg:py-16">
-        <h1 className="style-heading text-2xl lg:text-3xl">{title}</h1>
-        <div className="grid gap-4">{body}</div>
+      <PageIntro eyebrow="Tu reserva" title={title} />
+      <div className="mx-w grid max-w-3xl gap-6 rounded-lg bg-white p-6 lg:p-12">
+        <div className="grid gap-4 text-neutral-700 lg:text-lg">{body}</div>
         <div className="flex flex-wrap gap-3">
           {booking?.status === "rejected" || booking?.status === "expired" ? (
             <ButtonLink href="/reservar">Volver a buscar</ButtonLink>

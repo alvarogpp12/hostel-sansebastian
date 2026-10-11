@@ -81,7 +81,7 @@ export function QuickSearch({ className = "" }: { className?: string }) {
       </label>
       <button
         type="submit"
-        className="style-button col-span-2 mt-1 !w-full min-h-13 justify-center !rounded-xl !text-sm lg:col-span-1 lg:mt-0 lg:!w-auto lg:px-8"
+        className="style-button col-span-2 mt-1 !w-full min-h-13 whitespace-nowrap justify-center !rounded-xl !text-sm lg:col-span-1 lg:mt-0 lg:!w-auto lg:px-8"
       >
         Ver habitaciones libres
         <Arrow />
