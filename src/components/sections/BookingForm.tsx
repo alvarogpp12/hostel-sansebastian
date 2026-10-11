@@ -9,6 +9,7 @@ import { buildEngineUrl, engineOrigin, isEngineConfigured } from "@/content/book
 import { bookingPage as b } from "@/content/pages";
 import { priceLabel, rooms, type RoomId } from "@/content/rooms";
 import { site } from "@/content/site";
+import { parseBookingSearch } from "@/lib/booking-search";
 
 const isRoomId = (v: string | null): v is RoomId => rooms.some((r) => r.id === v);
 
@@ -30,8 +31,10 @@ export function BookingForm() {
   const params = useSearchParams();
   const initial = params.get("habitacion");
   const [room, setRoom] = useState<RoomId>(isRoomId(initial) ? initial : "doble");
-  const [checkIn, setCheckIn] = useState(isoDay());
-  const [checkOut, setCheckOut] = useState(isoDay(1));
+  // Fechas del buscador de la home, si llegan en la URL y son válidas
+  const [fromUrl] = useState(() => parseBookingSearch((k) => params.get(k), isoDay()));
+  const [checkIn, setCheckIn] = useState(fromUrl.arrival ?? isoDay());
+  const [checkOut, setCheckOut] = useState(fromUrl.departure ?? isoDay(1));
   const [photo, setPhoto] = useState(0);
   const [engineUrl, setEngineUrl] = useState<string | null>(null);
 

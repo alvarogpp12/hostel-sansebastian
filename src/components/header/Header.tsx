@@ -11,7 +11,10 @@ import { site } from "@/content/site";
 import { gsap } from "@/lib/gsap";
 
 /** Routes whose first section is a full-bleed dark photo (white header) */
-const DARK_HERO_ROUTES = ["/"];
+const DARK_HERO_ROUTES: string[] = [];
+
+/** Donde ya se está reservando, el botón de la cabecera sobra */
+const NO_BOOK_BUTTON_ROUTES = ["/reservar", "/reservar/confirmada", "/mi-reserva"];
 
 export function Header() {
   const pathname = usePathname();
@@ -155,6 +158,7 @@ export function Header() {
   }, [lenis]);
 
   const tone = dark ? "text-white" : "text-black";
+  const showBook = !NO_BOOK_BUTTON_ROUTES.includes(pathname);
 
   return (
     <>
@@ -190,6 +194,16 @@ export function Header() {
           <Logo variant="icon" tone="light" className="size-7" />
         </div>
       </TransitionLink>
+
+      {/* Reservar siempre a mano, junto al menú (se oculta con el menú abierto) */}
+      {showBook && (
+        <TransitionLink
+          href="/reservar"
+          className="style-button fixed top-5 right-[calc(var(--space-w)+5.5rem)] z-50 !px-4 !py-2.5 lg:top-7 lg:right-[calc(var(--space-w)+7.5rem)] [body.has-menu_&]:invisible"
+        >
+          Reservar
+        </TransitionLink>
+      )}
 
       <nav ref={navRef} className="fixed top-6 right-w z-50 isolate lg:top-8" aria-label="Principal">
         <Reveal

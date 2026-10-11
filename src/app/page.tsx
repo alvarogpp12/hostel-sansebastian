@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
+import { StickyBookBar } from "@/components/booking/StickyBookBar";
 import { FaqSchema } from "@/components/Schema";
-import { Cta } from "@/components/sections/Cta";
-import { BookingHero, HomeCity, HomeFaq, HomeFeatures, HomeIntro, RoomsHeading } from "@/components/sections/HomeSections";
-import { ItemList } from "@/components/sections/PageSections";
-import { home } from "@/content/home";
-import { rooms } from "@/content/rooms";
+import { BookingHero, HomeCity, HomeFaq, HomeFeatures, HomeRooms } from "@/components/sections/HomeSections";
 import { site } from "@/content/site";
 
 export const metadata: Metadata = {
@@ -13,21 +10,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+/**
+ * Home pensada como embudo de reserva: buscador en el hero, habitaciones con
+ * su botón de reservar y una barra fija que aparece al bajar.
+ */
 export default function HomePage() {
   return (
     <>
-      <main id="content">
+      <main id="content" className="pb-16">
         <BookingHero />
-        <HomeIntro />
-        <div className="bg-white">
-          <RoomsHeading />
-          <ItemList id="habitaciones" srTitle={home.rooms.title} items={rooms} headingLevel="h3" />
-        </div>
+        <HomeRooms />
         <HomeFeatures />
         <HomeCity />
         <HomeFaq />
       </main>
-      <Cta />
+      <StickyBookBar watch="reserva-rapida" />
       <FaqSchema />
     </>
   );

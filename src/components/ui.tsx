@@ -25,7 +25,9 @@ export function Frame({
         alt={image.alt}
         fill
         sizes={sizes}
-        priority={priority}
+        // `priority` está obsoleto en Next 16: precarga y carga inmediata (LCP)
+        preload={priority}
+        loading={priority ? "eager" : undefined}
         className={`absolute inset-0 size-full object-cover ${imgClassName}`}
       />
     </div>
