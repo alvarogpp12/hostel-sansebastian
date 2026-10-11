@@ -37,9 +37,20 @@ export function RoomRows({ detailed = false }: { detailed?: boolean }) {
                     imgClassName="transition-transform duration-700 lg:group-hover:scale-105"
                   />
                   {detailed && (
+                    // Toda la foto abre el visor; el botón lo deja claro
                     <button
                       type="button"
                       onClick={() => setOpenId(room.id)}
+                      aria-label={`${site.ui.openGallery}: ${room.name}`}
+                      className="absolute inset-0 cursor-zoom-in"
+                    />
+                  )}
+                  {detailed && (
+                    <button
+                      type="button"
+                      onClick={() => setOpenId(room.id)}
+                      tabIndex={-1}
+                      aria-hidden="true"
                       className="absolute right-3 bottom-3 flex min-h-10 items-center gap-2 rounded-full bg-white/95 px-4 text-xs font-medium shadow-sm transition-colors hover:bg-white"
                     >
                       {site.ui.openGallery} ({photos.length})

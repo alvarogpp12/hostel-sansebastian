@@ -270,59 +270,6 @@
     outline: none;
   }
 
-  .map-button {
-    display: inline-flex;
-    width: 2rem;
-    height: 2rem;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgb(17 24 39 / 0.12);
-    border-radius: 9999px;
-    background-color: #fff;
-    box-shadow: 0 10px 20px rgb(0 0 0 / 0.08);
-  }
-  .map-button svg {
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .map-button:hover svg {
-    transform: scale(1.25);
-  }
-
-  /* Hero slider progress bars */
-  .slider-pagination {
-    position: absolute;
-    right: var(--space-w);
-    bottom: var(--space-w);
-    z-index: 20;
-    display: flex;
-    width: 12rem;
-    align-items: center;
-    gap: 0.25rem;
-  }
-  @media (min-width: 768px) {
-    .slider-pagination {
-      width: 24rem;
-      gap: 0.5rem;
-    }
-  }
-  .slider-bullet {
-    position: relative;
-    flex: 1 1 0%;
-    height: 3px;
-    overflow: hidden;
-    border-radius: 2px;
-    background-color: hsl(0 0% 100% / 0.275);
-    padding-block: 0;
-  }
-  .slider-bullet::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-color: #fff;
-    transform: scaleX(var(--timescale, 0));
-    transform-origin: left;
-  }
-
   /* Accordion (business events page) */
   .accordion-content {
     display: grid;
@@ -466,5 +413,15 @@ html.lenis body {
 @media (prefers-reduced-motion: reduce) {
   [data-effect] {
     opacity: 1 !important;
+  }
+}
+
+/* Visor de fotos: entrada suave del visor y de cada foto */
+@keyframes gallery-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

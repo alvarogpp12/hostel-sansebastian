@@ -21,7 +21,6 @@
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
     "stripe": "^22.6.2",
-    "swiper": "^14.2.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
