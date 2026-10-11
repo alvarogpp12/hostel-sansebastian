@@ -68,3 +68,13 @@ export function buildEngineUrl({ room, checkIn, checkOut }: BookingSelection): s
 
   return `${engineOrigin}/${booking.lang}/iframe/${encodeURIComponent(booking.beCode)}/?${params.toString()}`;
 }
+
+/**
+ * Qué flujo de reserva usa la web (solo servidor):
+ * - "legacy" (por defecto): el motor de Redforts incrustado en un iframe.
+ * - "redforts": reserva nativa con la Booking API v5 y pago con Stripe.
+ */
+export type BookingProvider = "legacy" | "redforts";
+export function bookingProvider(): BookingProvider {
+  return process.env.BOOKING_PROVIDER === "redforts" ? "redforts" : "legacy";
+}
