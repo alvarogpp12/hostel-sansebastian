@@ -21,8 +21,8 @@ import { Logo } from "@/components/brand/Logo";
  *    cortinilla dura medio segundo.
  */
 
-/** Duración de la animación del SVG (5,05 s de la marca, un 40 % más rápida) */
-const ANIMATION_MS = 3600;
+/** Duración de la animación de entrada del logo (ver `.ec-logo` en globals.css) */
+const ANIMATION_MS = 2200;
 const FADE_MS = 450;
 const MAX_MS = 5500;
 const STORAGE_KEY = "ec-intro-visto";
@@ -113,7 +113,7 @@ export function Intro() {
       data-leaving={leaving || undefined}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-beige"
     >
-      <Logo variant="full" tone="dark" animated priority className="h-auto w-[min(72vw,340px)]" />
+      <Logo variant="stacked" address animated className="h-auto w-[min(52vw,220px)]" />
     </div>
   );
 }

@@ -108,8 +108,9 @@ export const site = {
 
   legal: {
     company: "Enjoy Comfort San Sebastián", // PENDIENTE: razón social
-    street: "Dirección pendiente", // PENDIENTE
-    postalCode: "20000", // PENDIENTE
+    // Dirección de LOGOS.pdf
+    street: "C/ Nueva 5 - 1ºB",
+    postalCode: "20001",
     city: "Donostia-San Sebastián",
     region: "Gipuzkoa",
     taxId: "NIF: pendiente", // PENDIENTE
@@ -123,8 +124,8 @@ export const site = {
     email: "reservas@enjoycomfortsansebastian.com", // PENDIENTE
     phoneLabel: "T: +34 000 000 000", // PENDIENTE
     phoneHref: "tel:+34000000000", // PENDIENTE
-    mapQuery: "Donostia-San Sebastián", // PENDIENTE: dirección exacta para el mapa
-    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Donostia-San+Sebasti%C3%A1n",
+    mapQuery: "Calle Nueva 5, 20001 Donostia-San Sebastián",
+    mapsUrl: "https://www.google.com/maps/search/?api=1&query=Calle+Nueva+5%2C+20001+Donostia-San+Sebasti%C3%A1n",
   },
 
   social: [

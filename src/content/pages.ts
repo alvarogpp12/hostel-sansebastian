@@ -64,7 +64,7 @@ export const locationPage = {
     ] satisfies ImageCard[],
   },
   mapTitle: "Cómo llegar",
-  mapText: "Te enviamos la dirección exacta y las indicaciones al confirmar tu reserva.", // PENDIENTE: dirección pública
+  mapText: "Estamos en la C/ Nueva 5 - 1ºB, 20001 Donostia. Con la confirmación de tu reserva te mandamos cómo llegar y cómo entrar.",
   mapLink: "Ver en Google Maps",
 };
 

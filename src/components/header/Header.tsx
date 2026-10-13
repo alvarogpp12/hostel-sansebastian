@@ -181,7 +181,7 @@ export function Header() {
         aria-label={site.brand.name}
         className={`fixed top-6 left-w z-40 lg:top-10 lg:left-1/2 lg:-translate-x-1/2 ${tone}`}
       >
-        <Logo variant="full" tone={dark ? "light" : "dark"} priority alt={site.brand.name} className="h-8 w-auto lg:h-10" />
+        <Logo variant="full" tone={dark ? "light" : "dark"} className="h-10 w-auto lg:h-12" />
       </TransitionLink>
 
       <TransitionLink
@@ -190,8 +190,9 @@ export function Header() {
         aria-label={site.brand.name}
         className="invisible fixed top-5 left-w z-40 lg:top-8"
       >
-        <div className="flex-center size-12 rounded-full bg-black">
-          <Logo variant="icon" tone="light" className="size-7" />
+        {/* Círculo beige: el rombo se lee igual sobre fotos, beige o el pie negro */}
+        <div className="flex-center size-12 rounded-full bg-beige shadow-[0_4px_14px_rgba(0,0,0,0.12)]">
+          <Logo variant="icon" tone="dark" className="size-8" />
         </div>
       </TransitionLink>
 
@@ -231,7 +232,7 @@ export function Header() {
           style={{ display: "none" }}
           className="absolute -top-4 -right-2 -z-10 gap-4 overflow-clip rounded-md bg-black px-8 py-8 text-white"
         >
-          <Logo variant="full" tone="light" className="h-6 w-auto" />
+          <Logo variant="full" tone="light" className="h-9 w-auto" />
           <div className="flex w-full gap-8 max-md:flex-col md:min-w-[520px]">
             <div className="flex h-full flex-1 flex-col justify-between gap-3 max-md:order-last">
               <div className="grid gap-2">

@@ -37,7 +37,7 @@ export function Footer() {
       <div className="grid gap-12 rounded-lg bg-black p-6 text-white sm:p-8 lg:gap-16 lg:p-12">
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-w">
           <div className="grid content-start gap-5 lg:col-span-5">
-            <Logo variant="full" tone="light" className="h-8 w-auto lg:h-10" alt={site.brand.name} />
+            <Logo variant="full" tone="light" address className="h-20 w-auto lg:h-24" alt={`${site.brand.name}, ${site.legal.addressLine}`} />
             <p className="max-w-[40ch] text-neutral-300">{site.ui.footerIntro}</p>
             <TransitionLink href="/reservar" className="style-button min-h-12 !bg-beige !text-black">
               Reservar
@@ -71,8 +71,6 @@ export function Footer() {
             </div>
             <p className="text-sm text-neutral-400">
               {site.legal.company}
-              <br />
-              {site.legal.addressLine}
               <br />
               {site.legal.taxId}
             </p>
