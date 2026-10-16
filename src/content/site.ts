@@ -121,7 +121,7 @@ export const site = {
   },
 
   contact: {
-    email: "reservas@enjoycomfortsansebastian.com", // PENDIENTE
+    email: "reservas@enjoycomfort.com",
     phoneLabel: "T: +34 000 000 000", // PENDIENTE
     phoneHref: "tel:+34000000000", // PENDIENTE
     mapQuery: "Calle Nueva 5, 20001 Donostia-San Sebastián",
