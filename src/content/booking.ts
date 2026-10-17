@@ -28,12 +28,16 @@ export const booking = {
   /** PENDIENTE: código del motor de reservas de Redforts */
   beCode: null as string | null,
 
-  /** Nuestro id de habitación → id de alojamiento ("acco") en Redforts. PENDIENTE */
+  /**
+   * Nuestro id de habitación → id de alojamiento ("acco") en Redforts, según
+   * la descripción de cada uno en el inventario. Sirve para abrir la reserva
+   * con esa habitación primero y para sacar sus fotos de Redforts.
+   */
   accoIds: {
-    doble: null,
-    "dos-camas": null,
-    "doble-privado": null,
-    familiar: null,
+    doble: "2", // «Habitación Interior/Exterior» con cama de matrimonio
+    "dos-camas": "13", // «Habitación Interior/Exterior» con dos camas individuales
+    "doble-privado": "1", // «Doble con baño exterior»
+    familiar: "14", // «Habitación Familiar»
   } as Record<RoomId, string | null>,
 
   /** Idioma del motor (tiene que estar activado en la cuenta de Redforts) */

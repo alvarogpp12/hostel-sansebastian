@@ -7,6 +7,7 @@ import { Frame } from "@/components/ui";
 import { hasPrice, priceLabel, rooms } from "@/content/rooms";
 import { site } from "@/content/site";
 import { bookingHref } from "@/lib/booking-search";
+import type { RoomPhotos } from "@/lib/redforts/room-photos";
 import { GalleryModal } from "./GalleryModal";
 
 /**
@@ -14,8 +15,10 @@ import { GalleryModal } from "./GalleryModal";
  * y «Reservar esta» con la habitación ya elegida.
  *  - Home: texto corto y enlace a la ficha en /habitaciones.
  *  - /habitaciones (`detailed`): texto largo y galería de fotos.
+ * `photos`: las de Redforts (ver getRoomPhotos); si una habitación no tiene,
+ * se usan las de content/rooms.ts.
  */
-export function RoomRows({ detailed = false }: { detailed?: boolean }) {
+export function RoomRows({ detailed = false, photos: remote = {} }: { detailed?: boolean; photos?: RoomPhotos }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const close = useCallback(() => setOpenId(null), []);
   const Heading = detailed ? "h2" : "h3";
@@ -24,13 +27,13 @@ export function RoomRows({ detailed = false }: { detailed?: boolean }) {
     <>
       <ul className="grid gap-3">
         {rooms.map((room, i) => {
-          const photos = [room.image, ...room.gallery];
+          const photos = remote[room.id] ?? [room.image, ...room.gallery];
           return (
             <li key={room.id} id={detailed ? room.id : undefined} className="scroll-mt-24">
               <article className="group grid overflow-clip rounded-lg bg-white md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[22rem_1fr_17rem]">
                 <div className="relative md:row-span-2 lg:row-span-1">
                   <Frame
-                    image={room.image}
+                    image={photos[0]}
                     priority={detailed && i === 0}
                     sizes="(min-width: 1024px) 22rem, (min-width: 768px) 18rem, 100vw"
                     className="aspect-[16/10] size-full !rounded-none md:aspect-auto md:min-h-60"
@@ -103,7 +106,7 @@ export function RoomRows({ detailed = false }: { detailed?: boolean }) {
             onClose={close}
             title={room.name}
             meta={room.meta}
-            images={[room.image, ...room.gallery]}
+            images={remote[room.id] ?? [room.image, ...room.gallery]}
           />
         ))}
     </>
