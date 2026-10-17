@@ -5,6 +5,9 @@ import { BookingHero, HomeCity, HomeFaq, HomeFeatures, HomeRooms } from "@/compo
 import { BookingBand } from "@/components/sections/Page";
 import { site } from "@/content/site";
 
+/** Las fotos de las habitaciones vienen de Redforts: se refrescan cada 10 min */
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: site.seo.title,
   description: site.seo.description,
