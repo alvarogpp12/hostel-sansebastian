@@ -63,9 +63,11 @@ export default async function BookingPage() {
                 <a className="w-fit underline" href={`mailto:${site.contact.email}`}>
                   {site.contact.email}
                 </a>
-                <a className="w-fit underline" href={site.contact.phoneHref}>
-                  {site.contact.phoneLabel}
-                </a>
+                {site.contact.phones.map((t) => (
+                  <a key={t.href} className="w-fit underline" href={t.href}>
+                    {t.label}
+                  </a>
+                ))}
               </div>
             </div>
           )}

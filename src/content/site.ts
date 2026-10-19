@@ -122,8 +122,14 @@ export const site = {
 
   contact: {
     email: "reservas@enjoycomfort.com",
-    phoneLabel: "T: +34 000 000 000", // PENDIENTE
-    phoneHref: "tel:+34000000000", // PENDIENTE
+    /** Teléfono principal (fijo): el que va en los datos estructurados */
+    phoneLabel: "T: +34 943 43 12 28",
+    phoneHref: "tel:+34943431228",
+    /** Todos los teléfonos que se enseñan en la web (cabecera, pie, reservas) */
+    phones: [
+      { label: "T: +34 943 43 12 28", href: "tel:+34943431228" },
+      { label: "M: +34 699 90 14 51", href: "tel:+34699901451" },
+    ],
     mapQuery: "Calle Nueva 5, 20001 Donostia-San Sebastián",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Calle+Nueva+5%2C+20001+Donostia-San+Sebasti%C3%A1n",
   },

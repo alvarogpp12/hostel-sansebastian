@@ -65,9 +65,11 @@ export function Footer() {
               <a className="w-fit text-neutral-200 transition-colors hover:text-white" href={`mailto:${site.contact.email}`}>
                 {site.contact.email}
               </a>
-              <a className="w-fit text-neutral-200 transition-colors hover:text-white" href={site.contact.phoneHref}>
-                {site.contact.phoneLabel}
-              </a>
+              {site.contact.phones.map((t) => (
+                <a key={t.href} className="w-fit text-neutral-200 transition-colors hover:text-white" href={t.href}>
+                  {t.label}
+                </a>
+              ))}
             </div>
             <p className="text-sm text-neutral-400">
               {site.legal.company}
