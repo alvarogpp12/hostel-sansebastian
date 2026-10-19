@@ -133,6 +133,8 @@ export const site = {
     ],
     /** Botón flotante de WhatsApp (móvil) */
     whatsapp: {
+      /** Número en formato internacional sin "+" (para wa.me) */
+      number: "34699901451",
       href: `https://wa.me/34699901451?text=${encodeURIComponent("Hola, quería información sobre una estancia en Enjoy Comfort.")}`,
       label: "Escríbenos por WhatsApp",
     },

@@ -62,7 +62,8 @@ export async function HomeRooms() {
   const photos = await getRoomPhotos();
   return (
     <Section id="habitaciones" eyebrow={eyebrow} title={title} text={text}>
-      <RoomRows photos={photos} />
+      {/* El mismo listado que /habitaciones: texto completo y galería de fotos */}
+      <RoomRows detailed headingLevel="h3" photos={photos} />
     </Section>
   );
 }

@@ -18,10 +18,19 @@ import { GalleryModal } from "./GalleryModal";
  * `photos`: las de Redforts (ver getRoomPhotos); si una habitación no tiene,
  * se usan las de content/rooms.ts.
  */
-export function RoomRows({ detailed = false, photos: remote = {} }: { detailed?: boolean; photos?: RoomPhotos }) {
+export function RoomRows({
+  detailed = false,
+  photos: remote = {},
+  headingLevel,
+}: {
+  detailed?: boolean;
+  photos?: RoomPhotos;
+  /** Por defecto h2 en /habitaciones y h3 en la home (que ya tiene su h2) */
+  headingLevel?: "h2" | "h3";
+}) {
   const [openId, setOpenId] = useState<string | null>(null);
   const close = useCallback(() => setOpenId(null), []);
-  const Heading = detailed ? "h2" : "h3";
+  const Heading = headingLevel ?? (detailed ? "h2" : "h3");
 
   return (
     <>
