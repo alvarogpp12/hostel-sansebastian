@@ -40,6 +40,15 @@ export const booking = {
     familiar: "14", // «Habitación Familiar»
   } as Record<RoomId, string | null>,
 
+  /**
+   * Cómo termina la reserva nativa (BOOKING_PROVIDER=redforts):
+   *  - "whatsapp": el huésped consulta disponibilidad y precio, rellena sus
+   *    datos y SOLICITA la reserva por WhatsApp con todo ya escrito. No se
+   *    cobra nada (mientras el pago online no esté activo).
+   *  - "pay": pago con Stripe y reserva automática en Redforts.
+   */
+  checkoutMode: "whatsapp" as "whatsapp" | "pay",
+
   /** Idioma del motor (tiene que estar activado en la cuenta de Redforts) */
   lang: "es",
 

@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { startCheckout } from "@/app/reservar/actions";
-import { ArrowOut } from "@/components/icons";
+import { ArrowOut, WhatsAppGlyph } from "@/components/icons";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { TransitionLink } from "@/components/TransitionLink";
 import { booking } from "@/content/booking";
@@ -12,6 +12,7 @@ import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
 import { site } from "@/content/site";
+import { bookingRequestMessage, whatsAppUrl } from "@/lib/whatsapp";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { BookingSteps } from "./BookingSteps";
 
@@ -21,8 +22,11 @@ import { BookingSteps } from "./BookingSteps";
  *   2. Opciones de /availability: nombre, fotos y textos del inventario,
  *      precio (tachado si hay promo) y comparativa con las OTAs.
  *   3. Datos del huésped generados desde `fields` del inventario.
- *   4. Pago con Stripe (Server Action). Los precios que se ven aquí son solo
- *      informativos: el servidor los vuelve a pedir a Redforts antes de cobrar.
+ *   4. Según `booking.checkoutMode`:
+ *      - "whatsapp": solicitud de reserva por WhatsApp con todo ya escrito
+ *        (habitación, fechas, personas, precio y datos). No se cobra nada.
+ *      - "pay": pago con Stripe (Server Action). Los precios que se ven aquí
+ *        son solo informativos: el servidor los vuelve a pedir a Redforts.
  *
  * Si la URL trae fechas (?llegada=…&salida=…&adultos=…, desde el buscador de
  * la home), busca nada más abrirse y salta directamente a las habitaciones.
@@ -175,9 +179,47 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     if (qty > 0 && !results?.combine) requestAnimationFrame(() => scrollTo(checkoutRef.current));
   };
 
+  const viaWhatsApp = booking.checkoutMode === "whatsapp";
+
+  /** Abre WhatsApp con la solicitud de reserva ya escrita */
+  const requestByWhatsApp = () => {
+    if (!lastSearch || !breakdown) return;
+    const rateNames = (o: OfferedOption) =>
+      [...new Set(o.periods.map((p) => inventory.rates[String(p.rate_id)]?.name).filter(Boolean))].join(" + ") || undefined;
+    const message = bookingRequestMessage({
+      arrival: chosen[0].option.arrival,
+      departure: chosen[0].option.departure,
+      adults: lastSearch.adults,
+      children: lastSearch.children,
+      rooms: chosen.map(({ option, quantity }) => ({
+        name: inventory.accos[String(option.acco_id)]?.name ?? `Habitación ${option.acco_id}`,
+        rate: rateNames(option),
+        quantity,
+        price: money.format(option.price * quantity),
+      })),
+      total: money.format(breakdown.total),
+      promo: lastSearch.promo,
+      guest: inventory.fields.map((f) => ({
+        label: FIELD_LABELS[f.id] ?? f.id,
+        value: f.id === "country" ? (inventory.countries.find((c) => c.code === guest.country)?.name ?? "") : (guest[f.id] ?? ""),
+      })),
+      notes,
+    });
+    const url = whatsAppUrl(site.contact.whatsapp.number, message);
+    // En el ordenador, en otra pestaña; si el navegador la bloquea, en esta.
+    // (Sin "noopener" en las opciones: con él window.open devuelve siempre null.)
+    const win = window.open(url, "_blank");
+    if (win) win.opener = null;
+    else window.location.assign(url);
+  };
+
   const pay = (e: FormEvent) => {
     e.preventDefault();
     if (!lastSearch || !breakdown) return;
+    if (viaWhatsApp) {
+      requestByWhatsApp();
+      return;
+    }
     setCheckoutErrors([]);
     setFieldErrors({});
     startPaying(async () => {
@@ -211,7 +253,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
 
   return (
     <div className="grid gap-10">
-      <BookingSteps current={step} />
+      <BookingSteps current={step} lastLabel={viaWhatsApp ? "Tus datos y solicitud" : undefined} />
 
       {/* ── 1. Búsqueda ─────────────────────────────────────────────── */}
       <form onSubmit={search} className="grid items-start gap-w text-sm lg:grid-cols-2">
@@ -482,18 +524,41 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             )}
             {inventory.privacySummary && <p className="text-xs whitespace-pre-line text-neutral-500">{inventory.privacySummary}</p>}
 
-            <button type="submit" disabled={paying || !guestsFit} className="style-button w-full justify-center disabled:opacity-60">
-              {paying ? "Comprobando disponibilidad…" : `Pagar ${money.format(breakdown.total)}`}
-              <ArrowOut />
-            </button>
-            <p className="text-xs text-neutral-500">
-              Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra
-              cuando la reserva queda confirmada. Al reservar aceptas las{" "}
-              <TransitionLink href={site.legalLinks.terms.href} className="underline">
-                {site.legalLinks.terms.label}
-              </TransitionLink>
-              .
-            </p>
+            {viaWhatsApp ? (
+              <>
+                <button
+                  type="submit"
+                  disabled={!guestsFit}
+                  className="style-button min-h-12 w-full justify-center !bg-[#25D366] !text-white disabled:opacity-60"
+                >
+                  <WhatsAppGlyph className="size-5" />
+                  Solicitar reserva por WhatsApp
+                </button>
+                <p className="text-xs text-neutral-500">
+                  Se abre WhatsApp con tu solicitud ya escrita (habitación, fechas y datos): solo tienes que enviarla. Te
+                  confirmamos la disponibilidad por el mismo chat y todavía no se cobra nada. Al solicitar la reserva aceptas las{" "}
+                  <TransitionLink href={site.legalLinks.terms.href} className="underline">
+                    {site.legalLinks.terms.label}
+                  </TransitionLink>
+                  .
+                </p>
+              </>
+            ) : (
+              <>
+                <button type="submit" disabled={paying || !guestsFit} className="style-button w-full justify-center disabled:opacity-60">
+                  {paying ? "Comprobando disponibilidad…" : `Pagar ${money.format(breakdown.total)}`}
+                  <ArrowOut />
+                </button>
+                <p className="text-xs text-neutral-500">
+                  Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra
+                  cuando la reserva queda confirmada. Al reservar aceptas las{" "}
+                  <TransitionLink href={site.legalLinks.terms.href} className="underline">
+                    {site.legalLinks.terms.label}
+                  </TransitionLink>
+                  .
+                </p>
+              </>
+            )}
             {checkoutErrors.length > 0 && (
               <ul role="alert" className="border border-red-400 p-3 text-xs">
                 {checkoutErrors.map((m) => (

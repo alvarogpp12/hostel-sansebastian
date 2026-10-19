@@ -1,10 +1,11 @@
 const STEPS = ["Fechas", "Habitación", "Tus datos y pago"];
 
 /** Progreso de la reserva: el huésped sabe siempre cuánto le queda */
-export function BookingSteps({ current }: { current: 1 | 2 | 3 }) {
+export function BookingSteps({ current, lastLabel }: { current: 1 | 2 | 3; lastLabel?: string }) {
+  const steps = lastLabel ? [...STEPS.slice(0, -1), lastLabel] : STEPS;
   return (
     <ol aria-label="Pasos de la reserva" className="grid grid-cols-3 gap-2">
-      {STEPS.map((label, i) => {
+      {steps.map((label, i) => {
         const n = i + 1;
         const state = n < current ? "done" : n === current ? "current" : "todo";
         return (

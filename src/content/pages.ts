@@ -128,7 +128,7 @@ export const bookingPage = {
   title: "Reservar",
   formTitle: "Reserva tu habitación",
   formIntro:
-    "Elige habitación y fechas y consulta al momento la disponibilidad y el precio. La reserva se confirma en el acto, sin intermediarios ni comisiones.",
+    "Elige fechas y consulta al momento la disponibilidad y el precio de cada habitación. Reserva directa, sin intermediarios ni comisiones.",
   fields: {
     room: "Habitación",
     checkIn: "Entrada",
