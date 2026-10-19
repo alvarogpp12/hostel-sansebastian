@@ -39,8 +39,8 @@ export const rooms: Room[] = [
       { icon: "key", text: "Habitación de uso privado" },
       { icon: "shower", text: "Baño compartido" },
     ],
-    image: media.rooms.double[0],
-    gallery: [media.rooms.double[1], ...media.bathrooms],
+    image: media.roomPhotos["doble"][0],
+    gallery: media.roomPhotos["doble"].slice(1),
   },
   {
     id: "dos-camas",
@@ -58,8 +58,8 @@ export const rooms: Room[] = [
       { icon: "key", text: "Habitación de uso privado" },
       { icon: "shower", text: "Baño compartido" },
     ],
-    image: media.rooms.twin[0],
-    gallery: [...media.rooms.twin.slice(1), ...media.bathrooms],
+    image: media.roomPhotos["dos-camas"][0],
+    gallery: media.roomPhotos["dos-camas"].slice(1),
   },
   {
     id: "doble-privado",
@@ -77,9 +77,8 @@ export const rooms: Room[] = [
       { icon: "key", text: "Habitación de uso privado" },
       { icon: "shower", text: "Baño privado, fuera de la habitación" },
     ],
-    // PENDIENTE: fotos de esta habitación y de su baño
-    image: media.rooms.double[1],
-    gallery: [media.rooms.double[0], media.detail],
+    image: media.roomPhotos["doble-privado"][0],
+    gallery: media.roomPhotos["doble-privado"].slice(1),
   },
   {
     id: "familiar",
@@ -98,9 +97,8 @@ export const rooms: Room[] = [
       { icon: "key", text: "Habitación de uso privado" },
       { icon: "shower", text: "Baño privado" },
     ],
-    // PENDIENTE: fotos de esta habitación y de su baño
-    image: media.rooms.family[0],
-    gallery: [media.detail],
+    image: media.roomPhotos["familiar"][0],
+    gallery: media.roomPhotos["familiar"].slice(1),
   },
 ];
 
