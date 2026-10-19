@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Footer } from "@/components/sections/Footer";
 import { Header } from "@/components/header/Header";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
@@ -27,10 +28,13 @@ export default function Template({ children }: { children: ReactNode }) {
   }, [lenis, pathname]);
 
   return (
-    <div ref={ref} data-page-view>
-      <Header />
-      {children}
-      <Footer />
-    </div>
+    <>
+      <div ref={ref} data-page-view>
+        <Header />
+        {children}
+        <Footer />
+      </div>
+      <WhatsAppButton />
+    </>
   );
 }
