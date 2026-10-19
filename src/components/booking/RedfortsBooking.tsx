@@ -305,7 +305,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                   <div className="grid gap-1">
                     {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-beige px-2.5 py-1">Tu elección</span>}
                     <h3 className="style-heading text-lg lg:text-xl">{acco?.name ?? `Alojamiento ${accoId}`}</h3>
-                    {acco?.description && <p className="text-sm text-neutral-600">{acco.description}</p>}
+                    {acco?.description && <p className="text-sm whitespace-pre-line text-neutral-600">{acco.description}</p>}
                   </div>
                   <ul className="grid gap-2">
                     {options.map((o) => {
@@ -475,7 +475,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             {inventory.consent && (
               <label className="flex items-start gap-2 text-xs">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
-                <span>
+                <span className="whitespace-pre-line">
                   <strong className="font-normal">{inventory.consent.title}.</strong> {inventory.consent.text}
                 </span>
               </label>

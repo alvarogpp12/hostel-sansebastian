@@ -4,6 +4,7 @@ import { getItemList, getReservation, updateItems } from "@/lib/redforts/api";
 import { isRedfortsConfigured, RedfortsError } from "@/lib/redforts/client";
 import { describeError, getInventory, pickLang } from "@/lib/redforts/inventory";
 import { itemsUpdateSchema, lookupSchema } from "@/lib/redforts/schemas";
+import { cleanText } from "@/lib/redforts/text";
 import type { InventoryResponse } from "@/lib/redforts/types";
 
 export type ReservationView = {
@@ -50,7 +51,7 @@ async function load(reserv_id: number, arrival: string, email: string, inventory
     items: items.map((i) => ({
       id: i.id,
       name: t?.items[String(i.id)]?.name ?? inventory.items[String(i.id)]?.name ?? `Extra ${i.id}`,
-      description: t?.items[String(i.id)]?.description ?? null,
+      description: cleanText(t?.items[String(i.id)]?.description),
       price: i.price,
       daily: i.daily,
       quantity: i.quantity ?? 0,
