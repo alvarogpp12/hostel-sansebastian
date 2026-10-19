@@ -113,7 +113,8 @@ export const site = {
     postalCode: "20001",
     city: "Donostia-San Sebastián",
     region: "Gipuzkoa",
-    taxId: "NIF: pendiente", // PENDIENTE
+    /** Nº de registro turístico de Euskadi (se muestra en el pie y el menú) */
+    taxId: "Nº de licencia: HSS00744",
     /** One-line address used in header, footer and contact block */
     get addressLine() {
       return `${this.street}, ${this.postalCode} ${this.city}`;
