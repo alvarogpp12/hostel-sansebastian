@@ -33,6 +33,12 @@ export function StickyBookBar({ watch }: { watch: string }) {
 
   const visible = pastTop && !atEnd;
 
+  // Avisa al botón flotante de WhatsApp para que suba por encima de la barra en el móvil.
+  useEffect(() => {
+    document.body.toggleAttribute("data-bookbar", visible);
+    return () => document.body.removeAttribute("data-bookbar");
+  }, [visible]);
+
   return (
     <div
       aria-hidden={!visible}

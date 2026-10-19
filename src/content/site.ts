@@ -130,6 +130,11 @@ export const site = {
       { label: "T: +34 943 43 12 28", href: "tel:+34943431228" },
       { label: "M: +34 699 90 14 51", href: "tel:+34699901451" },
     ],
+    /** Botón flotante de WhatsApp (móvil) */
+    whatsapp: {
+      href: `https://wa.me/34699901451?text=${encodeURIComponent("Hola, quería información sobre una estancia en Enjoy Comfort.")}`,
+      label: "Escríbenos por WhatsApp",
+    },
     mapQuery: "Calle Nueva 5, 20001 Donostia-San Sebastián",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Calle+Nueva+5%2C+20001+Donostia-San+Sebasti%C3%A1n",
   },
