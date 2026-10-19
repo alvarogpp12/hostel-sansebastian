@@ -114,7 +114,7 @@ export function MyReservation() {
                   <li key={i.id} className="flex items-center justify-between gap-4 border-t border-neutral-200 pt-2">
                     <span className="grid">
                       <span>{i.name}</span>
-                      {i.description && <span className="text-xs text-neutral-500">{i.description}</span>}
+                      {i.description && <span className="text-xs whitespace-pre-line text-neutral-500">{i.description}</span>}
                       <span className="text-xs text-neutral-500">
                         {money.format(i.price)}
                         {i.daily ? ` por día (${reservation.days} días)` : ""}

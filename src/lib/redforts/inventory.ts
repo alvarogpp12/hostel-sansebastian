@@ -1,6 +1,7 @@
 import "server-only";
 import { revalidateTag } from "next/cache";
 import { redforts, RedfortsError } from "./client";
+import { cleanText } from "./text";
 import type { InventoryField, InventoryResponse, Lang, RedfortsErrorItem } from "./types";
 
 /**
@@ -106,7 +107,7 @@ export function toPublicInventory(inv: InventoryResponse, wanted: Lang): PublicI
     accos[id] = {
       id: Number(id),
       name,
-      description: t?.accos[id]?.description ?? null,
+      description: cleanText(t?.accos[id]?.description),
       adults: a.adults,
       children: a.children,
       images: a.images
@@ -126,15 +127,15 @@ export function toPublicInventory(inv: InventoryResponse, wanted: Lang): PublicI
     rates[id] = {
       id: Number(id),
       name: rt?.name ?? r.name,
-      description: rt?.description ?? null,
-      cancellation: rt?.cancellation ?? null,
-      payment: rt?.payment ?? null,
+      description: cleanText(rt?.description),
+      cancellation: cleanText(rt?.cancellation),
+      payment: cleanText(rt?.payment),
     };
   }
 
   const items: Record<string, PublicItem> = {};
   for (const [id, it] of Object.entries(inv.items)) {
-    items[id] = { id: Number(id), name: t?.items[id]?.name ?? it.name, description: t?.items[id]?.description ?? null };
+    items[id] = { id: Number(id), name: t?.items[id]?.name ?? it.name, description: cleanText(t?.items[id]?.description) };
   }
 
   return {
@@ -152,11 +153,14 @@ export function toPublicInventory(inv: InventoryResponse, wanted: Lang): PublicI
     countries: Object.entries(t?.countries ?? {})
       .map(([code, name]) => ({ code: code.toUpperCase(), name }))
       .sort((a, b) => a.name.localeCompare(b.name, lang)),
-    consent: t?.consent_title && t?.consent_text ? { title: t.consent_title, text: t.consent_text } : null,
-    privacySummary: t?.privacy_summary ?? null,
-    privacy: t?.privacy ?? null,
-    conditions: t?.conditions ?? null,
-    checkinout: t?.checkinout ?? null,
-    noteText: t?.note_text ?? null,
+    consent:
+      t?.consent_title && t?.consent_text
+        ? { title: cleanText(t.consent_title) ?? t.consent_title, text: cleanText(t.consent_text) ?? t.consent_text }
+        : null,
+    privacySummary: cleanText(t?.privacy_summary),
+    privacy: cleanText(t?.privacy),
+    conditions: cleanText(t?.conditions),
+    checkinout: cleanText(t?.checkinout),
+    noteText: cleanText(t?.note_text),
   };
 }
