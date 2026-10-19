@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
 import { startCheckout } from "@/app/reservar/actions";
@@ -7,13 +8,14 @@ import { ArrowOut, WhatsAppGlyph } from "@/components/icons";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { TransitionLink } from "@/components/TransitionLink";
 import { booking } from "@/content/booking";
-import { roomById } from "@/content/rooms";
+import { roomById, rooms } from "@/content/rooms";
 import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
 import { site } from "@/content/site";
 import { bookingRequestMessage, whatsAppUrl } from "@/lib/whatsapp";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
+import { GalleryModal } from "@/components/sections/GalleryModal";
 import { BookingSteps } from "./BookingSteps";
 
 /**
@@ -64,6 +66,9 @@ const AUTOCOMPLETE: Record<string, string> = {
   phone: "tel",
 };
 
+/** Habitación de la web que corresponde a un alojamiento de Redforts (booking.accoIds) */
+const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] === String(accoId));
+
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
 
@@ -106,6 +111,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
   const [checkoutErrors, setCheckoutErrors] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [paying, startPaying] = useTransition();
+  const [galleryAcco, setGalleryAcco] = useState<number | null>(null);
 
   const money = useMemo(
     () => new Intl.NumberFormat("es-ES", { style: "currency", currency: results?.currency ?? "EUR" }),
@@ -332,15 +338,28 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
           )}
           {byAcco.map(([accoId, options]) => {
             const acco = inventory.accos[String(accoId)];
-            const img = acco?.images[0];
+            // Fotos nuestras (content/media.ts), no las de Redforts
+            const room = roomForAcco(accoId);
+            const photos = room ? [room.image, ...room.gallery] : [];
             return (
               <article key={accoId} className="grid gap-4 rounded-lg border border-neutral-300 p-2 md:grid-cols-[12rem_1fr]">
                 <div className="relative aspect-[4/3] overflow-clip rounded-lg bg-neutral-200 md:aspect-auto">
-                  {img && (
-                    // Las fotos vienen de Redforts (booking.redforts.com): sin optimizar para no
-                    // depender de remotePatterns.
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={img.thumb || img.url} alt={img.alt} className="absolute inset-0 size-full object-cover" loading="lazy" />
+                  {photos[0] && (
+                    <>
+                      <Image src={photos[0].src} alt={photos[0].alt} fill sizes="(min-width: 768px) 12rem, 100vw" className="object-cover" />
+                      {photos.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => setGalleryAcco(accoId)}
+                          className="absolute inset-0 flex cursor-zoom-in items-end justify-end p-2"
+                          aria-label={`${site.ui.openGallery}: ${acco?.name ?? room?.name ?? ""}`}
+                        >
+                          <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium shadow-sm">
+                            {site.ui.openGallery} ({photos.length})
+                          </span>
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
                 <div className="grid gap-3 p-2">
@@ -417,6 +436,20 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
           })}
         </section>
       )}
+
+      {galleryAcco !== null &&
+        (() => {
+          const room = roomForAcco(galleryAcco);
+          return room ? (
+            <GalleryModal
+              open
+              onClose={() => setGalleryAcco(null)}
+              title={inventory.accos[String(galleryAcco)]?.name ?? room.name}
+              meta={room.meta}
+              images={[room.image, ...room.gallery]}
+            />
+          ) : null;
+        })()}
 
       {/* ── 3. Datos y pago ─────────────────────────────────────────── */}
       {breakdown && lastSearch && (

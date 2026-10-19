@@ -70,7 +70,7 @@ export type PublicAcco = {
   description: string | null;
   adults: number;
   children: number;
-  images: { url: string; thumb: string; alt: string }[];
+  // Sin fotos: la web usa las suyas (content/media.ts), no las de Redforts
 };
 export type PublicRate = { id: number; name: string; description: string | null; cancellation: string | null; payment: string | null };
 export type PublicItem = { id: number; name: string; description: string | null };
@@ -110,14 +110,6 @@ export function toPublicInventory(inv: InventoryResponse, wanted: Lang): PublicI
       description: cleanText(t?.accos[id]?.description),
       adults: a.adults,
       children: a.children,
-      images: a.images
-        .map((imgId) => inv.images[String(imgId)])
-        .filter(Boolean)
-        .map((img, i) => ({
-          url: img.url,
-          thumb: img.thumbnail_url,
-          alt: t?.images[String(a.images[i])]?.name ?? name,
-        })),
     };
   }
 

@@ -5,7 +5,6 @@ import { Frame } from "@/components/ui";
 import { QuickSearch } from "@/components/booking/QuickSearch";
 import { home } from "@/content/home";
 import { ImageCards, Section, StripList } from "./Page";
-import { getRoomPhotos } from "@/lib/redforts/room-photos";
 import { RoomRows } from "./RoomRows";
 
 /**
@@ -57,13 +56,12 @@ function Check() {
   );
 }
 
-export async function HomeRooms() {
+export function HomeRooms() {
   const { eyebrow, title, text } = home.rooms;
-  const photos = await getRoomPhotos();
   return (
     <Section id="habitaciones" eyebrow={eyebrow} title={title} text={text}>
       {/* El mismo listado que /habitaciones: texto completo y galería de fotos */}
-      <RoomRows detailed headingLevel="h3" photos={photos} />
+      <RoomRows detailed headingLevel="h3" />
     </Section>
   );
 }

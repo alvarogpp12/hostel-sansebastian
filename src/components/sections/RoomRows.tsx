@@ -7,7 +7,6 @@ import { Frame } from "@/components/ui";
 import { hasPrice, priceLabel, rooms } from "@/content/rooms";
 import { site } from "@/content/site";
 import { bookingHref } from "@/lib/booking-search";
-import type { RoomPhotos } from "@/lib/redforts/room-photos";
 import { GalleryModal } from "./GalleryModal";
 
 /**
@@ -15,16 +14,13 @@ import { GalleryModal } from "./GalleryModal";
  * y «Reservar esta» con la habitación ya elegida.
  *  - Home: texto corto y enlace a la ficha en /habitaciones.
  *  - /habitaciones (`detailed`): texto largo y galería de fotos.
- * `photos`: las de Redforts (ver getRoomPhotos); si una habitación no tiene,
- * se usan las de content/rooms.ts.
+ * Las fotos son las nuestras (content/media.ts → public/media/habitaciones).
  */
 export function RoomRows({
   detailed = false,
-  photos: remote = {},
   headingLevel,
 }: {
   detailed?: boolean;
-  photos?: RoomPhotos;
   /** Por defecto h2 en /habitaciones y h3 en la home (que ya tiene su h2) */
   headingLevel?: "h2" | "h3";
 }) {
@@ -36,7 +32,7 @@ export function RoomRows({
     <>
       <ul className="grid gap-3">
         {rooms.map((room, i) => {
-          const photos = remote[room.id] ?? [room.image, ...room.gallery];
+          const photos = [room.image, ...room.gallery];
           return (
             <li key={room.id} id={detailed ? room.id : undefined} className="scroll-mt-24">
               <article className="group grid overflow-clip rounded-lg bg-white md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[22rem_1fr_17rem]">
@@ -115,7 +111,7 @@ export function RoomRows({
             onClose={close}
             title={room.name}
             meta={room.meta}
-            images={remote[room.id] ?? [room.image, ...room.gallery]}
+            images={[room.image, ...room.gallery]}
           />
         ))}
     </>
