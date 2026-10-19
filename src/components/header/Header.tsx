@@ -250,9 +250,11 @@ export function Header() {
                   <a className="w-fit transition-all duration-300 lg:hover:text-white" href={`mailto:${site.contact.email}`}>
                     {site.contact.email}
                   </a>
-                  <a className="w-fit transition-all duration-300 lg:hover:text-white" href={site.contact.phoneHref}>
-                    {site.contact.phoneLabel}
-                  </a>
+                  {site.contact.phones.map((t) => (
+                    <a key={t.href} className="w-fit transition-all duration-300 lg:hover:text-white" href={t.href}>
+                      {t.label}
+                    </a>
+                  ))}
                 </div>
               </div>
               <ul data-menu-social className="style-caption-xs flex items-center gap-2">
