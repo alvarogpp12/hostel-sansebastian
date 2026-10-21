@@ -107,7 +107,17 @@ export const site = {
   },
 
   legal: {
-    company: "Enjoy Comfort San Sebastián", // PENDIENTE: razón social
+    /** Nombre comercial del establecimiento */
+    company: "Enjoy Comfort San Sebastián",
+    /**
+     * PENDIENTE: titular (nombre y apellidos o razón social) y su NIF. Salen en
+     * el aviso legal, la privacidad y los términos; mientras sean null, esos
+     * textos nombran el establecimiento.
+     */
+    owner: null as string | null,
+    nif: null as string | null,
+    /** Nº de registro turístico de Euskadi */
+    license: "HSS00744",
     // Dirección de LOGOS.pdf
     street: "C/ Nueva 5 - 1ºB",
     postalCode: "20001",

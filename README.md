@@ -37,9 +37,9 @@ Fuera de Vercel:
   cambiar el CNAME de `www` a `cname.vercel-dns.com` y añadir
   `www.enjoycomfort.com` en Vercel > Settings > Domains (redirigiendo a
   `enjoycomfort.com`).
-- **Textos legales** (aviso legal, privacidad, cookies, términos): siguen con
-  texto de relleno en `src/content/pages.ts` y son obligatorios (LSSI y RGPD).
-  Hacen falta la razón social y el NIF del titular.
+- **Titular y NIF**: los textos legales ya están escritos
+  (`src/content/legal.ts`), pero el aviso legal exige identificar al titular.
+  Rellenar `owner` y `nif` en `site.legal` (`src/content/site.ts`).
 - Alta en Google Business Profile y en Search Console (enviar el sitemap).
 
 Los textos de la pantalla de «Próximamente» están en `src/content/home.ts`
@@ -81,6 +81,7 @@ historia del planteamiento anterior por no encajar con este público.
 | Habitaciones: nombre, capacidad, **precios**, textos, fotos y galería | `src/content/rooms.ts` |
 | Textos de la home (incluida la sección de preguntas frecuentes) | `src/content/home.ts` |
 | Textos del resto de páginas | `src/content/pages.ts` |
+| Aviso legal, privacidad, cookies y términos (tarifas y normas, las de Redforts) | `src/content/legal.ts` |
 | Rutas de todas las imágenes | `src/content/media.ts` |
 | Colores, tipografías, espaciados | `src/app/globals.css` |
 
@@ -173,9 +174,9 @@ de las tarifas (los mismos que en Redforts), precios (salen de Redforts).
 
 Pendientes:
 
-- **Textos legales** (`src/content/pages.ts`): aviso legal, privacidad, cookies
-  y términos. Necesitan la **razón social y el NIF** (`site.legal.company` en
-  `src/content/site.ts`).
+- **Titular y NIF** (`site.legal.owner` y `site.legal.nif` en
+  `src/content/site.ts`): aparecen solos en el aviso legal, la privacidad y los
+  términos en cuanto se rellenan.
 - **Redes sociales**: `site.social` está vacío y no se pinta ningún icono.
   Al añadir un perfil real, aparece en el menú y en el pie.
 - **Foto de la habitación familiar** (`src/content/media.ts`): de momento es la
