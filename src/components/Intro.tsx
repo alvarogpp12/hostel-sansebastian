@@ -111,7 +111,7 @@ export function Intro() {
       aria-hidden="true"
       data-intro
       data-leaving={leaving || undefined}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-beige"
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-offwhite"
     >
       <Logo variant="stacked" address animated className="h-auto w-[min(52vw,220px)]" />
     </div>

@@ -9,7 +9,7 @@ export const home = {
     lead: "Elige tus fechas y mira al momento qué habitaciones quedan libres. Reservas en un minuto, directamente con nosotros.",
     image: media.city.bay,
     /** Debajo del buscador: lo que hace fiable reservar aquí */
-    trust: ["Reserva directa, sin comisiones", "Confirmación al momento", "Pago seguro"],
+    trust: ["Reserva directa, sin comisiones", "Disponibilidad y precio reales", "Sin pagar nada por adelantado"],
   },
 
   rooms: {
@@ -95,7 +95,7 @@ export const home = {
       },
       {
         q: "¿Cómo puedo reservar?",
-        a: "Elige tus fechas en el buscador de la web, escoge la habitación y completa la reserva online. Verás la disponibilidad y el precio al momento, y la confirmación te llega por email.",
+        a: "Elige tus fechas en el buscador de la web, escoge la habitación y envíanos la solicitud por WhatsApp con un clic: ya va con tus fechas, la habitación y el precio. Verás la disponibilidad y el precio al momento, y te confirmamos la reserva por WhatsApp.",
       },
       {
         q: "¿Dónde puedo consultar la información para mi llegada?",

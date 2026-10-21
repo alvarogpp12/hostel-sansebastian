@@ -81,7 +81,7 @@ export function Header() {
       gsap.set(mid2, { opacity: 0 });
       gsap.set(clones, { yPercent: 110 });
       gsap.set(contact, { autoAlpha: 0 });
-      gsap.set([links, social], { autoAlpha: 0, y: 8 });
+      gsap.set([...links, ...social], { autoAlpha: 0, y: 8 });
       gsap.set(separator, desktop ? { scaleY: 0, scaleX: 1, transformOrigin: "top" } : { scaleX: 0, scaleY: 1, transformOrigin: "left center" });
 
       tl = gsap
@@ -97,14 +97,15 @@ export function Header() {
         tl.to(clones, { yPercent: 0, duration: 0.8, ease: "power3.out", stagger: 0.1 }, 0.65)
           .to(contact, { autoAlpha: 1, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 0.9)
           .to(separator, { scaleY: 1, duration: 0.8, ease: "power2.out" }, 1.1)
-          .to(links, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.09 }, 1.3)
-          .to(social, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.09 }, 1.9);
+          .to(links, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.09 }, 1.3);
+        // Sin perfiles en site.social no hay iconos: GSAP falla con una lista vacía.
+        if (social.length) tl.to(social, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.09 }, 1.9);
       } else {
         tl.to(links, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.07 }, 0.5)
           .to(separator, { scaleX: 1, duration: 0.5, ease: "power2.out" }, 0.85)
           .to(clones, { yPercent: 0, duration: 0.6, ease: "power3.out", stagger: 0.08 }, 0.95)
-          .to(contact, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.08 }, 1.3)
-          .to(social, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.07 }, 1.5);
+          .to(contact, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.08 }, 1.3);
+        if (social.length) tl.to(social, { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out", stagger: 0.07 }, 1.5);
       }
     };
 
@@ -190,8 +191,8 @@ export function Header() {
         aria-label={site.brand.name}
         className="invisible fixed top-5 left-w z-40 lg:top-8"
       >
-        {/* Círculo beige: el rombo se lee igual sobre fotos, beige o el pie negro */}
-        <div className="flex-center size-12 rounded-full bg-beige shadow-[0_4px_14px_rgba(0,0,0,0.12)]">
+        {/* Círculo blanco roto: el rombo se lee igual sobre fotos, fondo claro o el pie negro */}
+        <div className="flex-center size-12 rounded-full bg-offwhite shadow-[0_4px_14px_rgba(0,0,0,0.12)]">
           <Logo variant="icon" tone="dark" className="size-8" />
         </div>
       </TransitionLink>
@@ -257,15 +258,17 @@ export function Header() {
                   ))}
                 </div>
               </div>
-              <ul data-menu-social className="style-caption-xs flex items-center gap-2">
-                {site.social.map((s) => (
-                  <li key={s.label}>
-                    <a aria-label={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="social-icon">
-                      <SocialGlyph icon={s.icon} className="size-4" />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              {site.social.length > 0 && (
+                <ul data-menu-social className="style-caption-xs flex items-center gap-2">
+                  {site.social.map((s) => (
+                    <li key={s.label}>
+                      <a aria-label={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="social-icon">
+                        <SocialGlyph icon={s.icon} className="size-4" />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
             <div data-menu-separator className="h-[0.5px] w-full bg-neutral-500 md:h-auto md:w-[0.5px] md:self-stretch" />
             <div data-menu-nav className="min-w-48 max-md:order-first">

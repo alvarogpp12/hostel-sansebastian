@@ -6,7 +6,7 @@
  * when adapting the site for a client.
  */
 @theme {
-  --color-beige: #edebe4;
+  --color-offwhite: #faf9f6; /* blanco roto, cálido (no gris) */
   /* Negro de la marca (LOGOS.pdf): solo para el logo */
   --color-ink: #231f20;
   --color-black: #000;
@@ -37,7 +37,7 @@
 
 :root {
   --space-w: 1rem;
-  --bg: var(--color-beige);
+  --bg: var(--color-offwhite);
   --c: var(--color-black);
 }
 
@@ -238,7 +238,7 @@
     justify-content: center;
     overflow: hidden;
     border-radius: 0.5rem;
-    background-color: var(--color-beige);
+    background-color: var(--color-offwhite);
     color: #000;
   }
   .social-icon svg {

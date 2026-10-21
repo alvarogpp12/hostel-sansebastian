@@ -76,7 +76,7 @@ export const practical = {
   title: "Información práctica",
   intro: "Lo que conviene saber para preparar tu estancia: habitaciones, horarios, pago y cómo llegar.",
   image: media.detail,
-  // PENDIENTE: todos los datos concretos deben confirmarse con el cliente
+  // Horarios y condiciones: los mismos que hay en Redforts (inventario).
   cards: [
     {
       icon: "shower",
@@ -88,16 +88,22 @@ export const practical = {
       icon: "clock",
       title: "Entrada y salida",
       body: [
-        { type: "p", text: "Horario de check-in: pendiente de confirmar." },
-        { type: "p", text: "Horario de check-out: pendiente de confirmar." },
+        { type: "p", text: "Entrada (check-in): de 16:00 a 22:00." },
+        { type: "p", text: "Salida (check-out): antes de las 11:00." },
       ],
     },
     {
       icon: "creditCard",
       title: "Pago y cancelación",
       body: [
-        { type: "p", text: "Verás las condiciones de pago y cancelación de cada tarifa antes de pagar." },
-        { type: "em", text: "Condiciones pendientes de confirmar por el alojamiento." },
+        {
+          type: "ul",
+          items: [
+            "Tarifa flexible: cancelación gratuita hasta 7 días antes de la llegada.",
+            "Tarifa no reembolsable: sin cambios ni cancelaciones.",
+          ],
+        },
+        { type: "em", text: "Verás las condiciones exactas de cada tarifa antes de reservar." },
       ],
     },
     {
@@ -107,11 +113,6 @@ export const practical = {
         { type: "ul", items: ["Tren y autobús: estación de Donostia", "Aeropuerto de San Sebastián (Hondarribia)", "Aeropuerto de Bilbao con autobús directo"] },
         { type: "em", text: "Te mandamos indicaciones detalladas con la confirmación." },
       ],
-    },
-    {
-      icon: "globe",
-      title: "Idiomas",
-      body: [{ type: "p", text: "Idiomas de atención: pendiente de confirmar." }],
     },
   ] as {
     icon: IconName;
