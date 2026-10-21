@@ -10,7 +10,7 @@ export function ComingSoon() {
   return (
     <main
       id="content"
-      className="flex min-h-svh flex-col items-center justify-center gap-10 bg-beige px-w py-16 text-center"
+      className="flex min-h-svh flex-col items-center justify-center gap-10 bg-offwhite px-w py-16 text-center"
     >
       <h1 className="sr-only">{comingSoon.srTitle}</h1>
       <Logo variant="stacked" address animated className="h-auto w-[min(52vw,220px)]" />

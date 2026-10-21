@@ -54,7 +54,7 @@ export function StickyBookBar({ watch }: { watch: string }) {
         </p>
         <TransitionLink
           href="/reservar"
-          className="style-button min-h-11 !px-6 lg:!bg-beige lg:!text-black"
+          className="style-button min-h-11 !px-6 lg:!bg-offwhite lg:!text-black"
         >
           Reservar
           <Arrow />

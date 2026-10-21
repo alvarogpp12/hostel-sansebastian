@@ -364,7 +364,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                 </div>
                 <div className="grid gap-3 p-2">
                   <div className="grid gap-1">
-                    {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-beige px-2.5 py-1">Tu elección</span>}
+                    {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-offwhite px-2.5 py-1">Tu elección</span>}
                     <h3 className="style-heading text-lg lg:text-xl">{acco?.name ?? `Alojamiento ${accoId}`}</h3>
                     {acco?.description && <p className="text-sm whitespace-pre-line text-neutral-600">{acco.description}</p>}
                   </div>

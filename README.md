@@ -14,25 +14,58 @@ npm run build && npm start   # build de producción
 npm run lint
 ```
 
-## Pantalla de «Próximamente»
+## Publicar en producción (checklist)
 
-En producción (enjoycomfort.com) **solo se ve una pantalla de «Estamos
-trabajando en nuestra nueva web»** con el logo animado, en cualquier URL. En
-local y en las vistas previas de Vercel se ve la web completa.
+En producción (enjoycomfort.com) ahora **solo se ve la pantalla de «Estamos
+trabajando en nuestra nueva web»**, en cualquier URL. En local y en las vistas
+previas de Vercel se ve la web completa. Para abrirla, en Vercel > Settings >
+Environment Variables (entorno **Production**):
 
-Para abrir la web: en Vercel > Settings > Environment Variables, añadir
-`SITE_LAUNCHED=true` en Production y volver a desplegar. Los textos de la
-pantalla están en `src/content/home.ts` (`comingSoon`).
+| Variable | Valor para lanzar | Para qué |
+| --- | --- | --- |
+| `SITE_LAUNCHED` | `true` | Quita la pantalla de «Próximamente» |
+| `SITE_INDEXABLE` | `true` | Deja que Google indexe (si no, `robots.txt` lo bloquea todo) |
+| `NEXT_PUBLIC_SITE_URL` | `https://enjoycomfort.com` | Canonical, sitemap y datos estructurados |
+| `BOOKING_PROVIDER` | `redforts` | Reserva nativa con disponibilidad y precio reales (ya está así) |
+
+Después, **Redeploy** del último despliegue de producción.
+
+Fuera de Vercel:
+
+- **DNS de `www.enjoycomfort.com`**: ahora apunta a `dmspub1.buuteeq.com` (la
+  web antigua, que ya no existe) y no carga. En el panel de DNS del dominio,
+  cambiar el CNAME de `www` a `cname.vercel-dns.com` y añadir
+  `www.enjoycomfort.com` en Vercel > Settings > Domains (redirigiendo a
+  `enjoycomfort.com`).
+- **Textos legales** (aviso legal, privacidad, cookies, términos): siguen con
+  texto de relleno en `src/content/pages.ts` y son obligatorios (LSSI y RGPD).
+  Hacen falta la razón social y el NIF del titular.
+- Alta en Google Business Profile y en Search Console (enviar el sitemap).
+
+Los textos de la pantalla de «Próximamente» están en `src/content/home.ts`
+(`comingSoon`).
 
 ## El embudo de reserva
 
-1. **Home**: foto de San Sebastián a pantalla completa con las cuatro cards de
-   habitación encima (tipo · capacidad · «desde XX €/noche» · botón Reservar).
-2. Cada card lleva a `/reservar?habitacion=doble|dos-camas|doble-privado|familiar`.
-3. El formulario llega **con la habitación ya marcada**; solo hay que poner
-   fechas y se abre el motor de Redforts con todo preseleccionado.
-4. En móvil las cards se deslizan en horizontal; en la lista de habitaciones
-   cada una tiene su propio botón «Reservar» que salta el paso intermedio.
+Con `BOOKING_PROVIDER=redforts` (el de producción):
+
+1. **Home**: buscador de fechas y personas, y el listado completo de
+   habitaciones con su galería.
+2. **/reservar**: la web pide a Redforts en tiempo real la disponibilidad y el
+   precio de cada habitación y tarifa (flexible / no reembolsable). Si se llega
+   desde una habitación (`/reservar?habitacion=doble|dos-camas|doble-privado|familiar`),
+   sale la primera.
+3. El huésped rellena sus datos y pulsa **«Solicitar reserva por WhatsApp»**: se
+   abre el chat del 699 90 14 51 con habitación, tarifa, fechas, personas,
+   precio y datos ya escritos. **No se cobra nada**; la reserva se confirma a
+   mano por WhatsApp y se mete en Redforts.
+4. Cuando se quiera cobrar online: `checkoutMode: "pay"` en
+   `src/content/booking.ts` (pago con Stripe y reserva automática en Redforts,
+   ver [`docs/redforts.md`](docs/redforts.md)). Mientras esté en `"whatsapp"`, el
+   servidor rechaza cualquier intento de crear un pago.
+
+Hay además un botón flotante de WhatsApp en todas las páginas, y los teléfonos
+(fijo 943 43 12 28, móvil 699 90 14 51) en la cabecera, el menú y el pie.
 
 ## Páginas
 
@@ -53,10 +86,11 @@ historia del planteamiento anterior por no encajar con este público.
 
 ### Precios
 
-En `src/content/rooms.ts`, cada habitación tiene `priceFrom`. Ahora está en
-`null`, así que la web muestra «desde XX €» y **los precios no se publican en
-los datos estructurados**. En cuanto pongas el número real (`priceFrom: 45`)
-aparece en las cards, en la lista y en el schema de buscadores.
+Los precios reales los da Redforts en `/reservar` para las fechas elegidas.
+Además, en `src/content/rooms.ts` cada habitación tiene `priceFrom` (precio
+orientativo «desde»). Está en `null`, así que no se muestra ni se publica en
+los datos estructurados; con un número (`priceFrom: 45`) aparece en el listado
+y en el schema de buscadores.
 
 ## SEO
 
@@ -72,8 +106,8 @@ aparece en las cards, en la lista y en el schema de buscadores.
 - Los textos alternativos de las fotos describen la imagen e incluyen la
   ubicación donde tiene sentido.
 
-**Para que esto funcione de verdad falta**: dominio real en `site.url`,
-dirección y teléfono (van al schema), y darlo de alta en Google Business Profile.
+Dominio, dirección y teléfono ya son los reales. Falta poner `SITE_INDEXABLE=true`
+al lanzar y dar de alta el alojamiento en Google Business Profile y Search Console.
 
 ## Reservas: Redforts
 
@@ -82,8 +116,9 @@ precios, el channel manager (Booking.com y demás portales), el cobro y el
 correo de confirmación. La web no guarda ni cobra nada.
 
 > **Reserva nativa con la Booking API v5 + Stripe** (`BOOKING_PROVIDER=redforts`):
-> ver [`docs/redforts.md`](docs/redforts.md). Lo que sigue describe el flujo
-> `legacy` (iframe), que es el que hay por defecto.
+> ver [`docs/redforts.md`](docs/redforts.md). Es el que está en producción. Lo
+> que sigue describe el flujo `legacy` (iframe), que solo se usa si
+> `BOOKING_PROVIDER` no es `redforts`.
 
 ### Cómo funciona
 
@@ -121,33 +156,58 @@ email del alojamiento y explica que la reserva online aún no está activa.
 4. Que el idioma `es` del motor esté activado (si se quiere otro, se cambia
    `lang` en `booking.ts`).
 
-## Newsletter — requiere backend
+## Newsletter — apagada
 
-`src/app/api/newsletter/route.ts` valida y responde **501**, y la web enseña ese
-aviso en vez de una confirmación falsa. Para activarla, conectar a Brevo,
-Mailchimp o Resend Audiences con la clave en una variable de entorno.
+El formulario del pie está oculto (`site.newsletter.enabled = false` en
+`src/content/site.ts`) porque `src/app/api/newsletter/route.ts` aún no guarda
+nada (responde **501**). Para activarla: conectar Brevo, Mailchimp o Resend
+Audiences con la clave en una variable de entorno, añadir límite de envíos y
+poner `enabled: true`.
 
-## Datos pendientes del cliente
+## Datos
 
-Marcados con `PENDIENTE` en `src/content/site.ts`:
+Ya reales: dirección (C/ Nueva 5 - 1ºB, 20001), nº de licencia HSS00744,
+teléfonos, email `reservas@enjoycomfort.com`, dominio `enjoycomfort.com`,
+horarios de entrada (16:00–22:00) y salida (antes de las 11:00) y condiciones
+de las tarifas (los mismos que en Redforts), precios (salen de Redforts).
 
-- Razón social, NIF, dirección exacta y código postal.
-- Email y teléfono reales.
-- Dominio definitivo.
-- Perfiles de redes sociales.
-- **Precios por tipo de habitación** (aquí para mostrarlos, y en Redforts para cobrarlos).
-- Cuenta de Redforts: `beCode` y los `accoIds` (`src/content/booking.ts`).
-- Horarios de check-in/check-out, condiciones de pago y cancelación, idiomas
-  de atención (`src/content/pages.ts`, sección Info práctica).
-- Textos legales de privacidad y términos.
+Pendientes:
+
+- **Textos legales** (`src/content/pages.ts`): aviso legal, privacidad, cookies
+  y términos. Necesitan la **razón social y el NIF** (`site.legal.company` en
+  `src/content/site.ts`).
+- **Redes sociales**: `site.social` está vacío y no se pinta ningún icono.
+  Al añadir un perfil real, aparece en el menú y en el pie.
+- **Foto de la habitación familiar** (`src/content/media.ts`): de momento es la
+  de la antigua triple.
 - Revisar que los argumentos de «¿Por qué dormir en Enjoy Comfort?» y «Qué
-  incluye» son ciertos (wifi, limpieza diaria, ropa de cama).
+  incluye» son ciertos.
+
+## Seguridad
+
+- Ningún secreto en el repositorio: las claves (Redforts, Stripe, Supabase) van
+  solo en variables de entorno de Vercel y se usan solo en el servidor
+  (`import "server-only"`). Al navegador llega un inventario filtrado, sin
+  códigos promocionales.
+- Cabeceras de seguridad en `next.config.ts`: no se puede meter la web en un
+  iframe ajeno, `nosniff`, `Referrer-Policy`, HSTS y `Permissions-Policy`.
+- Webhook de Stripe con firma verificada; el precio siempre se calcula en el
+  servidor con Redforts.
+- Base de datos (Supabase) con RLS activado y sin políticas: solo el servidor
+  puede leer o escribir.
+- Pendiente recomendado: límite de peticiones (Vercel > Firewall > Rate
+  limiting) para `/api/redforts/*`, `/reservar` y `/mi-reserva`, que consultan
+  Redforts en cada petición.
+- La pantalla de «Próximamente» es solo visual: con ella puesta, las páginas y
+  la API siguen respondiendo si se conoce la URL. Con `SITE_LAUNCHED=true`
+  deja de importar.
 
 ## Fotos
 
-Las 19 imágenes de `public/media` son las que enviaste, redimensionadas y
-optimizadas. Las de habitaciones vienen de `fotos_habitaciones` y las de la
-ciudad de `fotos_ciudad`; confirmaste que hay licencia para usarlas.
+Las fotos de `public/media` son las que enviaste, redimensionadas y
+optimizadas; confirmaste que hay licencia para usarlas. Las 27 de las
+habitaciones (`public/media/habitaciones`) son las que había en Redforts, sin
+metadatos ni GPS.
 Para sustituir cualquiera, deja el mismo nombre de archivo o cambia la ruta en
 `src/content/media.ts`.
 
@@ -157,5 +217,3 @@ Para sustituir cualquiera, deja el mismo nombre de archivo o cambia la ruta en
   provisionales; falta el logo real del alojamiento.
 - **Tipografía de titulares**: Newsreader (libre). La referencia original usaba
   una fuente de pago; si se compra, se cambia en `src/app/layout.tsx`.
-- **Mapa**: iframe de Google Maps con la ciudad, porque aún no hay dirección
-  pública. Con la dirección real se centra en el alojamiento.

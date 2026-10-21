@@ -2,7 +2,7 @@
  * Global brand, contact and SEO configuration.
  *
  * Anything marked PENDIENTE is a placeholder that must be replaced with the
- * client's real data before going live (see README → "Datos pendientes").
+ * client's real data before going live (see README → "Datos").
  */
 
 export type IconName =
@@ -142,10 +142,12 @@ export const site = {
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Calle+Nueva+5%2C+20001+Donostia-San+Sebasti%C3%A1n",
   },
 
-  social: [
-    { label: "Facebook", href: "https://www.facebook.com/", icon: "facebook" }, // PENDIENTE
-    { label: "Instagram", href: "https://www.instagram.com/", icon: "instagram" }, // PENDIENTE
-  ] satisfies SocialLink[],
+  /**
+   * Perfiles de redes sociales. Vacío hasta tener los enlaces reales (los
+   * iconos no se pintan si no hay ninguno). Ejemplo:
+   *   { label: "Instagram", href: "https://www.instagram.com/usuario/", icon: "instagram" },
+   */
+  social: [] as SocialLink[],
 
   nav: [
     { label: "Habitaciones", href: "/habitaciones" },
@@ -184,6 +186,8 @@ export const site = {
   },
 
   newsletter: {
+    /** Apagado hasta conectar un proveedor (ver README → Newsletter) */
+    enabled: false,
     eyebrow: "Recibe nuestras novedades y ofertas",
     title: "Déjanos tu correo electrónico si quieres recibir información sobre ofertas y próximas estancias en Enjoy Comfort.",
     placeholder: "Tu correo electrónico",

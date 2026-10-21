@@ -39,7 +39,7 @@ export function Footer() {
           <div className="grid content-start gap-5 lg:col-span-5">
             <Logo variant="full" tone="light" address className="h-20 w-auto lg:h-24" alt={`${site.brand.name}, ${site.legal.addressLine}`} />
             <p className="max-w-[40ch] text-neutral-300">{site.ui.footerIntro}</p>
-            <TransitionLink href="/reservar" className="style-button min-h-12 !bg-beige !text-black">
+            <TransitionLink href="/reservar" className="style-button min-h-12 !bg-offwhite !text-black">
               Reservar
               <Arrow />
             </TransitionLink>
@@ -76,68 +76,72 @@ export function Footer() {
               <br />
               {site.legal.taxId}
             </p>
-            <ul className="flex items-center gap-2">
-              {site.social.map((s) => (
-                <li key={s.label}>
-                  <a aria-label={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="social-icon">
-                    <SocialGlyph icon={s.icon} className="size-4" />
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {site.social.length > 0 && (
+              <ul className="flex items-center gap-2">
+                {site.social.map((s) => (
+                  <li key={s.label}>
+                    <a aria-label={s.label} href={s.href} target="_blank" rel="noopener noreferrer" className="social-icon">
+                      <SocialGlyph icon={s.icon} className="size-4" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </div>
 
-        {/* Boletín */}
-        <form onSubmit={onSubmit} className="grid gap-5 border-t border-neutral-800 pt-10 lg:grid-cols-12 lg:items-start lg:gap-w">
-          <div className="grid gap-2 lg:col-span-5">
-            <h2 className={caption}>{n.eyebrow}</h2>
-            <p className="max-w-[44ch] text-neutral-300">{n.title}</p>
-          </div>
-          <div className="grid gap-3 lg:col-span-7">
-            <div className="flex gap-2 max-sm:flex-col">
-              <label htmlFor="newsletter-email" className="sr-only">
-                Email
-              </label>
-              <input
-                type="email"
-                id="newsletter-email"
-                name="email"
-                autoComplete="email"
-                placeholder={n.placeholder}
-                required
-                className="min-h-12 flex-1 rounded-full border border-neutral-700 bg-neutral-900 px-5 outline-none placeholder:text-neutral-500 focus:border-neutral-400"
-              />
-              <button
-                disabled={status.state === "sending"}
-                className="style-button min-h-12 justify-center !bg-white !text-black disabled:opacity-60 max-sm:!w-full"
-              >
-                {n.submit}
-                <Arrow />
-              </button>
+        {/* Boletín (apagado mientras no haya proveedor: site.newsletter.enabled) */}
+        {n.enabled && (
+          <form onSubmit={onSubmit} className="grid gap-5 border-t border-neutral-800 pt-10 lg:grid-cols-12 lg:items-start lg:gap-w">
+            <div className="grid gap-2 lg:col-span-5">
+              <h2 className={caption}>{n.eyebrow}</h2>
+              <p className="max-w-[44ch] text-neutral-300">{n.title}</p>
             </div>
-            <label htmlFor="newsletter-consent" className="flex items-start gap-2.5 text-xs text-neutral-300">
-              <input
-                required
-                type="checkbox"
-                name="consent"
-                id="newsletter-consent"
-                className="mt-0.5 size-4 shrink-0 appearance-none rounded-sm border border-white checked:bg-white"
-              />
-              <span>
-                {n.consent}{" "}
-                <TransitionLink href={n.consentLink.href} className="underline">
-                  {n.consentLink.label}
-                </TransitionLink>
-              </span>
-            </label>
-            {status.message && (
-              <p role="status" className={`text-sm ${status.state === "error" ? "text-red-400" : "text-neutral-200"}`}>
-                {status.message}
-              </p>
-            )}
-          </div>
-        </form>
+            <div className="grid gap-3 lg:col-span-7">
+              <div className="flex gap-2 max-sm:flex-col">
+                <label htmlFor="newsletter-email" className="sr-only">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="newsletter-email"
+                  name="email"
+                  autoComplete="email"
+                  placeholder={n.placeholder}
+                  required
+                  className="min-h-12 flex-1 rounded-full border border-neutral-700 bg-neutral-900 px-5 outline-none placeholder:text-neutral-500 focus:border-neutral-400"
+                />
+                <button
+                  disabled={status.state === "sending"}
+                  className="style-button min-h-12 justify-center !bg-white !text-black disabled:opacity-60 max-sm:!w-full"
+                >
+                  {n.submit}
+                  <Arrow />
+                </button>
+              </div>
+              <label htmlFor="newsletter-consent" className="flex items-start gap-2.5 text-xs text-neutral-300">
+                <input
+                  required
+                  type="checkbox"
+                  name="consent"
+                  id="newsletter-consent"
+                  className="mt-0.5 size-4 shrink-0 appearance-none rounded-sm border border-white checked:bg-white"
+                />
+                <span>
+                  {n.consent}{" "}
+                  <TransitionLink href={n.consentLink.href} className="underline">
+                    {n.consentLink.label}
+                  </TransitionLink>
+                </span>
+              </label>
+              {status.message && (
+                <p role="status" className={`text-sm ${status.state === "error" ? "text-red-400" : "text-neutral-200"}`}>
+                  {status.message}
+                </p>
+              )}
+            </div>
+          </form>
+        )}
 
         <div className="flex flex-wrap items-end justify-between gap-4 border-t border-neutral-800 pt-6 text-xs text-neutral-400">
           <ul className="flex flex-wrap gap-x-5 gap-y-2">

@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { bookingProvider } from "@/content/booking";
+import { booking as bookingConfig, bookingProvider } from "@/content/booking";
 import { createBooking, isDatabaseConfigured, updateBooking, type StoredRequest } from "@/lib/bookings";
 import { getAvailability, isTestMode } from "@/lib/redforts/api";
 import { isRedfortsConfigured } from "@/lib/redforts/client";
@@ -79,6 +79,8 @@ async function siteOrigin(): Promise<string> {
  */
 export async function startCheckout(input: unknown): Promise<CheckoutResult> {
   if (bookingProvider() !== "redforts") return { ok: false, errors: ["La reserva online no está activa."] };
+  // Con checkoutMode "whatsapp" no se cobra: nadie debe poder crear pagos llamando a la acción a mano.
+  if (bookingConfig.checkoutMode !== "pay") return { ok: false, errors: ["El pago online no está activo."] };
   if (!isRedfortsConfigured() || !isStripeConfigured() || !isDatabaseConfigured()) {
     console.error("[checkout] falta configuración", {
       redforts: isRedfortsConfigured(),

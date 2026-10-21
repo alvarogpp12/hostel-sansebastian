@@ -12,7 +12,7 @@ import { getInventory, toPublicInventory, type PublicInventory } from "@/lib/red
 export const metadata: Metadata = {
   title: "Reservar habitación en San Sebastián",
   description:
-    "Reserva online en nuestro alojamiento céntrico de San Sebastián: elige habitación y fechas, consulta la disponibilidad real y confirma al momento. Reserva directa sin comisiones.",
+    "Reserva online en nuestro alojamiento céntrico de San Sebastián: elige habitación y fechas, consulta la disponibilidad y el precio reales y solicita tu reserva. Reserva directa sin comisiones.",
   alternates: { canonical: "/reservar" },
 };
 
