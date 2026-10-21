@@ -100,7 +100,7 @@ export const practical = {
           type: "ul",
           items: [
             "Tarifa flexible: cancelación gratuita hasta 7 días antes de la llegada.",
-            "Tarifa no reembolsable: sin cambios ni cancelaciones.",
+            "Tarifa no reembolsable: sin cancelaciones; se pueden cambiar las fechas una vez hasta 7 días antes.",
           ],
         },
         { type: "em", text: "Verás las condiciones exactas de cada tarifa antes de reservar." },
@@ -149,21 +149,4 @@ export const bookingPage = {
   mapLink: "Ver en Google Maps",
 };
 
-export const legal = {
-  notice: {
-    title: "Aviso legal",
-    body: "Texto legal pendiente. Sustituye este contenido por el aviso legal del alojamiento: titular del sitio, datos identificativos, objeto, condiciones de uso y propiedad intelectual.",
-  },
-  cookies: {
-    title: "Política de cookies",
-    body: "Texto legal pendiente. Sustituye este contenido por la política de cookies: qué cookies se usan, con qué finalidad, su duración y cómo configurarlas o rechazarlas.",
-  },
-  privacy: {
-    title: "Política de privacidad",
-    body: "Texto legal pendiente. Sustituye este contenido por la política de privacidad del alojamiento (responsable del tratamiento, finalidad, legitimación, destinatarios y derechos RGPD).",
-  },
-  terms: {
-    title: "Términos y condiciones",
-    body: "Texto legal pendiente. Sustituye este contenido por las condiciones de reserva, pago, cancelación y normas de la casa.",
-  },
-};
+export { legal } from "./legal";
