@@ -61,24 +61,18 @@ function resolveSiteUrl(value: string | undefined): string {
 
 export const site = {
   /**
-   * ¿Puede Google indexar la web?
-   *
-   * Por defecto NO. Se activa poniendo la variable de entorno
-   * SITE_INDEXABLE=true en Vercel y volviendo a desplegar, cuando estén la
-   * dirección, el teléfono, el NIF y los precios reales. Indexar datos de
-   * relleno perjudica al alojamiento y tarda semanas en corregirse en Google.
+   * ¿Puede Google indexar la web? Sí en producción (enjoycomfort.com); no en
+   * local ni en las vistas previas de Vercel, para que Google no recoja
+   * copias de la web en otras URLs. SITE_INDEXABLE=false lo apaga en
+   * producción si alguna vez hace falta.
    */
-  indexable: process.env.SITE_INDEXABLE === "true",
+  indexable: process.env.VERCEL_ENV === "production" && process.env.SITE_INDEXABLE !== "false",
 
   /**
-   * Pantalla de "Próximamente".
-   *
-   * En producción (enjoycomfort.com) se ve SOLO esa pantalla hasta que se
-   * ponga la variable de entorno SITE_LAUNCHED=true en Vercel y se vuelva a
-   * desplegar. En local y en los despliegues de vista previa se ve la web
-   * completa, para poder seguir trabajando en ella.
+   * Pantalla de "Próximamente". La web está abierta: solo se vuelve a ver esa
+   * pantalla en producción si se pone SITE_LAUNCHED=false en Vercel.
    */
-  comingSoon: process.env.VERCEL_ENV === "production" && process.env.SITE_LAUNCHED !== "true",
+  comingSoon: process.env.VERCEL_ENV === "production" && process.env.SITE_LAUNCHED === "false",
 
   /** Production URL, used for canonical URLs, sitemap and structured data */
   url: resolveSiteUrl(process.env.NEXT_PUBLIC_SITE_URL),
