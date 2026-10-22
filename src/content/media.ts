@@ -42,7 +42,7 @@ export const media = {
    * son los números de foto que llevan el aviso «Habitación interior».
    */
   roomPhotos: {
-    "doble": roomPhotos("doble", "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián", [2, 3]),
+    "doble": roomPhotos("doble", "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián", [2, 4]),
     "dos-camas": roomPhotos("dos-camas", "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián", [2, 3, 4, 5]),
     "doble-privado": roomPhotos("doble-privado", "Habitación doble con baño privado en Enjoy Comfort, San Sebastián"),
     "familiar": roomPhotos("familiar", "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián"),
