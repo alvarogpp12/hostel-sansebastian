@@ -17,6 +17,18 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  images: {
+    // Fotos de las habitaciones en Vercel Blob (store público enjoycomfort-media)
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "0qeiuusypiirkq70.public.blob.vercel-storage.com",
+        port: "",
+        pathname: "/habitaciones/**",
+        search: "",
+      },
+    ],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

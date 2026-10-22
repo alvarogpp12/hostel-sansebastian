@@ -1,0 +1,145 @@
+{
+  "doble": [
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-1.jpg",
+      "width": 1920,
+      "height": 1287
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-2.jpg",
+      "width": 1920,
+      "height": 1287
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-3.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-4.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-5.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-6.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-7.jpg",
+      "width": 1920,
+      "height": 2561
+    }
+  ],
+  "dos-camas": [
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-1.jpg",
+      "width": 1920,
+      "height": 1287
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-2.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-3.jpg",
+      "width": 1920,
+      "height": 2571
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-4.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-5.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-6.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/dos-camas-7.jpg",
+      "width": 1920,
+      "height": 2561
+    }
+  ],
+  "doble-privado": [
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-1.jpg",
+      "width": 1920,
+      "height": 1287
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-2.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-3.jpg",
+      "width": 1920,
+      "height": 2571
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-4.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-5.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-6.jpg",
+      "width": 1920,
+      "height": 2571
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-7.jpg",
+      "width": 1920,
+      "height": 2571
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/doble-privado-8.jpg",
+      "width": 1920,
+      "height": 2561
+    }
+  ],
+  "familiar": [
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/familiar-1.jpg",
+      "width": 1920,
+      "height": 1072
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/familiar-2.jpg",
+      "width": 1920,
+      "height": 2753
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/familiar-3.jpg",
+      "width": 1920,
+      "height": 2561
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/familiar-4.jpg",
+      "width": 1920,
+      "height": 1440
+    },
+    {
+      "src": "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/familiar-5.jpg",
+      "width": 1920,
+      "height": 2561
+    }
+  ]
+}
