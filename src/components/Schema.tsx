@@ -28,7 +28,7 @@ export function LocalBusinessSchema() {
         name: site.brand.name,
         description: site.seo.description,
         url: site.url,
-        image: `${site.url}/media/habitacion-doble-1.jpg`,
+        image: rooms[0].image.src,
         starRating: { "@type": "Rating", ratingValue: 1 },
         email: site.contact.email,
         telephone: site.contact.phoneHref.replace("tel:", ""),
