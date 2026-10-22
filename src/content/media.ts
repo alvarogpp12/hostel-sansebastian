@@ -6,7 +6,8 @@
 
 import roomPhotoFiles from "./room-photos.json";
 
-export type Media = { src: string; width: number; height: number; alt: string };
+/** `note`: aviso corto que se pinta sobre la foto (abajo a la derecha) */
+export type Media = { src: string; width: number; height: number; alt: string; note?: string };
 
 const img = (name: string, width: number, height: number, alt: string): Media => ({
   src: `/media/${name}.jpg`,
@@ -20,8 +21,12 @@ const img = (name: string, width: number, height: number, alt: string): Media =>
  * el alto los escribe `npm run photos:upload` en room-photos.json; aquí solo se
  * añade el texto alternativo.
  */
-const roomPhotos = (room: keyof typeof roomPhotoFiles, alt: string): Media[] =>
-  roomPhotoFiles[room].map((p, i) => ({ ...p, alt: `${alt} (foto ${i + 1})` }));
+const roomPhotos = (room: keyof typeof roomPhotoFiles, alt: string, interior: number[] = []): Media[] =>
+  roomPhotoFiles[room].map((p, i) => ({
+    ...p,
+    alt: `${alt} (foto ${i + 1})`,
+    ...(interior.includes(i + 1) && { note: "Habitación interior" }),
+  }));
 
 export const media = {
   city: {
@@ -33,11 +38,12 @@ export const media = {
   },
   /**
    * Fotos de cada habitación, en el orden en que se enseñan (la primera es la
-   * portada). Para cambiarlas: ver «Fotos» en el README.
+   * portada). Para cambiarlas: ver «Fotos» en el README. El último argumento
+   * son los números de foto que llevan el aviso «Habitación interior».
    */
   roomPhotos: {
-    "doble": roomPhotos("doble", "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián"),
-    "dos-camas": roomPhotos("dos-camas", "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián"),
+    "doble": roomPhotos("doble", "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián", [2, 4]),
+    "dos-camas": roomPhotos("dos-camas", "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián", [2, 3, 4, 5]),
     "doble-privado": roomPhotos("doble-privado", "Habitación doble con baño privado en Enjoy Comfort, San Sebastián"),
     "familiar": roomPhotos("familiar", "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián"),
   },
