@@ -205,12 +205,41 @@ Pendientes:
 
 ## Fotos
 
-Las fotos de `public/media` son las que enviaste, redimensionadas y
-optimizadas; confirmaste que hay licencia para usarlas. Las 27 de las
-habitaciones (`public/media/habitaciones`) son las que había en Redforts, sin
-metadatos ni GPS.
-Para sustituir cualquiera, deja el mismo nombre de archivo o cambia la ruta en
+Las fotos de `public/media` (ciudad y detalles) son las que enviaste,
+redimensionadas y optimizadas; confirmaste que hay licencia para usarlas. Para
+sustituir cualquiera, deja el mismo nombre de archivo o cambia la ruta en
 `src/content/media.ts`.
+
+### Fotos de las habitaciones
+
+No están en el repositorio: están en **Vercel Blob** (store público
+`enjoycomfort-media`, conectado al proyecto), en la carpeta `habitaciones/`.
+Son los originales editados, a 1920 px de ancho como máximo, calidad 80 y sin
+metadatos EXIF ni GPS.
+
+- `src/content/room-photos.json` guarda la URL, el ancho y el alto de cada foto.
+  Lo escribe el script de subida; no hace falta editarlo a mano.
+- `src/content/media.ts` (`roomPhotos`) lo lee y añade el texto alternativo de
+  cada habitación.
+- `next.config.ts` permite a `next/image` cargar
+  `https://0qeiuusypiirkq70.public.blob.vercel-storage.com/habitaciones/**`.
+  Si se cambia de store, hay que cambiar ese host.
+
+Para cambiarlas:
+
+1. Prepara los JPG en una carpeta **fuera del repo**, con el nombre
+   `<habitacion>-<n>.jpg` (`doble`, `dos-camas`, `doble-privado`, `familiar`).
+   `n` es el orden en la galería y la `1` es la portada. Quítales los metadatos.
+2. `vercel env pull .env.local`. El script necesita `BLOB_READ_WRITE_TOKEN`,
+   que llega así desde Vercel. Ese token solo va en `.env.local`: nunca en el
+   código, en un commit ni en una variable `NEXT_PUBLIC_`.
+3. `npm run photos:upload -- <carpeta>`. Sube cada foto a
+   `habitaciones/<nombre>.jpg` (sobrescribe la anterior, caché de un año) y
+   reescribe `room-photos.json`.
+4. Commit de `room-photos.json`. Ojo: si una foto sustituye a otra con el
+   mismo nombre, la URL no cambia, y los navegadores y la caché de imágenes de
+   Vercel pueden seguir enseñando la antigua (la caché es de un año). Para que
+   el cambio se vea ya, invalida la caché de imágenes en el proyecto de Vercel.
 
 ## Pendiente de decidir
 

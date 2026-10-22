@@ -14,7 +14,7 @@ import { GalleryModal } from "./GalleryModal";
  * y «Reservar esta» con la habitación ya elegida.
  *  - Home: texto corto y enlace a la ficha en /habitaciones.
  *  - /habitaciones (`detailed`): texto largo y galería de fotos.
- * Las fotos son las nuestras (content/media.ts → public/media/habitaciones).
+ * Las fotos son las nuestras (content/media.ts → Vercel Blob).
  */
 export function RoomRows({
   detailed = false,

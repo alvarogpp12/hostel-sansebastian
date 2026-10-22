@@ -4,6 +4,8 @@
  * `alt` texts are written for accessibility first and SEO second.
  */
 
+import roomPhotoFiles from "./room-photos.json";
+
 export type Media = { src: string; width: number; height: number; alt: string };
 
 const img = (name: string, width: number, height: number, alt: string): Media => ({
@@ -13,13 +15,13 @@ const img = (name: string, width: number, height: number, alt: string): Media =>
   alt,
 });
 
-/** Fotos de las habitaciones: /public/media/habitaciones (nuestro almacenamiento, no Redforts) */
-const photo = (name: string, width: number, height: number, alt: string): Media => ({
-  src: `/media/habitaciones/${name}.jpg`,
-  width,
-  height,
-  alt,
-});
+/**
+ * Fotos de las habitaciones: en Vercel Blob, no en el repo. La URL, el ancho y
+ * el alto los escribe `npm run photos:upload` en room-photos.json; aquí solo se
+ * añade el texto alternativo.
+ */
+const roomPhotos = (room: keyof typeof roomPhotoFiles, alt: string): Media[] =>
+  roomPhotoFiles[room].map((p, i) => ({ ...p, alt: `${alt} (foto ${i + 1})` }));
 
 export const media = {
   city: {
@@ -31,45 +33,13 @@ export const media = {
   },
   /**
    * Fotos de cada habitación, en el orden en que se enseñan (la primera es la
-   * portada). Para cambiarlas: sustituir el archivo en public/media/habitaciones
-   * con el mismo nombre, o añadir/quitar líneas aquí.
+   * portada). Para cambiarlas: ver «Fotos» en el README.
    */
   roomPhotos: {
-    "doble": [
-      photo("doble-1", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 1)"),
-      photo("doble-2", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 2)"),
-      photo("doble-3", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 3)"),
-      photo("doble-4", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 4)"),
-      photo("doble-5", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 5)"),
-      photo("doble-6", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 6)"),
-      photo("doble-7", 960, 540, "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián (foto 7)"),
-    ],
-    "dos-camas": [
-      photo("dos-camas-1", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 1)"),
-      photo("dos-camas-2", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 2)"),
-      photo("dos-camas-3", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 3)"),
-      photo("dos-camas-4", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 4)"),
-      photo("dos-camas-5", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 5)"),
-      photo("dos-camas-6", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 6)"),
-      photo("dos-camas-7", 960, 540, "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián (foto 7)"),
-    ],
-    "doble-privado": [
-      photo("doble-privado-1", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 1)"),
-      photo("doble-privado-2", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 2)"),
-      photo("doble-privado-3", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 3)"),
-      photo("doble-privado-4", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 4)"),
-      photo("doble-privado-5", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 5)"),
-      photo("doble-privado-6", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 6)"),
-      photo("doble-privado-7", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 7)"),
-      photo("doble-privado-8", 960, 540, "Habitación doble con baño privado en Enjoy Comfort, San Sebastián (foto 8)"),
-    ],
-    "familiar": [
-      photo("familiar-1", 960, 540, "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián (foto 1)"),
-      photo("familiar-2", 960, 540, "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián (foto 2)"),
-      photo("familiar-3", 960, 540, "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián (foto 3)"),
-      photo("familiar-4", 960, 540, "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián (foto 4)"),
-      photo("familiar-5", 960, 540, "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián (foto 5)"),
-    ],
+    "doble": roomPhotos("doble", "Habitación doble con baño compartido en Enjoy Comfort, San Sebastián"),
+    "dos-camas": roomPhotos("dos-camas", "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián"),
+    "doble-privado": roomPhotos("doble-privado", "Habitación doble con baño privado en Enjoy Comfort, San Sebastián"),
+    "familiar": roomPhotos("familiar", "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián"),
   },
   rooms: {
     double: [
@@ -83,8 +53,6 @@ export const media = {
       img("habitacion-dos-camas-4", 529, 768, "Habitación de dos camas con cortinas verdes"),
       img("habitacion-dos-camas-5", 512, 768, "Detalle de cama en habitación de dos camas"),
     ],
-    // PENDIENTE: foto real de la habitación familiar (de momento, la de la antigua triple)
-    family: [img("habitacion-triple-1", 1024, 540, "Habitación familiar en San Sebastián")],
   },
   bathrooms: [
     img("bano-compartido-1", 530, 768, "Baño compartido con lavabo y espejo"),
