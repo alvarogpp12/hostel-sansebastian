@@ -58,7 +58,8 @@ export function AvailabilityCalendar({
 }) {
   const [cal, setCal] = useState<CalendarData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [month, setMonth] = useState(() => todayIso().slice(0, 7));
+  // Abre en el mes de la llegada si ya viene elegida (desde la home)
+  const [month, setMonth] = useState(() => (arrival ?? todayIso()).slice(0, 7));
 
   useEffect(() => {
     let alive = true;
@@ -163,7 +164,7 @@ export function AvailabilityCalendar({
         })}
       </div>
       <p className="text-xs text-neutral-500">
-        {!cal ? "Cargando disponibilidad…" : choosingDeparture ? "Elige el día de salida." : "Elige el día de llegada."}
+        {!cal ? "Cargando disponibilidad…" : choosingDeparture ? "Elige el día de salida." : arrival && departure ? "Toca otro día para cambiar la llegada." : "Elige el día de llegada."}
       </p>
     </div>
   );

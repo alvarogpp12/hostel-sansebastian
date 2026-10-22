@@ -120,23 +120,28 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     [results?.currency],
   );
 
-  const search = async (e?: FormEvent) => {
-    e?.preventDefault();
+  /** Código promocional aplicado («Aplicar» o Enter); el del campo puede estar a medio escribir */
+  const [appliedPromo, setAppliedPromo] = useState("");
+  /** Solo cuenta la respuesta de la última petición (se puede cambiar algo mientras busca) */
+  const requestId = useRef(0);
+  /** Fechas de la última búsqueda: solo se baja a los resultados si cambian */
+  const searchedDates = useRef<string | null>(null);
+
+  /** Consulta /availability con la búsqueda actual; el estado se actualiza después del await */
+  const runSearch = async () => {
     if (!arrival || !departure) return;
+    const id = ++requestId.current;
+    const promoCode = appliedPromo || undefined;
     setSearching(true);
     setSearchErrors([]);
     setSelection({});
     setCheckoutErrors([]);
-    await fetchResults(arrival, departure);
-  };
-
-  /** Consulta /availability; todo el estado se actualiza después del await */
-  const fetchResults = async (arrival: string, departure: string) => {
     const params = new URLSearchParams({ arrival, departure, adults: String(adults), children: String(children) });
-    if (promo.trim()) params.set("promo", promo.trim());
+    if (promoCode) params.set("promo", promoCode);
     try {
       const res = await fetch(`/api/redforts/availability?${params}`);
       const json = await res.json();
+      if (id !== requestId.current) return;
       const stats = { noches: nightsBetween(arrival, departure), personas: adults + children };
       if (!res.ok) {
         setResults(null);
@@ -154,24 +159,35 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
         trackEvent("Reserva · fechas no disponibles", { motivo, noches: stats.noches });
       }
       setResults(found);
-      setLastSearch({ arrival, departure, adults, children, promo: promo.trim() || undefined });
-      // Espera a que se pinten los resultados antes de bajar hasta ellos
-      requestAnimationFrame(() => scrollTo(resultsRef.current));
+      setLastSearch({ arrival, departure, adults, children, promo: promoCode });
+      // Con fechas nuevas, baja a los resultados (al cambiar personas o código, no)
+      const dates = `${arrival}|${departure}`;
+      if (dates !== searchedDates.current) {
+        searchedDates.current = dates;
+        requestAnimationFrame(() => scrollTo(resultsRef.current));
+      }
     } catch {
+      if (id !== requestId.current) return;
       setSearchErrors(["No se pudo conectar con el sistema de reservas."]);
       trackEvent("Reserva · error", { paso: "búsqueda", motivo: "sin conexión" });
     } finally {
-      setSearching(false);
+      if (id === requestId.current) setSearching(false);
     }
   };
 
-  // Llegada con fechas en la URL: `searching` ya empieza en true
-  const searchOnArrival = useEffectEvent(() => {
-    if (arrival && departure) void fetchResults(arrival, departure);
-  });
+  // Busca sola, sin botón: al llegar con fechas en la URL (desde la home) y cada
+  // vez que se completan las fechas o cambian las personas o el código aplicado.
+  const autoSearch = useEffectEvent(() => void runSearch());
   useEffect(() => {
-    if (initial.arrival && initial.departure) searchOnArrival();
-  }, [initial.arrival, initial.departure]);
+    if (!arrival || !departure) return;
+    const timer = window.setTimeout(autoSearch, 250);
+    return () => window.clearTimeout(timer);
+  }, [arrival, departure, adults, children, appliedPromo]);
+
+  const applyPromo = (e?: FormEvent) => {
+    e?.preventDefault();
+    setAppliedPromo(promo.trim());
+  };
 
   // Vuelta desde Stripe sin pagar (cancel_url)
   const cancelledPayment = params.get("pago") === "cancelado";
@@ -276,7 +292,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
         paso: "pago",
         motivo: res.newTotal !== undefined ? "precio cambiado" : res.fieldErrors && Object.keys(res.fieldErrors).length ? "datos del huésped" : "otro",
       });
-      if (res.newTotal !== undefined) await search();
+      if (res.newTotal !== undefined) await runSearch();
     });
   };
 
@@ -295,7 +311,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       <BookingSteps current={step} lastLabel={viaWhatsApp ? "Tus datos y solicitud" : undefined} />
 
       {/* ── 1. Búsqueda ─────────────────────────────────────────────── */}
-      <form onSubmit={search} className="grid items-start gap-w text-sm lg:grid-cols-2">
+      <form onSubmit={applyPromo} className="grid items-start gap-w text-sm lg:grid-cols-2">
         <AvailabilityCalendar
           arrival={arrival}
           departure={departure}
@@ -330,19 +346,27 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             )}
           </div>
           {showPromo ? (
-            <label className="field">
-              <span className="style-caption-xs block !font-light">Código promocional</span>
-              <input value={promo} onChange={(e) => setPromo(e.target.value)} maxLength={40} className="mt-1 w-full" autoComplete="off" autoFocus />
-            </label>
+            <div className="flex items-end gap-2">
+              <label className="field flex-1">
+                <span className="style-caption-xs block !font-light">Código promocional</span>
+                <input value={promo} onChange={(e) => setPromo(e.target.value)} maxLength={40} className="mt-1 w-full" autoComplete="off" autoFocus />
+              </label>
+              <button type="submit" disabled={promo.trim() === appliedPromo} className="style-button min-h-12 disabled:opacity-40">
+                Aplicar
+              </button>
+            </div>
           ) : (
             <button type="button" onClick={() => setShowPromo(true)} className="w-fit text-xs underline">
               ¿Tienes un código promocional?
             </button>
           )}
-          <button type="submit" disabled={!arrival || !departure || searching} className="style-button min-h-12 !w-full justify-center disabled:opacity-60">
-            {searching ? "Buscando…" : "Ver disponibilidad y precios"}
-            <ArrowOut />
-          </button>
+          <p aria-live="polite" className="min-h-5 text-xs text-neutral-500">
+            {searching
+              ? "Buscando habitaciones libres…"
+              : results && arrival && departure
+                ? "Cambia las fechas o las personas y los precios se actualizan solos."
+                : null}
+          </p>
           {searchErrors.length > 0 && (
             <ul role="alert" className="border border-red-400 p-3 text-xs">
               {searchErrors.map((m) => (
