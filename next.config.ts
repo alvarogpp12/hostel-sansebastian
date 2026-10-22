@@ -18,13 +18,20 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
-    // Fotos de las habitaciones en Vercel Blob (store público enjoycomfort-media)
+    // Fotos de las habitaciones y de la ciudad en Vercel Blob (store público enjoycomfort-media)
     remotePatterns: [
       {
         protocol: "https",
         hostname: "0qeiuusypiirkq70.public.blob.vercel-storage.com",
         port: "",
         pathname: "/habitaciones/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "0qeiuusypiirkq70.public.blob.vercel-storage.com",
+        port: "",
+        pathname: "/ciudad/**",
         search: "",
       },
     ],

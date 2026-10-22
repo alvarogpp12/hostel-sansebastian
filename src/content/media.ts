@@ -34,6 +34,13 @@ export const media = {
     aerial: img("san-sebastian-playa-la-concha-vista-aerea", 2400, 1600, "Vista aérea de la playa de La Concha y el centro de San Sebastián"),
     comb: img("peine-del-viento-san-sebastian", 2400, 1600, "Escultura del Peine del Viento frente al mar en San Sebastián"),
     waves: img("peine-del-viento-olas", 2400, 1600, "Olas rompiendo en el Peine del Viento, Donostia"),
+    // En Vercel Blob (ciudad/), como las fotos de las habitaciones
+    mariaCristina: {
+      src: "https://0qeiuusypiirkq70.public.blob.vercel-storage.com/ciudad/hotel-maria-cristina.jpg",
+      width: 1920,
+      height: 1440,
+      alt: "Hotel María Cristina junto al río Urumea y el monte Urgull, en San Sebastián",
+    },
     pintxos: img("pintxos-san-sebastian", 1024, 685, "Gamba de un pintxo en San Sebastián"),
   },
   /**
@@ -46,19 +53,6 @@ export const media = {
     "dos-camas": roomPhotos("dos-camas", "Habitación de dos camas con baño compartido en Enjoy Comfort, San Sebastián", [2, 3, 4, 5]),
     "doble-privado": roomPhotos("doble-privado", "Habitación doble con baño privado en Enjoy Comfort, San Sebastián"),
     "familiar": roomPhotos("familiar", "Habitación familiar con baño privado en Enjoy Comfort, San Sebastián"),
-  },
-  rooms: {
-    double: [
-      img("habitacion-doble-1", 1920, 1080, "Habitación doble con cama de matrimonio en San Sebastián"),
-      img("habitacion-doble-2", 1920, 1080, "Habitación doble con ventana a la calle"),
-    ],
-    twin: [
-      img("habitacion-dos-camas-1", 1024, 683, "Habitación con dos camas y cojines de flores en San Sebastián"),
-      img("habitacion-dos-camas-2", 1024, 582, "Habitación de dos camas con lámpara de lectura"),
-      img("habitacion-dos-camas-3", 1024, 553, "Habitación de dos camas con armario de madera"),
-      img("habitacion-dos-camas-4", 529, 768, "Habitación de dos camas con cortinas verdes"),
-      img("habitacion-dos-camas-5", 512, 768, "Detalle de cama en habitación de dos camas"),
-    ],
   },
   bathrooms: [
     img("bano-compartido-1", 530, 768, "Baño compartido con lavabo y espejo"),

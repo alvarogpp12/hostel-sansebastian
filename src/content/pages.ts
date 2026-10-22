@@ -10,7 +10,7 @@ export type ImageCard = { icon: IconName; title: string; text: string; image: Me
 export const roomsPage = {
   eyebrow: "Habitaciones",
   title: "Habitaciones en el centro de San Sebastián",
-  image: media.rooms.twin[0],
+  image: media.city.mariaCristina,
   intro:
     "Cuatro tipos de habitación privada, con baño compartido o privado. Elige la que encaja con tu viaje, mira las fotos y reserva en un minuto.",
   quickNav: [
