@@ -14,21 +14,18 @@ npm run build && npm start   # build de producción
 npm run lint
 ```
 
-## Publicar en producción (checklist)
+## En producción
 
-En producción (enjoycomfort.com) ahora **solo se ve la pantalla de «Estamos
-trabajando en nuestra nueva web»**, en cualquier URL. En local y en las vistas
-previas de Vercel se ve la web completa. Para abrirla, en Vercel > Settings >
-Environment Variables (entorno **Production**):
+La web está **abierta al público** en enjoycomfort.com y Google puede
+indexarla (`robots.txt` la permite solo en producción; las vistas previas de
+Vercel y el entorno local llevan `noindex`). Variables de Vercel (Production):
 
-| Variable | Valor para lanzar | Para qué |
+| Variable | Valor | Para qué |
 | --- | --- | --- |
-| `SITE_LAUNCHED` | `true` | Quita la pantalla de «Próximamente» |
-| `SITE_INDEXABLE` | `true` | Deja que Google indexe (si no, `robots.txt` lo bloquea todo) |
 | `NEXT_PUBLIC_SITE_URL` | `https://enjoycomfort.com` | Canonical, sitemap y datos estructurados |
-| `BOOKING_PROVIDER` | `redforts` | Reserva nativa con disponibilidad y precio reales (ya está así) |
-
-Después, **Redeploy** del último despliegue de producción.
+| `BOOKING_PROVIDER` | `redforts` | Reserva nativa con disponibilidad y precio reales |
+| `SITE_LAUNCHED` | sin definir | Con `false` vuelve la pantalla de «Próximamente» |
+| `SITE_INDEXABLE` | sin definir | Con `false` se bloquea a Google |
 
 Fuera de Vercel:
 
@@ -107,8 +104,8 @@ y en el schema de buscadores.
 - Los textos alternativos de las fotos describen la imagen e incluyen la
   ubicación donde tiene sentido.
 
-Dominio, dirección y teléfono ya son los reales. Falta poner `SITE_INDEXABLE=true`
-al lanzar y dar de alta el alojamiento en Google Business Profile y Search Console.
+Dominio, dirección y teléfono ya son los reales. Falta dar de alta el
+alojamiento en Google Business Profile y en Search Console (enviar el sitemap).
 
 ## Reservas: Redforts
 
@@ -199,9 +196,8 @@ Pendientes:
 - Pendiente recomendado: límite de peticiones (Vercel > Firewall > Rate
   limiting) para `/api/redforts/*`, `/reservar` y `/mi-reserva`, que consultan
   Redforts en cada petición.
-- La pantalla de «Próximamente» es solo visual: con ella puesta, las páginas y
-  la API siguen respondiendo si se conoce la URL. Con `SITE_LAUNCHED=true`
-  deja de importar.
+- La pantalla de «Próximamente» (`SITE_LAUNCHED=false`) es solo visual: con
+  ella puesta, las páginas y la API siguen respondiendo si se conoce la URL.
 
 ## Fotos
 
