@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Karla, Newsreader } from "next/font/google";
+import { ClickTracker } from "@/components/ClickTracker";
 import { ComingSoon } from "@/components/ComingSoon";
+import { CookieBanner } from "@/components/CookieBanner";
 import { Intro } from "@/components/Intro";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { site } from "@/content/site";
@@ -74,6 +76,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Intro />
             <SmoothScroll>{children}</SmoothScroll>
             <LocalBusinessSchema />
+            <CookieBanner />
+            <ClickTracker />
           </>
         )}
         <Analytics />

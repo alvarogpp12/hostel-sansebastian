@@ -5,6 +5,8 @@ import { Logo } from "@/components/brand/Logo";
 import { Arrow, SocialGlyph } from "@/components/icons";
 import { TransitionLink } from "@/components/TransitionLink";
 import { site } from "@/content/site";
+import { trackEvent } from "@/lib/analytics";
+import { openCookieSettings } from "@/lib/consent";
 
 /**
  * Pie en un bloque negro, el mismo lenguaje que el bloque de reserva:
@@ -24,7 +26,9 @@ export function Footer() {
       if (!res.ok) throw new Error(json.message ?? "No se pudo completar la suscripción.");
       e.currentTarget?.reset();
       setStatus({ state: "idle", message: json.message });
+      trackEvent("Newsletter", { resultado: "alta" });
     } catch (err) {
+      trackEvent("Newsletter", { resultado: "error" });
       setStatus({ state: "error", message: (err as Error).message });
     }
   };
@@ -152,6 +156,11 @@ export function Footer() {
                 </TransitionLink>
               </li>
             ))}
+            <li>
+              <button type="button" onClick={openCookieSettings} className="transition-colors hover:text-white">
+                Configurar cookies
+              </button>
+            </li>
           </ul>
           <p>
             {site.legalLinks.rights}

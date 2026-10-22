@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { StickyBookBar } from "@/components/booking/StickyBookBar";
+import { ConsentMap } from "@/components/ConsentMap";
 import { ArrowOut } from "@/components/icons";
 import { BookingBand, ImageCards, PAGE_HERO_ID, PageHero, Section } from "@/components/sections/Page";
 import { locationPage } from "@/content/pages";
@@ -40,13 +41,7 @@ export default function LocationPage() {
               </a>
             </div>
             <div className="relative aspect-[4/3] bg-neutral-200 lg:col-span-8 lg:aspect-auto lg:min-h-[480px]">
-              <iframe
-                title={`Mapa de ${site.contact.mapQuery}`}
-                src={mapSrc}
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="absolute inset-0 size-full border-0 grayscale-[0.9] sepia-[0.15]"
-              />
+              <ConsentMap title={`Mapa de ${site.contact.mapQuery}`} src={mapSrc} />
             </div>
           </div>
         </Section>
