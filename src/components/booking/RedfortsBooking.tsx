@@ -10,6 +10,7 @@ import { TransitionLink } from "@/components/TransitionLink";
 import { booking } from "@/content/booking";
 import { roomById, rooms } from "@/content/rooms";
 import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
+import { datesNotice } from "@/lib/redforts/dates-notice";
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
 import { site } from "@/content/site";
@@ -383,7 +384,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                             </span>
                             {otherDates && (
                               <span className="text-xs text-amber-700">
-                                Fechas propuestas: {fmtDate(o.arrival)} → {fmtDate(o.departure)} (estancia mínima o días de llegada)
+                                {datesNotice(lastSearch, o)}
                               </span>
                             )}
                             {saving && (
