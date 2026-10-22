@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ArrowOut, Icon } from "@/components/icons";
+import { PhotoNote } from "@/components/sections/GalleryModal";
 import { TransitionLink } from "@/components/TransitionLink";
 import { buildEngineUrl, engineOrigin, isEngineConfigured } from "@/content/booking";
 import { bookingPage as b } from "@/content/pages";
@@ -72,6 +73,7 @@ export function BookingForm() {
               priority
               className="object-cover"
             />
+            {photos[photo].note && <PhotoNote text={photos[photo].note} />}
           </div>
 
           <ul className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">

@@ -19,6 +19,15 @@ type Props = {
 
 const noop = () => () => {};
 
+/** Aviso pequeño sobre una foto, abajo a la derecha (p. ej. «Habitación interior») */
+export function PhotoNote({ text }: { text: string }) {
+  return (
+    <span className="pointer-events-none absolute right-2 bottom-2 rounded-md bg-white/90 px-2.5 py-1 font-caption text-xs text-neutral-900 shadow-sm backdrop-blur-sm lg:right-3 lg:bottom-3">
+      {text}
+    </span>
+  );
+}
+
 /**
  * Visor de fotos a pantalla completa sobre fondo oscuro. Cada foto se ve
  * entera (object-contain), sea horizontal o vertical: nunca se recorta.
@@ -137,8 +146,21 @@ export function GalleryModal({ open, onClose, title, meta, images, startIndex = 
         onPointerUp={onPointerUp}
         onPointerCancel={() => (swipeX.current = null)}
       >
-        <div key={current.src} className="absolute inset-2 animate-[gallery-fade_0.3s_ease-out] sm:inset-x-20 lg:inset-x-28 lg:inset-y-4">
-          <Image src={current.src} alt={current.alt} fill sizes="100vw" preload loading="eager" draggable={false} className="object-contain" />
+        {/* La caja interior mide lo mismo que la foto, para que el aviso caiga sobre ella */}
+        <div
+          key={current.src}
+          className="absolute inset-2 flex animate-[gallery-fade_0.3s_ease-out] items-center justify-center [container-type:size] sm:inset-x-20 lg:inset-x-28 lg:inset-y-4"
+        >
+          <div
+            className="relative"
+            style={{
+              aspectRatio: `${current.width} / ${current.height}`,
+              width: `min(100cqw, ${current.width / current.height} * 100cqh)`,
+            }}
+          >
+            <Image src={current.src} alt={current.alt} fill sizes="100vw" preload loading="eager" draggable={false} className="object-contain" />
+            {current.note && <PhotoNote text={current.note} />}
+          </div>
         </div>
         {count > 1 && (
           <>
