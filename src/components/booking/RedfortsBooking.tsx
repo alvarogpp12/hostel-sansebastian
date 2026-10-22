@@ -10,6 +10,7 @@ import { TransitionLink } from "@/components/TransitionLink";
 import { booking } from "@/content/booking";
 import { roomById, rooms } from "@/content/rooms";
 import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
+import { trackEvent } from "@/lib/analytics";
 import { datesNotice } from "@/lib/redforts/dates-notice";
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
@@ -136,17 +137,29 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     try {
       const res = await fetch(`/api/redforts/availability?${params}`);
       const json = await res.json();
+      const stats = { noches: nightsBetween(arrival, departure), personas: adults + children };
       if (!res.ok) {
         setResults(null);
         setSearchErrors(json.errors ?? ["No se pudo consultar la disponibilidad."]);
+        trackEvent("Reserva · error", { paso: "búsqueda", motivo: `HTTP ${res.status}` });
         return;
       }
-      setResults(json as Results);
+      const found = json as Results;
+      trackEvent("Reserva · búsqueda", stats);
+      if (found.options.length === 0) trackEvent("Reserva · sin disponibilidad", stats);
+      else if (found.options.every((o) => o.arrival !== arrival || o.departure !== departure)) {
+        const first = found.options[0];
+        const motivo =
+          first.arrival !== arrival && first.departure !== departure ? "llegada y estancia" : first.arrival !== arrival ? "llegada" : "estancia";
+        trackEvent("Reserva · fechas no disponibles", { motivo, noches: stats.noches });
+      }
+      setResults(found);
       setLastSearch({ arrival, departure, adults, children, promo: promo.trim() || undefined });
       // Espera a que se pinten los resultados antes de bajar hasta ellos
       requestAnimationFrame(() => scrollTo(resultsRef.current));
     } catch {
       setSearchErrors(["No se pudo conectar con el sistema de reservas."]);
+      trackEvent("Reserva · error", { paso: "búsqueda", motivo: "sin conexión" });
     } finally {
       setSearching(false);
     }
@@ -159,6 +172,12 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
   useEffect(() => {
     if (initial.arrival && initial.departure) searchOnArrival();
   }, [initial.arrival, initial.departure]);
+
+  // Vuelta desde Stripe sin pagar (cancel_url)
+  const cancelledPayment = params.get("pago") === "cancelado";
+  useEffect(() => {
+    if (cancelledPayment) trackEvent("Reserva · pago cancelado");
+  }, [cancelledPayment]);
 
   const chosen = useMemo(
     () =>
@@ -182,11 +201,18 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       else delete next[o.key];
       return next;
     });
+    if (qty > 0)
+      trackEvent("Reserva · habitación elegida", {
+        habitacion: roomForAcco(o.acco_id)?.id ?? String(o.acco_id),
+        noches: nightsBetween(o.arrival, o.departure),
+      });
     // Con una sola habitación por reserva, elegir es el último paso: a los datos
     if (qty > 0 && !results?.combine) requestAnimationFrame(() => scrollTo(checkoutRef.current));
   };
 
   const viaWhatsApp = booking.checkoutMode === "whatsapp";
+  /** Habitaciones de la selección, para las estadísticas (ids de content/rooms) */
+  const soldRooms = () => chosen.map((c) => roomForAcco(c.option.acco_id)?.id ?? String(c.option.acco_id)).join(" + ");
 
   /** Abre WhatsApp con la solicitud de reserva ya escrita */
   const requestByWhatsApp = () => {
@@ -213,6 +239,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       notes,
     });
     const url = whatsAppUrl(site.contact.whatsapp.number, message);
+    trackEvent("Reserva · solicitud por WhatsApp", { habitacion: soldRooms(), importe: Math.round(breakdown.total) });
     // En el ordenador, en otra pestaña; si el navegador la bloquea, en esta.
     // (Sin "noopener" en las opciones: con él window.open devuelve siempre null.)
     const win = window.open(url, "_blank");
@@ -229,6 +256,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     }
     setCheckoutErrors([]);
     setFieldErrors({});
+    trackEvent("Reserva · pago iniciado", { habitacion: soldRooms(), importe: Math.round(breakdown.total) });
     startPaying(async () => {
       const res = await startCheckout({
         search: lastSearch,
@@ -244,6 +272,10 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       }
       setCheckoutErrors(res.errors);
       setFieldErrors(res.fieldErrors ?? {});
+      trackEvent("Reserva · error", {
+        paso: "pago",
+        motivo: res.newTotal !== undefined ? "precio cambiado" : res.fieldErrors && Object.keys(res.fieldErrors).length ? "datos del huésped" : "otro",
+      });
       if (res.newTotal !== undefined) await search();
     });
   };
@@ -352,6 +384,8 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                         <button
                           type="button"
                           onClick={() => setGalleryAcco(accoId)}
+                          data-evento="Ver fotos"
+                          data-zona={`habitación ${room?.id ?? accoId}`}
                           className="absolute inset-0 flex cursor-zoom-in items-end justify-end p-2"
                           aria-label={`${site.ui.openGallery}: ${acco?.name ?? room?.name ?? ""}`}
                         >

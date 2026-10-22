@@ -16,6 +16,7 @@ export type LegalSection = { title?: string; body: LegalBlock[] };
 export type LegalDoc = { title: string; updated: string; sections: LegalSection[] };
 
 const UPDATED = "21 de octubre de 2026";
+const COOKIES_UPDATED = "22 de octubre de 2026";
 const { legal: l, contact } = site;
 const name = l.company;
 const holder = l.owner ? `${l.owner}${l.nif ? `, con NIF ${l.nif}` : ""}` : `el titular de ${name}`;
@@ -169,32 +170,42 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
 
   cookies: {
     title: "Política de cookies",
-    updated: UPDATED,
+    updated: COOKIES_UPDATED,
     sections: [
       {
-        title: "Qué usamos",
+        title: "Qué son",
         body: [
-          p("Esta web no usa cookies publicitarias ni de seguimiento, ni propias ni de terceros. Solo usa:"),
+          p(
+            "Las cookies y tecnologías parecidas (como el almacenamiento local del navegador) son pequeños archivos o datos que una web guarda en tu dispositivo para que funcione o para recordar algo entre visitas.",
+          ),
+        ],
+      },
+      {
+        title: "Qué usamos sin pedirte permiso",
+        body: [
+          p("Solo lo técnico y unas estadísticas anónimas, que no necesitan consentimiento:"),
           ul(
-            "Almacenamiento de sesión del navegador (ec-intro-visto): recuerda que ya has visto la animación de entrada para no repetirla en esa visita. Es técnico, se borra al cerrar la pestaña y no identifica a nadie.",
-            "Estadísticas de Vercel Web Analytics: cuentan visitas de forma agregada y anónima, sin cookies y sin identificarte.",
+            "Almacenamiento de sesión (ec-intro-visto): recuerda que ya has visto la animación de entrada para no repetirla en esa visita. Se borra al cerrar la pestaña.",
+            "Almacenamiento local (ec-cookies): guarda tu elección sobre las cookies para no volver a preguntarte. Dura un año; después te lo preguntamos de nuevo.",
+            "Estadísticas de Vercel Web Analytics: cuentan de forma agregada las visitas y algunas acciones (por ejemplo, qué botones se pulsan o en qué paso de la reserva se abandona) para mejorar la web. No usan cookies, no guardan nada en tu dispositivo y no te identifican.",
           ),
+          p("Esta web no usa cookies publicitarias ni de seguimiento."),
         ],
       },
       {
-        title: "Servicios de terceros",
+        title: "Qué usamos solo si lo aceptas",
         body: [
           p(
-            "La página de Ubicación muestra un mapa de Google Maps. Al cargarlo, Google puede instalar sus propias cookies, según su política (policies.google.com/technologies/cookies). Si no quieres, puedes no visitar esa página o bloquear las cookies de terceros en tu navegador.",
+            "Servicios de terceros: la página de Ubicación muestra un mapa de Google Maps. Al cargarlo, Google puede instalar sus propias cookies, según su política (policies.google.com/technologies/cookies). Por eso el mapa solo se carga si aceptas los servicios de terceros en el aviso de cookies o pulsas «Aceptar y ver el mapa».",
           ),
-          p("Si pagas online, Stripe usa en su página de pago las cookies necesarias para que el pago sea seguro y prevenir el fraude."),
+          p("Si pagas online, Stripe usa en su propia página de pago las cookies necesarias para que el pago sea seguro y para prevenir el fraude."),
         ],
       },
       {
-        title: "Cómo gestionarlas",
+        title: "Cómo cambiar tu elección",
         body: [
           p(
-            "Puedes ver, bloquear o borrar las cookies y el almacenamiento de los sitios desde la configuración de tu navegador (Chrome, Safari, Firefox o Edge). La web funciona igual aunque los bloquees.",
+            "Puedes cambiarla cuando quieras desde el enlace «Configurar cookies» del pie de la web. También puedes ver, bloquear o borrar las cookies y el almacenamiento de los sitios desde la configuración de tu navegador (Chrome, Safari, Firefox o Edge). La web funciona igual aunque no aceptes las de terceros: solo no verás el mapa.",
           ),
         ],
       },

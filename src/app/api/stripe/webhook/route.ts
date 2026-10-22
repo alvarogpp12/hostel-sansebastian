@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import { claimBooking, expireBooking, getBooking, updateBooking, type BookingRow } from "@/lib/bookings";
+import { track } from "@vercel/analytics/server";
 import { createReservation } from "@/lib/redforts/api";
 import { RedfortsError } from "@/lib/redforts/client";
 import { getStripe } from "@/lib/stripe";
@@ -51,6 +52,15 @@ async function processPaidSession(session: Stripe.Checkout.Session): Promise<voi
   await reserveAndCapture(booking, paymentIntentId);
 }
 
+/** Ventas en Vercel Web Analytics (ver src/lib/analytics.ts). Nunca rompe el webhook. */
+async function trackSale(name: string, data: Record<string, string | number>) {
+  try {
+    await track(name, data);
+  } catch (error) {
+    console.warn("[webhook] no se pudo enviar el evento de analytics", name, error);
+  }
+}
+
 async function reserveAndCapture(booking: BookingRow, paymentIntentId: string): Promise<void> {
   const stripe = getStripe();
   const { guest_notes: guestNotes, ...request } = booking.request;
@@ -67,6 +77,7 @@ async function reserveAndCapture(booking: BookingRow, paymentIntentId: string): 
       await stripe.paymentIntents.cancel(paymentIntentId, {}, { idempotencyKey: `cancel-${booking.id}` });
       await updateBooking(booking.id, { status: "rejected", errors: error.errors });
       console.warn("[webhook] Redforts rechazó la reserva; autorización anulada", { id: booking.id, codes: error.codes });
+      await trackSale("Reserva · rechazada", { motivo: error.codes?.join(",") || "redforts" });
       return;
     }
     // No sabemos si la reserva se ha creado: nada de reintentos ni de tocar el pago.
@@ -85,6 +96,7 @@ async function reserveAndCapture(booking: BookingRow, paymentIntentId: string): 
       await stripe.paymentIntents.capture(paymentIntentId, {}, { idempotencyKey: `capture-${booking.id}` });
       await updateBooking(booking.id, { status: "confirmed", reserv_id: result.id ?? null, guest_url: result.url ?? null });
       console.info("[webhook] reserva confirmada y cobrada", { id: booking.id, reserv_id: result.id });
+      await trackSale("Reserva · confirmada", { estado: "cobrada", importe: Math.round(booking.amount_cents / 100) });
     } catch (error) {
       await updateBooking(booking.id, { status: "capture_failed", reserv_id: result.id ?? null, guest_url: result.url ?? null });
       console.error(`[webhook] 🚨 REVISAR A MANO: reserva ${result.id} creada pero no se pudo cobrar`, error);
@@ -95,6 +107,7 @@ async function reserveAndCapture(booking: BookingRow, paymentIntentId: string): 
   // "unconfirmed": la recibieron pero la tiene que aceptar el personal.
   // REDFORTS-DUDA: ¿se cobra igual? De momento se deja el pago retenido (7 días).
   await updateBooking(booking.id, { status: "unconfirmed", reserv_id: result.id ?? null, guest_url: result.url ?? null });
+  await trackSale("Reserva · confirmada", { estado: "pendiente del alojamiento", importe: Math.round(booking.amount_cents / 100) });
   console.warn(`[webhook] reserva ${result.id} SIN CONFIRMAR por el hotel: pago ${paymentIntentId} retenido, revisar`);
 }
 

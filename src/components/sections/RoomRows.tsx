@@ -35,7 +35,7 @@ export function RoomRows({
           const photos = [room.image, ...room.gallery];
           return (
             <li key={room.id} id={detailed ? room.id : undefined} className="scroll-mt-24">
-              <article className="group grid overflow-clip rounded-lg bg-white md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[22rem_1fr_17rem]">
+              <article data-zona={`habitación ${room.id}`} className="group grid overflow-clip rounded-lg bg-white md:grid-cols-[minmax(0,18rem)_1fr] lg:grid-cols-[22rem_1fr_17rem]">
                 <div className="relative md:row-span-2 lg:row-span-1">
                   <Frame
                     image={photos[0]}
@@ -49,6 +49,7 @@ export function RoomRows({
                     <button
                       type="button"
                       onClick={() => setOpenId(room.id)}
+                      data-evento="Ver fotos"
                       aria-label={`${site.ui.openGallery}: ${room.name}`}
                       className="absolute inset-0 cursor-zoom-in"
                     />
@@ -57,6 +58,7 @@ export function RoomRows({
                     <button
                       type="button"
                       onClick={() => setOpenId(room.id)}
+                      data-evento="Ver fotos"
                       tabIndex={-1}
                       aria-hidden="true"
                       className="absolute right-3 bottom-3 flex min-h-10 items-center gap-2 rounded-full bg-white/95 px-4 text-xs font-medium shadow-sm transition-colors hover:bg-white"

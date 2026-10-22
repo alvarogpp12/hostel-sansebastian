@@ -7,6 +7,7 @@ export function WhatsAppButton() {
   return (
     <a
       href={href}
+      data-zona="botón flotante"
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}

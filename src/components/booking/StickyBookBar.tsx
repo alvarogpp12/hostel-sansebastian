@@ -41,6 +41,7 @@ export function StickyBookBar({ watch }: { watch: string }) {
 
   return (
     <div
+      data-zona="barra fija"
       aria-hidden={!visible}
       inert={!visible}
       className={`fixed inset-x-0 bottom-0 z-30 transition-transform duration-300 lg:bottom-5 lg:flex lg:justify-center ${
