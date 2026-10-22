@@ -71,6 +71,22 @@ const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] 
 
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
+const nights = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
+
+/**
+ * Por qué Redforts propone otras fechas: sus restricciones mandan (días sin
+ * llegadas y estancia mínima). Se explica a partir de lo que ha cambiado.
+ */
+function datesNotice(search: { arrival: string; departure: string }, o: { arrival: string; departure: string }): string {
+  const reasons: string[] = [];
+  if (o.arrival !== search.arrival) reasons.push(`El ${fmtDate(search.arrival)} no se admiten llegadas`);
+  if (o.departure !== search.departure) {
+    const n = nights(o.arrival, o.departure);
+    reasons.push(`llegando el ${fmtDate(o.arrival)}, la estancia mínima es de ${n} ${n === 1 ? "noche" : "noches"}`);
+  }
+  const why = reasons.join("; ");
+  return `${why.charAt(0).toUpperCase()}${why.slice(1)}. Fechas disponibles: ${fmtDate(o.arrival)} → ${fmtDate(o.departure)}.`;
+}
 
 export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
   const params = useSearchParams();
@@ -383,7 +399,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                             </span>
                             {otherDates && (
                               <span className="text-xs text-amber-700">
-                                Fechas propuestas: {fmtDate(o.arrival)} → {fmtDate(o.departure)} (estancia mínima o días de llegada)
+                                {datesNotice(lastSearch, o)}
                               </span>
                             )}
                             {saving && (
