@@ -126,6 +126,10 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
   const requestId = useRef(0);
   /** Fechas de la última búsqueda: solo se baja a los resultados si cambian */
   const searchedDates = useRef<string | null>(null);
+  /** Código rechazado por Redforts: se avisa junto al campo y se busca sin él */
+  const [promoError, setPromoError] = useState<string | null>(null);
+  /** Al quitar un código rechazado no hace falta repetir la búsqueda: ya se hizo sin él */
+  const skipNextSearch = useRef(false);
 
   /** Consulta /availability con la búsqueda actual; el estado se actualiza después del await */
   const runSearch = async () => {
@@ -136,12 +140,32 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     setSearchErrors([]);
     setSelection({});
     setCheckoutErrors([]);
-    const params = new URLSearchParams({ arrival, departure, adults: String(adults), children: String(children) });
-    if (promoCode) params.set("promo", promoCode);
-    try {
+    const query = async (code?: string) => {
+      const params = new URLSearchParams({ arrival, departure, adults: String(adults), children: String(children) });
+      if (code) params.set("promo", code);
       const res = await fetch(`/api/redforts/availability?${params}`);
-      const json = await res.json();
+      return { res, json: await res.json() };
+    };
+    try {
+      let { res, json } = await query(promoCode);
+      // Redforts rechaza la búsqueda entera si el código no vale (no existe,
+      // caducado…). Si sin código funciona, era el código: se enseñan las
+      // habitaciones al precio normal y se avisa junto al campo.
+      let rejected: string | null = null;
+      if (!res.ok && promoCode) {
+        const retry = await query();
+        if (retry.res.ok) {
+          rejected = json.errors?.[0] ?? "El código promocional no es válido.";
+          ({ res, json } = retry);
+        }
+      }
       if (id !== requestId.current) return;
+      setPromoError(rejected);
+      if (rejected) {
+        trackEvent("Reserva · error", { paso: "búsqueda", motivo: "código promocional" });
+        skipNextSearch.current = true;
+        setAppliedPromo("");
+      }
       const stats = { noches: nightsBetween(arrival, departure), personas: adults + children };
       if (!res.ok) {
         setResults(null);
@@ -159,7 +183,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
         trackEvent("Reserva · fechas no disponibles", { motivo, noches: stats.noches });
       }
       setResults(found);
-      setLastSearch({ arrival, departure, adults, children, promo: promoCode });
+      setLastSearch({ arrival, departure, adults, children, promo: rejected ? undefined : promoCode });
       // Con fechas nuevas, baja a los resultados (al cambiar personas o código, no)
       const dates = `${arrival}|${departure}`;
       if (dates !== searchedDates.current) {
@@ -177,7 +201,13 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
 
   // Busca sola, sin botón: al llegar con fechas en la URL (desde la home) y cada
   // vez que se completan las fechas o cambian las personas o el código aplicado.
-  const autoSearch = useEffectEvent(() => void runSearch());
+  const autoSearch = useEffectEvent(() => {
+    if (skipNextSearch.current) {
+      skipNextSearch.current = false;
+      return;
+    }
+    void runSearch();
+  });
   useEffect(() => {
     if (!arrival || !departure) return;
     const timer = window.setTimeout(autoSearch, 250);
@@ -349,9 +379,21 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             <div className="flex items-end gap-2">
               <label className="field flex-1">
                 <span className="style-caption-xs block !font-light">Código promocional</span>
-                <input value={promo} onChange={(e) => setPromo(e.target.value)} maxLength={40} className="mt-1 w-full" autoComplete="off" autoFocus />
+                <input
+                  value={promo}
+                  onChange={(e) => {
+                    setPromo(e.target.value);
+                    setPromoError(null);
+                  }}
+                  maxLength={40}
+                  className="mt-1 w-full"
+                  autoComplete="off"
+                  autoFocus
+                  aria-invalid={promoError ? true : undefined}
+                  aria-describedby={promoError ? "promo-error" : undefined}
+                />
               </label>
-              <button type="submit" disabled={promo.trim() === appliedPromo} className="style-button min-h-12 disabled:opacity-40">
+              <button type="submit" disabled={promo.trim() === appliedPromo || Boolean(promoError)} className="style-button min-h-12 disabled:opacity-40">
                 Aplicar
               </button>
             </div>
@@ -359,6 +401,11 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             <button type="button" onClick={() => setShowPromo(true)} className="w-fit text-xs underline">
               ¿Tienes un código promocional?
             </button>
+          )}
+          {promoError && (
+            <p id="promo-error" role="alert" className="-mt-3 text-xs text-red-700">
+              {promoError} Te enseñamos los precios sin descuento.
+            </p>
           )}
           <p aria-live="polite" className="min-h-5 text-xs text-neutral-500">
             {searching
