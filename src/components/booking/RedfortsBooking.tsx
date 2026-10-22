@@ -10,6 +10,7 @@ import { TransitionLink } from "@/components/TransitionLink";
 import { booking } from "@/content/booking";
 import { roomById, rooms } from "@/content/rooms";
 import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
+import { datesNotice } from "@/lib/redforts/dates-notice";
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
 import { site } from "@/content/site";
@@ -71,22 +72,6 @@ const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] 
 
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
-const nights = (from: string, to: string) => Math.round((Date.parse(to) - Date.parse(from)) / 86_400_000);
-
-/**
- * Por qué Redforts propone otras fechas: sus restricciones mandan (días sin
- * llegadas y estancia mínima). Se explica a partir de lo que ha cambiado.
- */
-function datesNotice(search: { arrival: string; departure: string }, o: { arrival: string; departure: string }): string {
-  const reasons: string[] = [];
-  if (o.arrival !== search.arrival) reasons.push(`El ${fmtDate(search.arrival)} no se admiten llegadas`);
-  if (o.departure !== search.departure) {
-    const n = nights(o.arrival, o.departure);
-    reasons.push(`llegando el ${fmtDate(o.arrival)}, la estancia mínima es de ${n} ${n === 1 ? "noche" : "noches"}`);
-  }
-  const why = reasons.join("; ");
-  return `${why.charAt(0).toUpperCase()}${why.slice(1)}. Fechas disponibles: ${fmtDate(o.arrival)} → ${fmtDate(o.departure)}.`;
-}
 
 export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
   const params = useSearchParams();
