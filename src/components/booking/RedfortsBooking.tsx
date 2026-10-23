@@ -564,14 +564,14 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
       {/* ── 3. Datos y pago ─────────────────────────────────────────── */}
       {breakdown && lastSearch && (
         <form ref={checkoutRef} onSubmit={pay} className="grid scroll-mt-24 gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-w">
-          {/* Compacto: dos columnas desde sm y campos bajos */}
-          <fieldset className="grid content-start gap-2 sm:grid-cols-2">
+          {/* Compacto: dos columnas (también en el móvil) y campos bajos */}
+          <fieldset className="grid grid-cols-2 content-start gap-2">
             <legend className="style-heading mb-3 text-xl">Tus datos</legend>
             {inventory.fields.map((f) => {
               const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? " *" : ""}`;
               const err = fieldErrors[f.id];
               return (
-                <label key={f.id} className={`field !py-1.5 ${f.id === "email" ? "sm:col-span-2" : ""}`}>
+                <label key={f.id} className={`field min-w-0 !py-1.5 ${f.id === "email" ? "col-span-2" : ""}`}>
                   <span className="style-caption-xs block !font-light">{label}</span>
                   {f.id === "country" ? (
                     <select
@@ -603,7 +603,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 </label>
               );
             })}
-            <label className="field !py-1.5 sm:col-span-2">
+            <label className="field !py-1.5 col-span-2">
               <span className="style-caption-xs block !font-light">{inventory.noteText ?? "Comentarios (opcional)"}</span>
               <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={2} className="w-full resize-y bg-transparent" />
             </label>
