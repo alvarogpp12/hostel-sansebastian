@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { RedfortsBooking } from "@/components/booking/RedfortsBooking";
 import { BookingForm } from "@/components/sections/BookingForm";
 import { PageIntro } from "@/components/sections/Page";
-import { bookingProvider } from "@/content/booking";
+import { bookingProvider, checkoutMode } from "@/content/booking";
 import { bookingPage } from "@/content/pages";
 import { site } from "@/content/site";
 import { isRedfortsConfigured } from "@/lib/redforts/client";
@@ -54,7 +54,7 @@ export default async function BookingPage() {
           ) : inventory ? (
             // Lee las fechas de la URL (useSearchParams): necesita su Suspense
             <Suspense fallback={null}>
-              <RedfortsBooking inventory={inventory} />
+              <RedfortsBooking inventory={inventory} mode={checkoutMode()} />
             </Suspense>
           ) : (
             <div className="grid gap-3 border border-neutral-300 p-4 text-sm">

@@ -40,15 +40,6 @@ export const booking = {
     familiar: "14", // «Habitación Familiar»
   } as Record<RoomId, string | null>,
 
-  /**
-   * Cómo termina la reserva nativa (BOOKING_PROVIDER=redforts):
-   *  - "whatsapp": el huésped consulta disponibilidad y precio, rellena sus
-   *    datos y SOLICITA la reserva por WhatsApp con todo ya escrito. No se
-   *    cobra nada (mientras el pago online no esté activo).
-   *  - "pay": pago con Stripe y reserva automática en Redforts.
-   */
-  checkoutMode: "whatsapp" as "whatsapp" | "pay",
-
   /** Idioma del motor (tiene que estar activado en la cuenta de Redforts) */
   lang: "es",
 
@@ -85,9 +76,31 @@ export function buildEngineUrl({ room, checkIn, checkOut }: BookingSelection): s
 /**
  * Qué flujo de reserva usa la web (solo servidor):
  * - "legacy" (por defecto): el motor de Redforts incrustado en un iframe.
- * - "redforts": reserva nativa con la Booking API v5 y pago con Stripe.
+ * - "redforts": reserva nativa con la Booking API v5 (ver checkoutMode).
  */
 export type BookingProvider = "legacy" | "redforts";
 export function bookingProvider(): BookingProvider {
   return process.env.BOOKING_PROVIDER === "redforts" ? "redforts" : "legacy";
+}
+
+/**
+ * Cómo termina la reserva nativa (BOOKING_PROVIDER=redforts). Solo servidor:
+ * la página se lo pasa al formulario.
+ *  - "tpv": la web crea la reserva en Redforts «pendiente de pago» y manda al
+ *    huésped a pagarla con el TPV virtual (Redsys) configurado en Redforts.
+ *    Si no paga, Redforts la anula sola (unos 30 min).
+ *  - "whatsapp": el huésped SOLICITA la reserva por WhatsApp con todo ya
+ *    escrito. No se cobra nada.
+ *  - "pay": pago con Stripe y reserva automática en Redforts (sin uso: el
+ *    TPV está en Redforts).
+ *
+ * Se elige con CHECKOUT_MODE. Sin ella: "tpv" en las vistas previas de Vercel
+ * (para probarlo) y "whatsapp" en producción, hasta dar el visto bueno.
+ */
+export type CheckoutMode = "tpv" | "whatsapp" | "pay";
+const CHECKOUT_MODES: CheckoutMode[] = ["tpv", "whatsapp", "pay"];
+export function checkoutMode(): CheckoutMode {
+  const fromEnv = process.env.CHECKOUT_MODE as CheckoutMode | undefined;
+  if (fromEnv && CHECKOUT_MODES.includes(fromEnv)) return fromEnv;
+  return process.env.VERCEL_ENV === "preview" ? "tpv" : "whatsapp";
 }

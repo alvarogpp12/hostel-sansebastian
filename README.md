@@ -52,16 +52,23 @@ Con `BOOKING_PROVIDER=redforts` (el de producción):
    precio de cada habitación y tarifa (flexible / no reembolsable). Si se llega
    desde una habitación (`/reservar?habitacion=doble|dos-camas|doble-privado|familiar`),
    sale la primera.
-3. El huésped rellena sus datos y pulsa **«Solicitar reserva por WhatsApp»**: se
-   abre el chat del 699 90 14 51 con habitación, tarifa, fechas, personas,
-   precio y datos ya escritos. **No se cobra nada**; la reserva se confirma a
-   mano por WhatsApp y se mete en Redforts.
-4. Cuando se quiera cobrar online: `checkoutMode: "pay"` en
-   `src/content/booking.ts` (pago con Stripe y reserva automática en Redforts,
-   ver [`docs/redforts.md`](docs/redforts.md)). Mientras esté en `"whatsapp"`, el
-   servidor rechaza cualquier intento de crear un pago.
+3. El huésped rellena sus datos y el final depende de `CHECKOUT_MODE`
+   (variable de Vercel; ver `checkoutMode()` en `src/content/booking.ts`):
+   - **`tpv`** (por defecto en las vistas previas): «Reservar y pagar». El
+     servidor vuelve a comprobar disponibilidad y precio, crea la reserva en
+     Redforts **pendiente de pago** y lleva al huésped al pago con tarjeta del
+     **TPV virtual (Redsys) configurado en Redforts**. Si no paga, Redforts la
+     anula sola (~30 min). La web no ve ni guarda la tarjeta. Debajo queda
+     «¿Prefieres reservar por WhatsApp?».
+   - **`whatsapp`** (por defecto en producción): «Solicitar reserva por
+     WhatsApp», con habitación, tarifa, fechas, personas, precio y datos ya
+     escritos. No se cobra nada.
+   - `pay`: pago con Stripe (programado pero sin usar: el TPV está en Redforts).
 
-Hay además un botón flotante de WhatsApp en todas las páginas, y los teléfonos
+   Para pasar producción al TPV: `CHECKOUT_MODE=tpv` en Vercel (Production) y
+   Redeploy. El servidor rechaza crear reservas o pagos en cualquier otro modo.
+
+Hay además un botón flotante de WhatsApp en todas las páginas, siempre visible (por encima del menú, de la barra de reserva y del aviso de cookies), y los teléfonos
 (fijo 943 43 12 28, móvil 699 90 14 51) en la cabecera, el menú y el pie.
 
 ## Páginas

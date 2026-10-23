@@ -75,15 +75,22 @@ export function isTestMode(): boolean {
  * Con REDFORTS_TEST_MODE=true añade `api_test`. Según la especificación,
  * con `api_test` la reserva NO se crea de verdad en el PMS; si el valor es un
  * email, la notificación se manda a esa dirección (y si no, no se manda nada).
+ *
+ * `real: true` ignora REDFORTS_TEST_MODE: el pago con el TPV de Redforts
+ * necesita una reserva de verdad (con `api_test` no hay enlace de pago). Si
+ * no se paga, Redforts la anula sola.
  */
-export async function createReservation(req: Omit<ReservationRequest, "api_test">): Promise<ReservationResponse> {
+export async function createReservation(
+  req: Omit<ReservationRequest, "api_test">,
+  { real = false }: { real?: boolean } = {},
+): Promise<ReservationResponse> {
   if (req.sales_channel_id !== undefined) {
     // Con sales_channel_id Redforts no comprueba el precio: no se usa salvo indicación expresa.
     throw new Error("sales_channel_id no está permitido en las reservas de la web.");
   }
 
   const body: ReservationRequest = { ...req };
-  if (isTestMode()) {
+  if (isTestMode() && !real) {
     body.api_test = process.env.REDFORTS_TEST_EMAIL?.trim() || true;
     console.warn(
       `[redforts] ⚠️  RESERVA DE PRUEBA (api_test) — no se crea en el PMS. Notificación a: ${

@@ -3,11 +3,11 @@
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
-import { startCheckout } from "@/app/reservar/actions";
+import { startCheckout, startTpvReservation } from "@/app/reservar/actions";
 import { ArrowOut, WhatsAppGlyph } from "@/components/icons";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { TransitionLink } from "@/components/TransitionLink";
-import { booking } from "@/content/booking";
+import { booking, type CheckoutMode } from "@/content/booking";
 import { roomById, rooms } from "@/content/rooms";
 import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
 import { trackEvent } from "@/lib/analytics";
@@ -26,11 +26,15 @@ import { BookingSteps } from "./BookingSteps";
  *   2. Opciones de /availability: nombre, fotos y textos del inventario,
  *      precio (tachado si hay promo) y comparativa con las OTAs.
  *   3. Datos del huésped generados desde `fields` del inventario.
- *   4. Según `booking.checkoutMode`:
+ *   4. Según `mode` (checkoutMode, lo decide el servidor):
+ *      - "tpv": la reserva se crea en Redforts pendiente de pago y el huésped
+ *        paga con el TPV virtual de Redforts (Server Action).
  *      - "whatsapp": solicitud de reserva por WhatsApp con todo ya escrito
  *        (habitación, fechas, personas, precio y datos). No se cobra nada.
- *      - "pay": pago con Stripe (Server Action). Los precios que se ven aquí
- *        son solo informativos: el servidor los vuelve a pedir a Redforts.
+ *      - "pay": pago con Stripe (Server Action).
+ *      Con pago online, WhatsApp queda como alternativa debajo del botón.
+ *      Los precios que se ven aquí son solo informativos: el servidor los
+ *      vuelve a pedir a Redforts.
  *
  * Si la URL trae fechas (?llegada=…&salida=…&adultos=…, desde el buscador de
  * la home), busca nada más abrirse y salta directamente a las habitaciones.
@@ -74,7 +78,7 @@ const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] 
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
 
-export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
+export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventory; mode: CheckoutMode }) {
   const params = useSearchParams();
   // Solo se renderiza en el navegador (useSearchParams bajo Suspense): "hoy" es el del huésped
   const [initial] = useState(() => parseBookingSearch((k) => params.get(k), localToday()));
@@ -256,7 +260,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     if (qty > 0 && !results?.combine) requestAnimationFrame(() => scrollTo(checkoutRef.current));
   };
 
-  const viaWhatsApp = booking.checkoutMode === "whatsapp";
+  const viaWhatsApp = mode === "whatsapp";
   /** Habitaciones de la selección, para las estadísticas (ids de content/rooms) */
   const soldRooms = () => chosen.map((c) => roomForAcco(c.option.acco_id)?.id ?? String(c.option.acco_id)).join(" + ");
 
@@ -304,7 +308,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     setFieldErrors({});
     trackEvent("Reserva · pago iniciado", { habitacion: soldRooms(), importe: Math.round(breakdown.total) });
     startPaying(async () => {
-      const res = await startCheckout({
+      const res = await (mode === "tpv" ? startTpvReservation : startCheckout)({
         search: lastSearch,
         selection: chosen.map((c) => ({ key: c.option.key, quantity: c.quantity })),
         guest,
@@ -685,17 +689,32 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             ) : (
               <>
                 <button type="submit" disabled={paying || !guestsFit} className="style-button w-full justify-center disabled:opacity-60">
-                  {paying ? "Comprobando disponibilidad…" : `Pagar ${money.format(breakdown.total)}`}
+                  {paying
+                    ? mode === "tpv"
+                      ? "Creando tu reserva…"
+                      : "Comprobando disponibilidad…"
+                    : `${mode === "tpv" ? "Reservar y pagar" : "Pagar"} ${money.format(breakdown.total)}`}
                   <ArrowOut />
                 </button>
                 <p className="text-xs text-neutral-500">
-                  Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra
-                  cuando la reserva queda confirmada. Al reservar aceptas las{" "}
+                  {mode === "tpv"
+                    ? "Volvemos a comprobar la disponibilidad y el precio, guardamos tu reserva y te llevamos al pago seguro con tarjeta de nuestro sistema de reservas. Tienes 30 minutos para pagar; si no, la reserva se anula sola."
+                    : "Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra cuando la reserva queda confirmada."}{" "}
+                  Al reservar aceptas las{" "}
                   <TransitionLink href={site.legalLinks.terms.href} className="underline">
                     {site.legalLinks.terms.label}
                   </TransitionLink>
                   .
                 </p>
+                <button
+                  type="button"
+                  onClick={requestByWhatsApp}
+                  disabled={paying}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] text-sm text-black disabled:opacity-60"
+                >
+                  <WhatsAppGlyph className="size-4 text-[#25D366]" />
+                  ¿Prefieres reservar por WhatsApp?
+                </button>
               </>
             )}
             {checkoutErrors.length > 0 && (
