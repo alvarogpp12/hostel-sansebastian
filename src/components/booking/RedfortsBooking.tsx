@@ -564,20 +564,21 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
       {/* ── 3. Datos y pago ─────────────────────────────────────────── */}
       {breakdown && lastSearch && (
         <form ref={checkoutRef} onSubmit={pay} className="grid scroll-mt-24 gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-w">
-          <fieldset className="grid content-start gap-2.5">
-            <legend className="style-heading mb-4 text-xl">Tus datos</legend>
+          {/* Compacto: dos columnas desde sm y campos bajos */}
+          <fieldset className="grid content-start gap-2 sm:grid-cols-2">
+            <legend className="style-heading mb-3 text-xl">Tus datos</legend>
             {inventory.fields.map((f) => {
               const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? " *" : ""}`;
               const err = fieldErrors[f.id];
               return (
-                <label key={f.id} className="field">
+                <label key={f.id} className={`field !py-1.5 ${f.id === "email" ? "sm:col-span-2" : ""}`}>
                   <span className="style-caption-xs block !font-light">{label}</span>
                   {f.id === "country" ? (
                     <select
                       required={f.required}
                       value={guest.country ?? ""}
                       onChange={(e) => setGuest({ ...guest, country: e.target.value })}
-                      className="mt-1 w-full bg-transparent outline-none"
+                      className="w-full bg-transparent outline-none"
                       autoComplete="country"
                     >
                       <option value="">—</option>
@@ -594,17 +595,17 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                       autoComplete={AUTOCOMPLETE[f.id]}
                       value={guest[f.id] ?? ""}
                       onChange={(e) => setGuest({ ...guest, [f.id]: e.target.value })}
-                      className="mt-1 w-full"
                       aria-invalid={Boolean(err)}
+                      className="w-full"
                     />
                   )}
                   {err && <span className="text-xs text-red-600">{err}</span>}
                 </label>
               );
             })}
-            <label className="field">
+            <label className="field !py-1.5 sm:col-span-2">
               <span className="style-caption-xs block !font-light">{inventory.noteText ?? "Comentarios (opcional)"}</span>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={3} className="mt-1 w-full bg-transparent" />
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={2} className="w-full resize-y bg-transparent" />
             </label>
           </fieldset>
 
