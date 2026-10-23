@@ -54,6 +54,30 @@ vuelta      ── /reservar/confirmada?session_id=… lee Supabase y se refresc
 | Tests | `src/lib/redforts/*.test.ts` (`npm test`) |
 | Prueba de conexión | `scripts/redforts-smoke.ts` (`npm run redforts:smoke`) |
 
+## Pago con el TPV virtual de Redforts (`CHECKOUT_MODE=tpv`)
+
+El TPV (Redsys) está configurado **en Redforts**, no en la web. Desde que se
+activó, `/availability` marca las opciones con `prepayment_required: true`.
+
+```
+pagar ── Server Action startTpvReservation
+           1. revalida con /availability y calcula el importe en el servidor
+           2. /reservation (confirmed, SIN ignore_prepayment, siempre real) ▶ Redforts
+              → la reserva queda «pendiente de pago»
+           3. devuelve result.url (página de Redforts) ─▶ el huésped paga con tarjeta
+           si no paga: Redforts la anula sola (~30 min)
+```
+
+- No pasa por Stripe ni por Supabase: la tarjeta y el cobro son de Redforts.
+- Siempre reserva real (ignora `REDFORTS_TEST_MODE`): con `api_test` no hay
+  enlace de pago. Para probar sin cobrar, llegar a la pantalla de pago y no
+  pagar.
+- Fallo de red o timeout: no se reintenta; se pide al huésped que contacte.
+  Revisar en Redforts si la reserva existe (log `[tpv] 🚨 REVISAR`).
+- Modo por entorno: `tpv` en las vistas previas, `whatsapp` en producción
+  salvo `CHECKOUT_MODE=tpv`. Las vistas previas necesitan las mismas
+  variables de Redforts que producción (marcar «Preview» en Vercel).
+
 ## Variables de entorno
 
 Ver `.env.example`. Hay que crearlas en `.env.local` (local) y en Vercel

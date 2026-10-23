@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { TransitionLink } from "@/components/TransitionLink";
 import { trackEvent } from "@/lib/analytics";
 import { onOpenCookieSettings, setConsent, useConsent } from "@/lib/consent";
@@ -16,6 +16,26 @@ export function CookieBanner() {
   const [settings, setSettings] = useState(false);
   const [thirdParty, setThirdParty] = useState(false);
   const titleId = useId();
+  const ref = useRef<HTMLDivElement>(null);
+  const open = consent !== undefined && (consent === null || reopened);
+
+  // Mientras está abierto, el botón de WhatsApp sube por encima en el móvil
+  // (ver WhatsAppButton): se publica su altura en una variable CSS del body.
+  useEffect(() => {
+    const el = ref.current;
+    if (!open || !el) return;
+    const body = document.body;
+    const sync = () => body.style.setProperty("--cookie-banner-h", `${el.offsetHeight}px`);
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(el);
+    body.dataset.cookies = "";
+    return () => {
+      observer.disconnect();
+      delete body.dataset.cookies;
+      body.style.removeProperty("--cookie-banner-h");
+    };
+  }, [open, settings]);
 
   useEffect(
     () =>
@@ -28,7 +48,7 @@ export function CookieBanner() {
   );
 
   // undefined: aún sin hidratar. Con una decisión guardada, solo si se reabre.
-  if (consent === undefined || (consent !== null && !reopened)) return null;
+  if (!open) return null;
 
   const decide = (terceros: boolean, decision: "aceptar" | "rechazar" | "guardar") => {
     setConsent(terceros);
@@ -41,6 +61,7 @@ export function CookieBanner() {
 
   return (
     <div
+      ref={ref}
       role="dialog"
       aria-modal="false"
       aria-labelledby={titleId}

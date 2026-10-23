@@ -3,11 +3,11 @@
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useEffectEvent, useMemo, useRef, useState, useTransition, type FormEvent } from "react";
-import { startCheckout } from "@/app/reservar/actions";
+import { startCheckout, startTpvReservation } from "@/app/reservar/actions";
 import { ArrowOut, WhatsAppGlyph } from "@/components/icons";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { TransitionLink } from "@/components/TransitionLink";
-import { booking } from "@/content/booking";
+import { booking, type CheckoutMode } from "@/content/booking";
 import { roomById, rooms } from "@/content/rooms";
 import { localToday, MAX_ADULTS, nightsBetween, parseBookingSearch } from "@/lib/booking-search";
 import { trackEvent } from "@/lib/analytics";
@@ -26,11 +26,15 @@ import { BookingSteps } from "./BookingSteps";
  *   2. Opciones de /availability: nombre, fotos y textos del inventario,
  *      precio (tachado si hay promo) y comparativa con las OTAs.
  *   3. Datos del huésped generados desde `fields` del inventario.
- *   4. Según `booking.checkoutMode`:
+ *   4. Según `mode` (checkoutMode, lo decide el servidor):
+ *      - "tpv": la reserva se crea en Redforts pendiente de pago y el huésped
+ *        paga con el TPV virtual de Redforts (Server Action).
  *      - "whatsapp": solicitud de reserva por WhatsApp con todo ya escrito
  *        (habitación, fechas, personas, precio y datos). No se cobra nada.
- *      - "pay": pago con Stripe (Server Action). Los precios que se ven aquí
- *        son solo informativos: el servidor los vuelve a pedir a Redforts.
+ *      - "pay": pago con Stripe (Server Action).
+ *      Con pago online, WhatsApp queda como alternativa debajo del botón.
+ *      Los precios que se ven aquí son solo informativos: el servidor los
+ *      vuelve a pedir a Redforts.
  *
  * Si la URL trae fechas (?llegada=…&salida=…&adultos=…, desde el buscador de
  * la home), busca nada más abrirse y salta directamente a las habitaciones.
@@ -74,7 +78,7 @@ const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] 
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
 
-export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
+export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventory; mode: CheckoutMode }) {
   const params = useSearchParams();
   // Solo se renderiza en el navegador (useSearchParams bajo Suspense): "hoy" es el del huésped
   const [initial] = useState(() => parseBookingSearch((k) => params.get(k), localToday()));
@@ -256,7 +260,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     if (qty > 0 && !results?.combine) requestAnimationFrame(() => scrollTo(checkoutRef.current));
   };
 
-  const viaWhatsApp = booking.checkoutMode === "whatsapp";
+  const viaWhatsApp = mode === "whatsapp";
   /** Habitaciones de la selección, para las estadísticas (ids de content/rooms) */
   const soldRooms = () => chosen.map((c) => roomForAcco(c.option.acco_id)?.id ?? String(c.option.acco_id)).join(" + ");
 
@@ -304,7 +308,7 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
     setFieldErrors({});
     trackEvent("Reserva · pago iniciado", { habitacion: soldRooms(), importe: Math.round(breakdown.total) });
     startPaying(async () => {
-      const res = await startCheckout({
+      const res = await (mode === "tpv" ? startTpvReservation : startCheckout)({
         search: lastSearch,
         selection: chosen.map((c) => ({ key: c.option.key, quantity: c.quantity })),
         guest,
@@ -560,20 +564,21 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
       {/* ── 3. Datos y pago ─────────────────────────────────────────── */}
       {breakdown && lastSearch && (
         <form ref={checkoutRef} onSubmit={pay} className="grid scroll-mt-24 gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-w">
-          <fieldset className="grid content-start gap-2.5">
-            <legend className="style-heading mb-4 text-xl">Tus datos</legend>
+          {/* Compacto: dos columnas (también en el móvil) y campos bajos */}
+          <fieldset className="grid grid-cols-2 content-start gap-2">
+            <legend className="style-heading mb-3 text-xl">Tus datos</legend>
             {inventory.fields.map((f) => {
               const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? " *" : ""}`;
               const err = fieldErrors[f.id];
               return (
-                <label key={f.id} className="field">
+                <label key={f.id} className={`field min-w-0 !py-1.5 ${f.id === "email" ? "col-span-2" : ""}`}>
                   <span className="style-caption-xs block !font-light">{label}</span>
                   {f.id === "country" ? (
                     <select
                       required={f.required}
                       value={guest.country ?? ""}
                       onChange={(e) => setGuest({ ...guest, country: e.target.value })}
-                      className="mt-1 w-full bg-transparent outline-none"
+                      className="w-full bg-transparent outline-none"
                       autoComplete="country"
                     >
                       <option value="">—</option>
@@ -590,17 +595,17 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
                       autoComplete={AUTOCOMPLETE[f.id]}
                       value={guest[f.id] ?? ""}
                       onChange={(e) => setGuest({ ...guest, [f.id]: e.target.value })}
-                      className="mt-1 w-full"
                       aria-invalid={Boolean(err)}
+                      className="w-full"
                     />
                   )}
                   {err && <span className="text-xs text-red-600">{err}</span>}
                 </label>
               );
             })}
-            <label className="field">
+            <label className="field !py-1.5 col-span-2">
               <span className="style-caption-xs block !font-light">{inventory.noteText ?? "Comentarios (opcional)"}</span>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={3} className="mt-1 w-full bg-transparent" />
+              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={2} className="w-full resize-y bg-transparent" />
             </label>
           </fieldset>
 
@@ -685,17 +690,32 @@ export function RedfortsBooking({ inventory }: { inventory: PublicInventory }) {
             ) : (
               <>
                 <button type="submit" disabled={paying || !guestsFit} className="style-button w-full justify-center disabled:opacity-60">
-                  {paying ? "Comprobando disponibilidad…" : `Pagar ${money.format(breakdown.total)}`}
+                  {paying
+                    ? mode === "tpv"
+                      ? "Creando tu reserva…"
+                      : "Comprobando disponibilidad…"
+                    : `${mode === "tpv" ? "Reservar y pagar" : "Pagar"} ${money.format(breakdown.total)}`}
                   <ArrowOut />
                 </button>
                 <p className="text-xs text-neutral-500">
-                  Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra
-                  cuando la reserva queda confirmada. Al reservar aceptas las{" "}
+                  {mode === "tpv"
+                    ? "Volvemos a comprobar la disponibilidad y el precio, guardamos tu reserva y te llevamos al pago seguro con tarjeta de nuestro sistema de reservas. Tienes 30 minutos para pagar; si no, la reserva se anula sola."
+                    : "Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra cuando la reserva queda confirmada."}{" "}
+                  Al reservar aceptas las{" "}
                   <TransitionLink href={site.legalLinks.terms.href} className="underline">
                     {site.legalLinks.terms.label}
                   </TransitionLink>
                   .
                 </p>
+                <button
+                  type="button"
+                  onClick={requestByWhatsApp}
+                  disabled={paying}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] text-sm text-black disabled:opacity-60"
+                >
+                  <WhatsAppGlyph className="size-4 text-[#25D366]" />
+                  ¿Prefieres reservar por WhatsApp?
+                </button>
               </>
             )}
             {checkoutErrors.length > 0 && (
