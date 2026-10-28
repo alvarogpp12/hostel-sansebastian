@@ -4,7 +4,7 @@ import type { IconName } from "./site";
 export const home = {
   hero: {
     /** H1: lleva la palabra clave, en versalita sobre el titular grande */
-    h1: "Tu alojamiento céntrico en San Sebastián",
+    h1: "Enjoy Comfort · Tu alojamiento céntrico en San Sebastián",
     title: ["Céntrico, cómodo", "y tranquilo."],
     lead: "Elige tus fechas y mira al momento qué habitaciones quedan libres. Reservas en un minuto, directamente con nosotros.",
     image: media.city.bay,
