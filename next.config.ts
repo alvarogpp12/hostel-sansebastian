@@ -36,6 +36,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  /**
+   * URLs de la web antigua (buuteeq: /es-es, /en-us, /es-es/habitaciones…), que
+   * Google aún tiene guardadas. Redirección permanente para que no den 404 y
+   * su posicionamiento pase a la web nueva.
+   */
+  async redirects() {
+    const old = ":lang(es-es|es-ES|en-us|en-US|en-gb|en-GB|fr-fr|fr-FR|de-de|de-DE|it-it|it-IT|pt-pt|pt-PT|eu-es|eu-ES|ca-es|ca-ES|nl-nl|nl-NL)";
+    return [
+      { source: `/${old}/:path(rooms|habitaciones|alojamiento|accommodation)`, destination: "/habitaciones", permanent: true },
+      { source: `/${old}/:path(location|ubicacion|localizacion|como-llegar|contact|contacto)`, destination: "/ubicacion", permanent: true },
+      { source: `/${old}/:path(booking|reservas|reservar|book)`, destination: "/reservar", permanent: true },
+      { source: `/${old}/:path*`, destination: "/", permanent: true },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

@@ -86,12 +86,18 @@ export const site = {
   },
 
   seo: {
-    /** Main keyword target: "alojamiento céntrico San Sebastián" */
-    title: "Alojamiento céntrico en San Sebastián | Enjoy Comfort",
+    /**
+     * La marca va delante: quien busca «Enjoy Comfort» tiene que ver la web
+     * oficial antes que Booking y los agregadores. Después, la palabra clave
+     * «alojamiento céntrico San Sebastián».
+     */
+    title: "Enjoy Comfort San Sebastián · Web oficial | Pensión céntrica en Donostia",
     description:
-      "Alojamiento céntrico en San Sebastián, junto a la playa de Gros y a pocos minutos de la Parte Vieja. Habitaciones dobles, de dos camas y familiares con baño compartido o privado.",
+      "Web oficial de Enjoy Comfort, pensión en Calle Nueva 5 (Gros), en el centro de San Sebastián, junto a la playa de Gros y a pocos minutos de la Parte Vieja. Reserva directa, sin comisiones.",
     keywords: [
       "alojamiento céntrico San Sebastián",
+      "Enjoy Comfort San Sebastián",
+      "Pensión Enjoy Comfort",
       "pensión en San Sebastián",
       "alojamiento céntrico Donostia",
       "alojamiento cerca de la playa de Gros",
