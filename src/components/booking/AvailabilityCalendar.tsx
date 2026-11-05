@@ -31,6 +31,8 @@ const todayIso = () => {
 
 const monthFmt = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric", timeZone: "UTC" });
 const weekdayFmt = new Intl.DateTimeFormat("es-ES", { weekday: "narrow", timeZone: "UTC" });
+/** «noviembre de 2026» → «Noviembre de 2026» (con CSS capitalize salía «Noviembre De 2026») */
+const capitalizeFirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function charAt(cal: CalendarData, iso: string): string {
   if (iso < cal.firstDate || iso > cal.lastDate) return "-";
@@ -124,7 +126,7 @@ export function AvailabilityCalendar({
         <button type="button" onClick={() => shift(-1)} disabled={month <= today.slice(0, 7)} className="px-2 py-1 disabled:opacity-30" aria-label="Mes anterior">
           ←
         </button>
-        <p className="style-caption-xs !font-normal capitalize">{monthFmt.format(new Date(toTime(`${month}-01`)))}</p>
+        <p className="style-caption-xs !font-normal">{capitalizeFirst(monthFmt.format(new Date(toTime(`${month}-01`))))}</p>
         <button type="button" onClick={() => shift(1)} className="px-2 py-1" aria-label="Mes siguiente">
           →
         </button>

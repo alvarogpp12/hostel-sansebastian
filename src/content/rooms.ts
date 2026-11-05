@@ -11,8 +11,10 @@ export type Room = {
   guests: number;
   meta: string;
   /**
-   * Precio mínimo por noche en euros. `null` = sin confirmar: la web muestra
-   * "desde XX €" y el precio no se publica en los datos estructurados.
+   * Precio mínimo por noche en euros (tarifa no reembolsable de Redforts, el
+   * más bajo visto en noviembre de 2026). `null` = sin confirmar: la web
+   * muestra «Consultar precio» y no se publica en los datos estructurados.
+   * Revisar si Redforts baja precios en alguna temporada.
    */
   priceFrom: number | null;
   cardText: string;
@@ -29,7 +31,7 @@ export const rooms: Room[] = [
     short: "Doble",
     guests: 2,
     meta: "1 o 2 personas · Cama de matrimonio · Baño compartido",
-    priceFrom: null,
+    priceFrom: 49.5,
     cardText:
       "Una cama de matrimonio y tu propio espacio para descansar, tanto si vienes solo como en pareja.",
     text: "Un paseo por la bahía, una tarde descubriendo la ciudad y un lugar tranquilo donde descansar al terminar el día. La habitación doble de Enjoy Comfort tiene una cama de matrimonio y es perfecta para una o dos personas. El baño se comparte con otros huéspedes.",
@@ -48,7 +50,7 @@ export const rooms: Room[] = [
     short: "Dos camas",
     guests: 2,
     meta: "1 o 2 personas · Dos camas individuales · Baño compartido",
-    priceFrom: null,
+    priceFrom: 49.5,
     cardText:
       "Dos camas separadas para viajar con un amigo, un familiar o un compañero de trabajo, cada uno a su aire.",
     text: "Si viajáis juntos pero preferís dormir cada uno en su cama, esta es vuestra habitación. Tiene dos camas individuales y es de uso privado para una o dos personas. El baño se comparte con otros huéspedes.",
@@ -67,7 +69,7 @@ export const rooms: Room[] = [
     short: "Doble con baño privado",
     guests: 2,
     meta: "2 personas · Cama de matrimonio · Baño privado exterior",
-    priceFrom: null,
+    priceFrom: 58.5,
     cardText:
       "La comodidad de tener un baño solo para vosotros, justo fuera de la habitación.",
     text: "Para quienes prefieren no compartir baño. Esta habitación doble tiene cama de matrimonio y un baño privado de uso exclusivo, situado fuera de la habitación. Toda la tranquilidad de tener tu propio espacio en pleno San Sebastián.",
@@ -87,7 +89,7 @@ export const rooms: Room[] = [
     // VERIFICAR con el cliente: capacidad máxima (2 camas de matrimonio)
     guests: 4,
     meta: "Hasta 4 personas · Dos camas de matrimonio · Baño privado",
-    priceFrom: null,
+    priceFrom: 108,
     cardText:
       "Dos camas de matrimonio y baño privado para venir en familia o con amigos y estar todos juntos.",
     text: "Cuando viajáis en familia o en grupo, alojaros en la misma habitación lo hace todo más fácil. La habitación familiar tiene dos camas de matrimonio y baño privado, para que tengáis vuestro propio espacio mientras descubrís San Sebastián.",
@@ -102,7 +104,8 @@ export const rooms: Room[] = [
   },
 ];
 
-export const priceLabel = (room: Room) => (room.priceFrom === null ? "Consultar precio" : `desde ${room.priceFrom} €`);
+const euros = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+export const priceLabel = (room: Room) => (room.priceFrom === null ? "Consultar precio" : `desde ${euros.format(room.priceFrom)}`);
 
 /** ¿Hay tarifa confirmada? Si no, no se enseña el sufijo "/noche". */
 export const hasPrice = (room: Room) => room.priceFrom !== null;
