@@ -104,8 +104,10 @@ export const rooms: Room[] = [
   },
 ];
 
-const euros = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 0, maximumFractionDigits: 2 });
-export const priceLabel = (room: Room) => (room.priceFrom === null ? "Consultar precio" : `desde ${euros.format(room.priceFrom)}`);
+/** 108 → «108 €»; 49.5 → «49,50 €» */
+const euros = (n: number) =>
+  new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: Number.isInteger(n) ? 0 : 2 }).format(n);
+export const priceLabel = (room: Room) => (room.priceFrom === null ? "Consultar precio" : `desde ${euros(room.priceFrom)}`);
 
 /** ¿Hay tarifa confirmada? Si no, no se enseña el sufijo "/noche". */
 export const hasPrice = (room: Room) => room.priceFrom !== null;
