@@ -77,6 +77,16 @@ const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] 
 
 const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
 const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
+const longDateFmt = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+const fmtLongDate = (iso: string) => longDateFmt.format(new Date(`${iso}T00:00:00Z`));
+const nightsText = (n: number) => (n === 1 ? "1 noche" : `${n} noches`);
+const peopleText = (adults: number, children: number) =>
+  `${adults === 1 ? "1 adulto" : `${adults} adultos`}${children ? ` y ${children === 1 ? "1 niño" : `${children} niños`}` : ""}`;
+
+/** Tarifa no reembolsable de Redforts (por el nombre: «Tarifa No Reembolsable») */
+const isNonRefundable = (rateNames: string) => /no\s*reembolsable/i.test(rateNames);
+/** Plazo de cancelación gratuita de la tarifa estándar (ver /terminos) */
+const FREE_CANCEL_TEXT = "Cancelación gratis hasta 7 días antes de la llegada";
 
 export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventory; mode: CheckoutMode }) {
   const params = useSearchParams();
@@ -88,6 +98,18 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
   const [children, setChildren] = useState(0);
   const [promo, setPromo] = useState("");
   const [showPromo, setShowPromo] = useState(false);
+  /**
+   * Si llega con fechas (desde el buscador de la home), la búsqueda sale
+   * plegada en una línea («18 nov → 19 nov · 2 adultos · Cambiar») y lo
+   * primero que se ve son las habitaciones, no el calendario otra vez.
+   */
+  const [editingSearch, setEditingSearch] = useState(!(initial.arrival && initial.departure));
+  /** Campos opcionales del huésped (segundo apellido, país, otro teléfono…) y comentarios */
+  const [showOptional, setShowOptional] = useState(false);
+  /** Ya se va al pago: la capa de «Te llevamos al pago» se queda hasta que cambie la página */
+  const [redirecting, setRedirecting] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const [actionsInView, setActionsInView] = useState(false);
 
   const lenis = useLenis();
   const resultsRef = useRef<HTMLElement>(null);
@@ -188,11 +210,12 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
       }
       setResults(found);
       setLastSearch({ arrival, departure, adults, children, promo: rejected ? undefined : promoCode });
-      // Con fechas nuevas, baja a los resultados (al cambiar personas o código, no)
+      // Con fechas nuevas, baja a los resultados (al cambiar personas o código, no).
+      // Con la búsqueda plegada ya están justo debajo: no hace falta moverse.
       const dates = `${arrival}|${departure}`;
       if (dates !== searchedDates.current) {
         searchedDates.current = dates;
-        requestAnimationFrame(() => scrollTo(resultsRef.current));
+        if (editingSearch) requestAnimationFrame(() => scrollTo(resultsRef.current));
       }
     } catch {
       if (id !== requestId.current) return;
@@ -317,6 +340,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
         expectedTotal: breakdown.total,
       });
       if (res.ok) {
+        setRedirecting(true);
         window.location.href = res.url;
         return;
       }
@@ -340,11 +364,65 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
 
   const step = breakdown ? 3 : results ? 2 : 1;
 
+  // Barra fija con el total y el botón de pagar (móvil): sale mientras el
+  // botón del formulario no está en pantalla.
+  const hasSelection = Boolean(breakdown);
+  useEffect(() => {
+    const el = actionsRef.current;
+    if (!hasSelection || !el) return;
+    const io = new IntersectionObserver(([entry]) => setActionsInView(entry.isIntersecting || entry.boundingClientRect.top < 0));
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasSelection]);
+  const showPayBar = hasSelection && !actionsInView;
+  // El botón flotante de WhatsApp sube por encima de la barra (ver WhatsAppButton)
+  useEffect(() => {
+    document.body.toggleAttribute("data-bookbar", showPayBar);
+    return () => document.body.removeAttribute("data-bookbar");
+  }, [showPayBar]);
+
+  const requiredFields = inventory.fields.filter((f) => f.required);
+  const optionalFields = inventory.fields.filter((f) => !f.required);
+  const optionalOpen = showOptional || optionalFields.some((f) => fieldErrors[f.id]);
+  const payLabel = viaWhatsApp ? "Solicitar por WhatsApp" : `${mode === "tpv" ? "Reservar y pagar" : "Pagar"} ${breakdown ? money.format(breakdown.total) : ""}`;
+
   return (
     <div className="grid gap-10">
       <BookingSteps current={step} lastLabel={viaWhatsApp ? "Tus datos y solicitud" : undefined} />
 
       {/* ── 1. Búsqueda ─────────────────────────────────────────────── */}
+      {!editingSearch && arrival && departure ? (
+        <div className="grid gap-2">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-neutral-300 px-4 py-3">
+            <p className="grid gap-0.5">
+              <span className="style-heading text-lg">
+                {fmtLongDate(arrival)} → {fmtLongDate(departure)}
+              </span>
+              <span className="text-xs text-neutral-500">
+                {nightsText(nightsBetween(arrival, departure))} · {peopleText(adults, children)}
+              </span>
+            </p>
+            <button
+              type="button"
+              onClick={() => setEditingSearch(true)}
+              data-evento="Cambiar búsqueda"
+              className="shrink-0 rounded-full border border-neutral-300 px-4 py-2 text-xs uppercase hover:bg-neutral-100"
+            >
+              Cambiar
+            </button>
+          </div>
+          <p aria-live="polite" className="min-h-5 text-xs text-neutral-500">
+            {searching ? "Buscando habitaciones libres…" : null}
+          </p>
+          {searchErrors.length > 0 && (
+            <ul role="alert" className="border border-red-400 p-3 text-xs">
+              {searchErrors.map((m) => (
+                <li key={m}>{m}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
       <form onSubmit={applyPromo} className="grid items-start gap-w text-sm lg:grid-cols-2">
         <AvailabilityCalendar
           arrival={arrival}
@@ -357,7 +435,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
         <div className="grid gap-5">
           <p className="style-heading text-lg">
             {arrival ? fmtDate(arrival) : "Llegada"} → {departure ? fmtDate(departure) : "Salida"}
-            {arrival && departure && <span className="font-body text-sm"> · {nightsBetween(arrival, departure)} noches</span>}
+            {arrival && departure && <span className="font-body text-sm"> · {nightsText(nightsBetween(arrival, departure))}</span>}
           </p>
           <div className={`grid gap-2.5 ${inventory.allowChildren ? "grid-cols-2" : ""}`}>
             <label className="field">
@@ -427,6 +505,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
           )}
         </div>
       </form>
+      )}
 
       {/* ── 2. Opciones ─────────────────────────────────────────────── */}
       {results && (
@@ -475,8 +554,23 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 <div className="grid gap-3 p-2">
                   <div className="grid gap-1">
                     {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-offwhite px-2.5 py-1">Tu elección</span>}
-                    <h3 className="style-heading text-lg lg:text-xl">{acco?.name ?? `Alojamiento ${accoId}`}</h3>
-                    {acco?.description && <p className="text-sm whitespace-pre-line text-neutral-600">{acco.description}</p>}
+                    {/* Nuestro nombre (el de la home), no el de Redforts: allí dos habitaciones se llaman igual */}
+                    <h3 className="style-heading text-lg lg:text-xl">{room?.name ?? acco?.name ?? `Alojamiento ${accoId}`}</h3>
+                    {room && (
+                      <ul className="flex flex-wrap gap-1.5 pt-1" aria-label="Características">
+                        {room.specs.map((s) => (
+                          <li
+                            key={s.text}
+                            className={`rounded-full px-2.5 py-1 text-xs ${
+                              s.icon === "shower" ? "bg-black text-white" : "bg-offwhite text-neutral-700"
+                            }`}
+                          >
+                            {s.text}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {acco?.description && <p className="pt-1 text-sm whitespace-pre-line text-neutral-600">{acco.description}</p>}
                   </div>
                   <ul className="grid gap-2">
                     {options.map((o) => {
@@ -484,12 +578,39 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                       const otherDates = lastSearch && (o.arrival !== lastSearch.arrival || o.departure !== lastSearch.departure);
                       const saving = bestOtaSaving(o);
                       const qty = selection[o.key] ?? 0;
+                      const nights = nightsBetween(o.arrival, o.departure);
+                      const nonRefundable = isNonRefundable(rateNames);
+                      // Lo que se ahorra con la no reembolsable frente a la flexible (mismas fechas)
+                      const flexible = nonRefundable
+                        ? options.find(
+                            (x) =>
+                              x !== o &&
+                              x.arrival === o.arrival &&
+                              x.departure === o.departure &&
+                              !isNonRefundable(x.periods.map((p) => inventory.rates[String(p.rate_id)]?.name ?? "").join(" ")),
+                          )
+                        : undefined;
+                      const cheaper = flexible && flexible.price > o.price ? flexible.price - o.price : 0;
                       return (
-                        <li key={o.key} className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-2">
+                        <li key={o.key} className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 pt-3">
                           <div className="grid gap-0.5 text-sm">
                             <span>{rateNames}</span>
+                            {nonRefundable ? (
+                              <span className="text-xs text-neutral-600">
+                                Sin cancelación
+                                {cheaper > 0 && (
+                                  <span className="text-green-700">
+                                    {" "}
+                                    · ahorras {money.format(cheaper)} ({Math.round((cheaper / flexible!.price) * 100)} %)
+                                  </span>
+                                )}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-green-700">{FREE_CANCEL_TEXT}</span>
+                            )}
                             <span className="text-xs text-neutral-500">
-                              Hasta {o.adults + o.children} {o.adults + o.children === 1 ? "persona" : "personas"} · quedan {o.amount}
+                              Hasta {o.adults + o.children} {o.adults + o.children === 1 ? "persona" : "personas"}
+                              {o.amount <= 2 ? ` · ${o.amount === 1 ? "queda 1" : `quedan ${o.amount}`}` : ""}
                             </span>
                             {otherDates && (
                               <span className="text-xs text-amber-700">
@@ -508,6 +629,9 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                                 <s className="block text-xs text-neutral-500">{money.format(o.orig_price)}</s>
                               )}
                               <span className="style-heading text-lg">{money.format(o.price)}</span>
+                              <span className="block text-xs text-neutral-500">
+                                {nights === 1 ? "total · 1 noche" : `total · ${nights} noches (${money.format(o.price / nights)}/noche)`}
+                              </span>
                               {o.excl_taxes ? <span className="block text-xs text-neutral-500">+ {o.excl_taxes}% impuestos</span> : null}
                             </span>
                             {results.combine ? (
@@ -528,8 +652,8 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                                 type="button"
                                 onClick={() => setQty(o, qty ? 0 : 1)}
                                 aria-pressed={qty > 0}
-                                className={`rounded-2xl border px-3 py-1.5 text-xs uppercase transition-colors ${
-                                  qty ? "border-black bg-black text-white" : "border-neutral-300 hover:bg-neutral-100"
+                                className={`min-h-11 rounded-full border px-5 text-xs uppercase transition-colors ${
+                                  qty ? "border-black bg-black text-white" : "border-black hover:bg-neutral-100"
                                 }`}
                               >
                                 {qty ? "Elegida" : "Elegir"}
@@ -563,67 +687,34 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
 
       {/* ── 3. Datos y pago ─────────────────────────────────────────── */}
       {breakdown && lastSearch && (
-        <form ref={checkoutRef} onSubmit={pay} className="grid scroll-mt-24 gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-w">
-          {/* Compacto: dos columnas (también en el móvil) y campos bajos */}
-          <fieldset className="grid grid-cols-2 content-start gap-2">
-            <legend className="style-heading mb-3 text-xl">Tus datos</legend>
-            {inventory.fields.map((f) => {
-              const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? " *" : ""}`;
-              const err = fieldErrors[f.id];
-              return (
-                <label key={f.id} className={`field min-w-0 !py-1.5 ${f.id === "email" ? "col-span-2" : ""}`}>
-                  <span className="style-caption-xs block !font-light">{label}</span>
-                  {f.id === "country" ? (
-                    <select
-                      required={f.required}
-                      value={guest.country ?? ""}
-                      onChange={(e) => setGuest({ ...guest, country: e.target.value })}
-                      className="w-full bg-transparent outline-none"
-                      autoComplete="country"
-                    >
-                      <option value="">—</option>
-                      {inventory.countries.map((c) => (
-                        <option key={c.code} value={c.code}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      required={f.required}
-                      type={FIELD_TYPES[f.id] ?? "text"}
-                      autoComplete={AUTOCOMPLETE[f.id]}
-                      value={guest[f.id] ?? ""}
-                      onChange={(e) => setGuest({ ...guest, [f.id]: e.target.value })}
-                      aria-invalid={Boolean(err)}
-                      className="w-full"
-                    />
-                  )}
-                  {err && <span className="text-xs text-red-600">{err}</span>}
-                </label>
-              );
-            })}
-            <label className="field !py-1.5 col-span-2">
-              <span className="style-caption-xs block !font-light">{inventory.noteText ?? "Comentarios (opcional)"}</span>
-              <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={2} className="w-full resize-y bg-transparent" />
-            </label>
-          </fieldset>
-
-          <div className="grid content-start gap-4">
+        <form
+          id="checkout"
+          ref={checkoutRef}
+          onSubmit={pay}
+          className="grid scroll-mt-24 gap-6 border-t border-neutral-300 pt-8 text-sm lg:grid-cols-2 lg:gap-x-w"
+        >
+          {/* Resumen arriba (en el móvil, antes de los datos): se ve el total desde el principio */}
+          <div className="grid content-start gap-3 rounded-xl bg-offwhite p-4 lg:col-start-2 lg:row-start-1">
             <h2 className="style-heading text-xl">Tu reserva</h2>
             <ul className="grid gap-1">
-              {chosen.map(({ option, quantity }) => (
-                <li key={option.key} className="flex justify-between gap-4">
-                  <span>
-                    {quantity} × {inventory.accos[String(option.acco_id)]?.name ?? option.acco_id}
-                  </span>
-                  <span>{money.format(option.price * quantity)}</span>
-                </li>
-              ))}
+              {chosen.map(({ option, quantity }) => {
+                const room = roomForAcco(option.acco_id);
+                const rate = [...new Set(option.periods.map((p) => inventory.rates[String(p.rate_id)]?.name).filter(Boolean))].join(" + ");
+                return (
+                  <li key={option.key} className="flex justify-between gap-4">
+                    <span>
+                      {quantity > 1 && `${quantity} × `}
+                      {room?.name ?? inventory.accos[String(option.acco_id)]?.name ?? option.acco_id}
+                      {rate && <span className="block text-xs text-neutral-500">{rate}</span>}
+                    </span>
+                    <span className="shrink-0">{money.format(option.price * quantity)}</span>
+                  </li>
+                );
+              })}
             </ul>
             <p className="text-xs text-neutral-500">
-              {fmtDate(chosen[0].option.arrival)} → {fmtDate(chosen[0].option.departure)} · {lastSearch.adults} adultos
-              {lastSearch.children ? ` y ${lastSearch.children} niños` : ""}
+              {fmtLongDate(chosen[0].option.arrival)} → {fmtLongDate(chosen[0].option.departure)} ·{" "}
+              {nightsText(nightsBetween(chosen[0].option.arrival, chosen[0].option.departure))} · {peopleText(lastSearch.adults, lastSearch.children)}
             </p>
             {breakdown.voucher > 0 && (
               <p className="flex justify-between">
@@ -645,19 +736,75 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
               </span>
             </p>
             {!guestsFit && <p className="text-xs text-red-600">Las habitaciones elegidas no tienen plazas para todo el grupo.</p>}
-
             {[...new Set(chosen.flatMap((c) => c.option.periods.map((p) => p.rate_id)))].map((rateId) => {
               const rate = inventory.rates[String(rateId)];
               if (!rate?.cancellation && !rate?.payment) return null;
               return (
-                <div key={rateId} className="grid gap-1 text-xs text-neutral-600">
-                  <p className="font-normal text-black">{rate.name}</p>
-                  {rate.cancellation && <p className="whitespace-pre-line">{rate.cancellation}</p>}
-                  {rate.payment && <p className="whitespace-pre-line">{rate.payment}</p>}
-                </div>
+                <details key={rateId} className="text-xs text-neutral-600">
+                  <summary className="cursor-pointer underline">Condiciones de la {rate.name}</summary>
+                  <div className="grid gap-1 pt-2">
+                    {rate.cancellation && <p className="whitespace-pre-line">{rate.cancellation}</p>}
+                    {rate.payment && <p className="whitespace-pre-line">{rate.payment}</p>}
+                  </div>
+                </details>
               );
             })}
+          </div>
 
+          {/* Solo lo imprescindible a la vista; lo opcional, detrás de un enlace */}
+          <fieldset className="grid grid-cols-2 content-start gap-2 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+            <legend className="style-heading mb-3 text-xl">Tus datos</legend>
+            {[...requiredFields, ...(optionalOpen ? optionalFields : [])].map((f) => {
+              const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? "" : " (opcional)"}`;
+              const err = fieldErrors[f.id];
+              const wide = f.id === "email" || f.id === "phone" || f.id === "country";
+              return (
+                <label key={f.id} className={`field min-w-0 !py-1.5 ${wide ? "col-span-2" : ""}`}>
+                  <span className="style-caption-xs block !font-light">{label}</span>
+                  {f.id === "country" ? (
+                    <select
+                      required={f.required}
+                      value={guest.country ?? ""}
+                      onChange={(e) => setGuest({ ...guest, country: e.target.value })}
+                      className="w-full bg-transparent outline-none"
+                      autoComplete="country"
+                    >
+                      <option value="">—</option>
+                      {inventory.countries.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      required={f.required}
+                      type={FIELD_TYPES[f.id] ?? "text"}
+                      autoComplete={AUTOCOMPLETE[f.id]}
+                      inputMode={f.id === "phone" || f.id === "phone2" ? "tel" : f.id === "email" ? "email" : undefined}
+                      value={guest[f.id] ?? ""}
+                      onChange={(e) => setGuest({ ...guest, [f.id]: e.target.value })}
+                      aria-invalid={Boolean(err)}
+                      className="w-full"
+                    />
+                  )}
+                  {err && <span className="text-xs text-red-600">{err}</span>}
+                </label>
+              );
+            })}
+            {optionalOpen ? (
+              <label className="field !py-1.5 col-span-2">
+                <span className="style-caption-xs block !font-light">{inventory.noteText ?? "Comentarios (opcional)"}</span>
+                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={2} className="w-full resize-y bg-transparent" />
+              </label>
+            ) : (
+              <button type="button" onClick={() => setShowOptional(true)} className="col-span-2 w-fit pt-1 text-xs underline">
+                Añadir más datos o un comentario (opcional)
+              </button>
+            )}
+          </fieldset>
+
+          <div ref={actionsRef} className="grid content-start gap-4 lg:col-start-2 lg:row-start-2">
             {inventory.consent && (
               <label className="flex items-start gap-2 text-xs">
                 <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
@@ -666,7 +813,6 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 </span>
               </label>
             )}
-            {inventory.privacySummary && <p className="text-xs whitespace-pre-line text-neutral-500">{inventory.privacySummary}</p>}
 
             {viaWhatsApp ? (
               <>
@@ -689,17 +835,13 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
               </>
             ) : (
               <>
-                <button type="submit" disabled={paying || !guestsFit} className="style-button w-full justify-center disabled:opacity-60">
-                  {paying
-                    ? mode === "tpv"
-                      ? "Creando tu reserva…"
-                      : "Comprobando disponibilidad…"
-                    : `${mode === "tpv" ? "Reservar y pagar" : "Pagar"} ${money.format(breakdown.total)}`}
+                <button type="submit" disabled={paying || redirecting || !guestsFit} className="style-button min-h-13 w-full justify-center disabled:opacity-60">
+                  {paying || redirecting ? (mode === "tpv" ? "Guardando tu reserva…" : "Comprobando disponibilidad…") : payLabel}
                   <ArrowOut />
                 </button>
                 <p className="text-xs text-neutral-500">
                   {mode === "tpv"
-                    ? "Volvemos a comprobar la disponibilidad y el precio, guardamos tu reserva y te llevamos al pago seguro con tarjeta de nuestro sistema de reservas. Tienes 30 minutos para pagar; si no, la reserva se anula sola."
+                    ? "Pago seguro con tarjeta en la pasarela de Redsys. Antes comprobamos otra vez la disponibilidad y el precio. Tienes 30 minutos para pagar; si no, la reserva se anula sola."
                     : "Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra cuando la reserva queda confirmada."}{" "}
                   Al reservar aceptas las{" "}
                   <TransitionLink href={site.legalLinks.terms.href} className="underline">
@@ -707,17 +849,15 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                   </TransitionLink>
                   .
                 </p>
-                <button
-                  type="button"
-                  onClick={requestByWhatsApp}
-                  disabled={paying}
-                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] text-sm text-black disabled:opacity-60"
-                >
-                  <WhatsAppGlyph className="size-4 text-[#25D366]" />
-                  ¿Prefieres reservar por WhatsApp?
-                </button>
               </>
             )}
+            <p className="text-xs text-neutral-500">
+              Usamos tus datos solo para gestionar tu reserva y, si hace falta, hacer tu factura.{" "}
+              <TransitionLink href="/privacidad" className="underline">
+                Política de privacidad
+              </TransitionLink>
+              .
+            </p>
             {checkoutErrors.length > 0 && (
               <ul role="alert" className="border border-red-400 p-3 text-xs">
                 {checkoutErrors.map((m) => (
@@ -725,8 +865,58 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 ))}
               </ul>
             )}
+            {!viaWhatsApp && (
+              <button
+                type="button"
+                onClick={requestByWhatsApp}
+                disabled={paying || redirecting}
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] text-sm text-black disabled:opacity-60"
+              >
+                <WhatsAppGlyph className="size-4 text-[#25D366]" />
+                ¿Prefieres reservar por WhatsApp?
+              </button>
+            )}
           </div>
         </form>
+      )}
+
+      {/* Barra fija del móvil: total + pagar, mientras el botón del formulario no se ve */}
+      {breakdown && (
+        <div
+          aria-hidden={!showPayBar}
+          inert={!showPayBar}
+          className={`fixed inset-x-0 bottom-0 z-30 border-t border-neutral-200 bg-white px-w py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-transform duration-300 lg:hidden ${
+            showPayBar ? "translate-y-0" : "translate-y-[calc(100%+2rem)]"
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <p className="flex-1 leading-tight">
+              <span className="style-caption-xs block !font-light text-neutral-500">Total</span>
+              <span className="style-heading text-xl">{money.format(breakdown.total)}</span>
+            </p>
+            <button
+              type="submit"
+              form="checkout"
+              disabled={paying || redirecting || !guestsFit}
+              className={`style-button min-h-11 !px-5 disabled:opacity-60 ${viaWhatsApp ? "!bg-[#25D366] !text-white" : ""}`}
+            >
+              {viaWhatsApp ? "Solicitar" : "Reservar y pagar"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Mientras se crea la reserva y se abre la pasarela (tarda unos segundos) */}
+      {mode === "tpv" && (paying || redirecting) && (
+        <div role="status" aria-live="assertive" className="fixed inset-0 z-[95] grid place-items-center bg-white/95 p-w text-center">
+          <div className="grid max-w-xs justify-items-center gap-4">
+            <span className="size-10 animate-spin rounded-full border-2 border-neutral-300 border-t-black" aria-hidden />
+            <p className="style-heading text-2xl">Te llevamos al pago seguro</p>
+            <p className="text-sm text-neutral-600">
+              Estamos guardando tu habitación. En unos segundos se abre la pasarela de pago con tarjeta (Redsys). No cierres esta ventana.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );
