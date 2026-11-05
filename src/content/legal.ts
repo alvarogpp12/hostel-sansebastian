@@ -15,7 +15,7 @@ export type LegalBlock = { type: "p"; text: string } | { type: "ul"; items: stri
 export type LegalSection = { title?: string; body: LegalBlock[] };
 export type LegalDoc = { title: string; updated: string; sections: LegalSection[] };
 
-const UPDATED = "21 de octubre de 2026";
+const UPDATED = "5 de noviembre de 2026";
 const COOKIES_UPDATED = "5 de noviembre de 2026";
 const { legal: l, contact } = site;
 const name = l.company;
@@ -227,10 +227,10 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
         title: "Cómo se reserva",
         body: [
           p(
-            "En la web eliges fechas, número de personas, habitación y tarifa, y ves el precio total en ese momento. Al pulsar «Solicitar reserva por WhatsApp» nos envías la solicitud con esos datos.",
+            "En la web eliges fechas, número de personas, habitación y tarifa, y ves el precio total en ese momento. Al pulsar «Reservar y pagar» volvemos a comprobar la disponibilidad y el precio, guardamos la reserva y te llevamos a la pasarela de pago segura con tarjeta de nuestro sistema de reservas (Redforts, con TPV de Redsys). La reserva queda confirmada cuando se completa el pago y te llega la confirmación por email. Si no pagas en unos 30 minutos, la reserva se anula sola.",
           ),
           p(
-            "Una solicitud no es todavía una reserva: la reserva queda hecha cuando te la confirmamos por escrito (WhatsApp o email). Si mientras tanto la habitación deja de estar libre o cambia el precio, te lo decimos antes de confirmar.",
+            "También puedes enviarnos una solicitud por WhatsApp. Una solicitud no es todavía una reserva: queda hecha cuando te la confirmamos por escrito (WhatsApp o email). Si mientras tanto la habitación deja de estar libre o cambia el precio, te lo decimos antes de confirmar.",
           ),
         ],
       },
@@ -250,7 +250,7 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
             "Tarifa Estándar: puedes cancelar gratis hasta 7 días antes de la llegada. Si cancelas en los 7 días anteriores a la llegada, o si no te presentas, el cargo es el precio total de la reserva.",
             "Tarifa No Reembolsable: no admite cancelaciones. Si cancelas, modificas la reserva o no te presentas, el cargo es el precio total. Puedes cambiar las fechas una vez, hasta 7 días antes de la llegada, a un precio igual o mayor; solo pagas la diferencia.",
           ),
-          p("El pago es del precio total de la reserva, en las condiciones que te indiquemos al confirmarla."),
+          p("En la reserva online se paga el precio total de la estancia con tarjeta al reservar. Si cancelas dentro del plazo gratuito de la Tarifa Estándar, no tienes ningún cargo y te devolvemos lo pagado. En las reservas por WhatsApp, el pago se hace en las condiciones que te indiquemos al confirmarla."),
           p(
             "Al tratarse de un servicio de alojamiento en fechas concretas, no se aplica el derecho de desistimiento de 14 días (art. 103.l del texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios).",
           ),

@@ -4,10 +4,10 @@ import { checkoutMode } from "@/content/booking";
 describe("checkoutMode", () => {
   afterEach(() => vi.unstubAllEnvs());
 
-  it("en producción, WhatsApp hasta dar el visto bueno al TPV", () => {
+  it("en producción, el TPV de Redforts (pago con tarjeta en la web)", () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("CHECKOUT_MODE", "");
-    expect(checkoutMode()).toBe("whatsapp");
+    expect(checkoutMode()).toBe("tpv");
   });
 
   it("en las vistas previas, el TPV de Redforts", () => {
@@ -18,9 +18,9 @@ describe("checkoutMode", () => {
 
   it("CHECKOUT_MODE manda; un valor desconocido se ignora", () => {
     vi.stubEnv("VERCEL_ENV", "production");
-    vi.stubEnv("CHECKOUT_MODE", "tpv");
-    expect(checkoutMode()).toBe("tpv");
-    vi.stubEnv("CHECKOUT_MODE", "gratis");
+    vi.stubEnv("CHECKOUT_MODE", "whatsapp");
     expect(checkoutMode()).toBe("whatsapp");
+    vi.stubEnv("CHECKOUT_MODE", "gratis");
+    expect(checkoutMode()).toBe("tpv");
   });
 });

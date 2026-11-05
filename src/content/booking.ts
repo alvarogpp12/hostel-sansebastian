@@ -94,13 +94,14 @@ export function bookingProvider(): BookingProvider {
  *  - "pay": pago con Stripe y reserva automática en Redforts (sin uso: el
  *    TPV está en Redforts).
  *
- * Se elige con CHECKOUT_MODE. Sin ella: "tpv" en las vistas previas de Vercel
- * (para probarlo) y "whatsapp" en producción, hasta dar el visto bueno.
+ * Se elige con CHECKOUT_MODE. Sin ella: "tpv" en todas partes (visto bueno
+ * para producción el 5/11/2026). Con CHECKOUT_MODE=whatsapp en Vercel se
+ * vuelve a la solicitud por WhatsApp sin tocar código.
  */
 export type CheckoutMode = "tpv" | "whatsapp" | "pay";
 const CHECKOUT_MODES: CheckoutMode[] = ["tpv", "whatsapp", "pay"];
 export function checkoutMode(): CheckoutMode {
   const fromEnv = process.env.CHECKOUT_MODE as CheckoutMode | undefined;
   if (fromEnv && CHECKOUT_MODES.includes(fromEnv)) return fromEnv;
-  return process.env.VERCEL_ENV === "preview" ? "tpv" : "whatsapp";
+  return "tpv";
 }
