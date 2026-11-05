@@ -9,8 +9,8 @@
 export const tracking = {
   /** GA4 · propiedad «enjoycomfort.com», flujo «Enjoy Comfort web» */
   ga4Id: process.env.NEXT_PUBLIC_GA4_ID ?? "G-BF1SH9V0R0",
-  /** Píxel de Meta (vacío = no se carga) */
-  metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "",
+  /** Píxel de Meta · conjunto de datos «Enjoy Comfort web» del portfolio Enjoy comfort */
+  metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID ?? "1846071030041787",
 };
 
 type Gtag = (...args: unknown[]) => void;
