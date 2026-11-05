@@ -16,7 +16,7 @@ export type LegalSection = { title?: string; body: LegalBlock[] };
 export type LegalDoc = { title: string; updated: string; sections: LegalSection[] };
 
 const UPDATED = "21 de octubre de 2026";
-const COOKIES_UPDATED = "22 de octubre de 2026";
+const COOKIES_UPDATED = "5 de noviembre de 2026";
 const { legal: l, contact } = site;
 const name = l.company;
 const holder = l.owner ? `${l.owner}${l.nif ? `, con NIF ${l.nif}` : ""}` : `el titular de ${name}`;
@@ -148,6 +148,7 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
           ul(
             "Redforts: sistema de reservas y gestión del alojamiento.",
             "Vercel: alojamiento de la web.",
+            "Google (Analytics y Ads) y Meta Platforms (píxel de Meta): medición de visitas y anuncios, solo si aceptas las cookies de analítica y publicidad.",
             "WhatsApp (Meta): si nos escribes o solicitas la reserva por WhatsApp.",
             "Stripe y Supabase: solo si pagas online (cobro y registro del pago).",
           ),
@@ -189,7 +190,6 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
             "Almacenamiento local (ec-cookies): guarda tu elección sobre las cookies para no volver a preguntarte. Dura un año; después te lo preguntamos de nuevo.",
             "Estadísticas de Vercel Web Analytics: cuentan de forma agregada las visitas y algunas acciones (por ejemplo, qué botones se pulsan o en qué paso de la reserva se abandona) para mejorar la web. No usan cookies, no guardan nada en tu dispositivo y no te identifican.",
           ),
-          p("Esta web no usa cookies publicitarias ni de seguimiento."),
         ],
       },
       {
@@ -198,6 +198,9 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
           p(
             "Servicios de terceros: la página de Ubicación muestra un mapa de Google Maps. Al cargarlo, Google puede instalar sus propias cookies, según su política (policies.google.com/technologies/cookies). Por eso el mapa solo se carga si aceptas los servicios de terceros en el aviso de cookies o pulsas «Aceptar y ver el mapa».",
           ),
+          p(
+            "Analítica y publicidad: Google Analytics 4 y Google Ads (cookies _ga y _ga_*, hasta 2 años; _gcl_*, 90 días) y el píxel de Meta (cookie _fbp, 90 días). Sirven para contar las visitas y saber cuántas reservas llegan desde cada anuncio de Google, Facebook o Instagram, y para mostrar nuestros anuncios a quien ya nos ha visitado. Solo se cargan si aceptas «Analítica y publicidad» en el aviso de cookies. Google (policies.google.com/technologies/cookies) y Meta (facebook.com/privacy/policies/cookies) tratan esos datos según sus políticas y pueden transferirlos fuera del Espacio Económico Europeo con las garantías del Marco de Privacidad de Datos UE-EE. UU.",
+          ),
           p("Si pagas online, Stripe usa en su propia página de pago las cookies necesarias para que el pago sea seguro y para prevenir el fraude."),
         ],
       },
@@ -205,7 +208,7 @@ export const legal: Record<"notice" | "privacy" | "cookies" | "terms", LegalDoc>
         title: "Cómo cambiar tu elección",
         body: [
           p(
-            "Puedes cambiarla cuando quieras desde el enlace «Configurar cookies» del pie de la web. También puedes ver, bloquear o borrar las cookies y el almacenamiento de los sitios desde la configuración de tu navegador (Chrome, Safari, Firefox o Edge). La web funciona igual aunque no aceptes las de terceros: solo no verás el mapa.",
+            "Puedes cambiarla cuando quieras desde el enlace «Configurar cookies» del pie de la web. También puedes ver, bloquear o borrar las cookies y el almacenamiento de los sitios desde la configuración de tu navegador (Chrome, Safari, Firefox o Edge). La web funciona igual aunque no aceptes las opcionales: solo no verás el mapa.",
           ),
         ],
       },

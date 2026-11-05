@@ -33,7 +33,7 @@ export function ConsentMap({ src, title }: { src: string; title: string }) {
           type="button"
           className="style-button min-h-12"
           onClick={() => {
-            setConsent(true);
+            setConsent({ terceros: true, medicion: consent?.medicion ?? false });
             trackEvent("Cookies", { decision: "ver mapa", terceros: true });
           }}
         >

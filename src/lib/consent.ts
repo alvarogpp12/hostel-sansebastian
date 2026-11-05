@@ -3,14 +3,20 @@
 import { useSyncExternalStore } from "react";
 
 /**
- * Consentimiento de cookies. La única categoría opcional son los servicios de
- * terceros que instalan sus cookies (el mapa de Google Maps). Lo técnico y las
- * estadísticas de Vercel (sin cookies ni datos personales) no lo necesitan.
+ * Consentimiento de cookies. Dos categorías opcionales:
+ *  - terceros: servicios que instalan sus cookies (el mapa de Google Maps).
+ *  - medicion: analítica y publicidad (Google Analytics 4 / Google Ads y el
+ *    píxel de Meta). Sin este permiso no se carga ninguno de sus scripts.
+ * Lo técnico y las estadísticas de Vercel (sin cookies ni datos personales) no
+ * lo necesitan.
  *
  * Se guarda en localStorage y caduca al año: entonces se vuelve a preguntar.
+ * Una elección guardada antes de existir «medicion» cuenta como no decidida,
+ * para volver a preguntar con las categorías nuevas.
  */
 
-export type Consent = { terceros: boolean; fecha: string };
+export type Consent = { terceros: boolean; medicion: boolean; fecha: string };
+export type ConsentChoice = Pick<Consent, "terceros" | "medicion">;
 
 const KEY = "ec-cookies";
 const CHANGE = "ec-cookies-cambio";
@@ -23,7 +29,7 @@ let cache: Consent | null | undefined;
 function read(): Consent | null {
   try {
     const value = JSON.parse(localStorage.getItem(KEY) ?? "null") as Consent | null;
-    if (!value || typeof value.terceros !== "boolean") return null;
+    if (!value || typeof value.terceros !== "boolean" || typeof value.medicion !== "boolean") return null;
     if (Date.now() - Date.parse(value.fecha) > MAX_AGE) return null;
     return value;
   } catch {
@@ -50,8 +56,8 @@ function subscribe(onChange: () => void) {
   };
 }
 
-export function setConsent(terceros: boolean) {
-  cache = { terceros, fecha: new Date().toISOString() };
+export function setConsent(choice: ConsentChoice) {
+  cache = { ...choice, fecha: new Date().toISOString() };
   try {
     localStorage.setItem(KEY, JSON.stringify(cache));
   } catch {

@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { TransitionLink } from "@/components/TransitionLink";
 import { trackEvent } from "@/lib/analytics";
-import { onOpenCookieSettings, setConsent, useConsent } from "@/lib/consent";
+import { type ConsentChoice, onOpenCookieSettings, setConsent, useConsent } from "@/lib/consent";
 
 /**
  * Aviso de cookies (guía de la AEPD): sale hasta que se decide, con «Aceptar»
@@ -15,6 +15,7 @@ export function CookieBanner() {
   const [reopened, setReopened] = useState(false);
   const [settings, setSettings] = useState(false);
   const [thirdParty, setThirdParty] = useState(false);
+  const [measurement, setMeasurement] = useState(false);
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const open = consent !== undefined && (consent === null || reopened);
@@ -41,6 +42,7 @@ export function CookieBanner() {
     () =>
       onOpenCookieSettings(() => {
         setThirdParty(consent?.terceros ?? false);
+        setMeasurement(consent?.medicion ?? false);
         setSettings(true);
         setReopened(true);
       }),
@@ -50,9 +52,9 @@ export function CookieBanner() {
   // undefined: aún sin hidratar. Con una decisión guardada, solo si se reabre.
   if (!open) return null;
 
-  const decide = (terceros: boolean, decision: "aceptar" | "rechazar" | "guardar") => {
-    setConsent(terceros);
-    trackEvent("Cookies", { decision, terceros });
+  const decide = (choice: ConsentChoice, decision: "aceptar" | "rechazar" | "guardar") => {
+    setConsent(choice);
+    trackEvent("Cookies", { decision, terceros: choice.terceros });
     setReopened(false);
     setSettings(false);
   };
@@ -73,8 +75,9 @@ export function CookieBanner() {
           Cookies
         </h2>
         <p>
-          Usamos solo lo técnico para que la web funcione y estadísticas anónimas, sin cookies. Con tu permiso cargamos
-          servicios de terceros, como el mapa de Google Maps, que instala sus propias cookies.{" "}
+          Usamos lo técnico para que la web funcione y estadísticas anónimas, sin cookies. Con tu permiso, además,
+          medimos las visitas y nuestros anuncios con Google y Meta, y cargamos el mapa de Google Maps. Todos instalan
+          sus propias cookies.{" "}
           <TransitionLink href="/cookies" className="underline">
             Política de cookies
           </TransitionLink>
@@ -89,6 +92,23 @@ export function CookieBanner() {
               <span className="text-xs text-neutral-500">Necesarias para que la web funcione. Siempre activas.</span>
             </span>
             <span className="style-caption-xs shrink-0 pt-0.5 text-neutral-500">Activas</span>
+          </li>
+          <li>
+            <label className="flex cursor-pointer items-start justify-between gap-4">
+              <span>
+                <span className="block text-black">Analítica y publicidad</span>
+                <span className="text-xs text-neutral-500">
+                  Google Analytics, Google Ads y el píxel de Meta: cuántas visitas y reservas llegan de cada anuncio.
+                </span>
+              </span>
+              <input
+                type="checkbox"
+                role="switch"
+                checked={measurement}
+                onChange={(e) => setMeasurement(e.target.checked)}
+                className="relative mt-0.5 h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-neutral-300 transition-colors before:absolute before:top-0.5 before:left-0.5 before:size-5 before:rounded-full before:bg-white before:transition-transform checked:bg-black checked:before:translate-x-5"
+              />
+            </label>
           </li>
           <li>
             <label className="flex cursor-pointer items-start justify-between gap-4">
@@ -110,15 +130,15 @@ export function CookieBanner() {
 
       <div className="flex flex-wrap gap-2">
         {settings ? (
-          <button type="button" className={button} onClick={() => decide(thirdParty, "guardar")}>
+          <button type="button" className={button} onClick={() => decide({ terceros: thirdParty, medicion: measurement }, "guardar")}>
             Guardar
           </button>
         ) : (
           <>
-            <button type="button" className={button} onClick={() => decide(false, "rechazar")}>
+            <button type="button" className={button} onClick={() => decide({ terceros: false, medicion: false }, "rechazar")}>
               Rechazar
             </button>
-            <button type="button" className={button} onClick={() => decide(true, "aceptar")}>
+            <button type="button" className={button} onClick={() => decide({ terceros: true, medicion: true }, "aceptar")}>
               Aceptar
             </button>
           </>

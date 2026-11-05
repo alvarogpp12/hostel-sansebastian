@@ -3,6 +3,7 @@ import { Inter, Karla, Newsreader } from "next/font/google";
 import { ClickTracker } from "@/components/ClickTracker";
 import { ComingSoon } from "@/components/ComingSoon";
 import { CookieBanner } from "@/components/CookieBanner";
+import { Tracking } from "@/components/Tracking";
 import { Intro } from "@/components/Intro";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { site } from "@/content/site";
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <LocalBusinessSchema />
             <CookieBanner />
             <ClickTracker />
+            <Tracking />
           </>
         )}
         <Analytics />
