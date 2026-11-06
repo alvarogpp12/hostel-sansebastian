@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Arrow } from "@/components/icons";
 import { TransitionLink } from "@/components/TransitionLink";
-import { site } from "@/content/site";
+import { getDict } from "@/content/i18n";
+import { path } from "@/i18n/config";
+import { useLocale } from "@/i18n/useLocale";
 
 /**
  * Barra de reserva que aparece cuando el buscador del hero sale de pantalla
@@ -13,6 +15,8 @@ import { site } from "@/content/site";
  * para no tapar ese bloque ni el pie.
  */
 export function StickyBookBar({ watch }: { watch: string }) {
+  const locale = useLocale();
+  const t = getDict(locale).site;
   const [pastTop, setPastTop] = useState(false);
   const [atEnd, setAtEnd] = useState(false);
 
@@ -50,14 +54,14 @@ export function StickyBookBar({ watch }: { watch: string }) {
     >
       <div className="flex items-center gap-4 border-t border-neutral-200 bg-white px-w py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:rounded-full lg:border-0 lg:bg-black lg:py-2 lg:pr-2 lg:pl-6 lg:text-white lg:shadow-[0_12px_30px_rgba(0,0,0,0.25)]">
         <p className="flex-1 text-sm leading-tight lg:flex-none">
-          <span className="block font-medium lg:inline">Reserva directa</span>
-          <span className="text-neutral-500 lg:text-neutral-300"> · {site.brand.slogan}</span>
+          <span className="block font-medium lg:inline">{t.ui.directBooking}</span>
+          <span className="text-neutral-500 lg:text-neutral-300"> · {t.slogan}</span>
         </p>
         <TransitionLink
-          href="/reservar"
+          href={path(locale, "book")}
           className="style-button min-h-11 !px-6 lg:!bg-offwhite lg:!text-black"
         >
-          Reservar
+          {t.ui.book}
           <Arrow />
         </TransitionLink>
       </div>

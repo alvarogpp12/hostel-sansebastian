@@ -1,6 +1,8 @@
 "use client";
 
 import { trackEvent } from "@/lib/analytics";
+import { getDict } from "@/content/i18n";
+import { useLocale } from "@/i18n/useLocale";
 import { setConsent, useConsent } from "@/lib/consent";
 
 /**
@@ -10,6 +12,7 @@ import { setConsent, useConsent } from "@/lib/consent";
  */
 export function ConsentMap({ src, title }: { src: string; title: string }) {
   const consent = useConsent();
+  const t = getDict(useLocale()).map;
 
   if (consent?.terceros) {
     return (
@@ -26,7 +29,7 @@ export function ConsentMap({ src, title }: { src: string; title: string }) {
   return (
     <div className="absolute inset-0 grid content-center justify-items-start gap-4 p-6 text-sm text-neutral-700 lg:p-10">
       <p className="max-w-[44ch]">
-        El mapa es de Google Maps y, al cargarlo, Google puede instalar sus cookies. Solo lo mostramos si nos das permiso.
+        {t.text}
       </p>
       {consent !== undefined && (
         <button
@@ -37,7 +40,7 @@ export function ConsentMap({ src, title }: { src: string; title: string }) {
             trackEvent("Cookies", { decision: "ver mapa", terceros: true });
           }}
         >
-          Aceptar y ver el mapa
+          {t.button}
         </button>
       )}
     </div>

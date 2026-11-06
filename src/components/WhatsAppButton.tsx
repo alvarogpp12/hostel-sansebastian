@@ -1,5 +1,9 @@
+"use client";
+
 import { WhatsAppGlyph } from "@/components/icons";
+import { getDict } from "@/content/i18n";
 import { site } from "@/content/site";
+import { useLocale } from "@/i18n/useLocale";
 
 /**
  * Botón flotante para escribir por WhatsApp al móvil del alojamiento. Siempre
@@ -7,7 +11,8 @@ import { site } from "@/content/site";
  * y del aviso de cookies (sube sobre ellos).
  */
 export function WhatsAppButton() {
-  const { href, label } = site.contact.whatsapp;
+  const { label, text } = getDict(useLocale()).site.whatsapp;
+  const href = `https://wa.me/${site.contact.whatsapp.number}?text=${encodeURIComponent(text)}`;
   return (
     <a
       href={href}

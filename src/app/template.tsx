@@ -7,6 +7,7 @@ import { Header } from "@/components/header/Header";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { localeFromPath } from "@/i18n/config";
 
 /**
  * A template re-mounts on every navigation, so the whole view (header,
@@ -16,6 +17,11 @@ export default function Template({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
   const pathname = usePathname();
+
+  // <html lang> del idioma de la página (el layout raíz lo pinta en español)
+  useLayoutEffect(() => {
+    document.documentElement.lang = localeFromPath(pathname);
+  }, [pathname]);
 
   useLayoutEffect(() => {
     lenis?.scrollTo(0, { immediate: true, force: true });

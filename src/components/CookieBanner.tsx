@@ -4,6 +4,8 @@ import { useEffect, useId, useRef, useState } from "react";
 import { TransitionLink } from "@/components/TransitionLink";
 import { trackEvent } from "@/lib/analytics";
 import { type ConsentChoice, onOpenCookieSettings, setConsent, useConsent } from "@/lib/consent";
+import { getDict } from "@/content/i18n";
+import { useLocale } from "@/i18n/useLocale";
 
 /**
  * Aviso de cookies (guía de la AEPD): sale hasta que se decide, con «Aceptar»
@@ -12,6 +14,7 @@ import { type ConsentChoice, onOpenCookieSettings, setConsent, useConsent } from
  */
 export function CookieBanner() {
   const consent = useConsent();
+  const t = getDict(useLocale()).cookies;
   const [reopened, setReopened] = useState(false);
   const [settings, setSettings] = useState(false);
   const [thirdParty, setThirdParty] = useState(false);
@@ -72,14 +75,12 @@ export function CookieBanner() {
     >
       <div className="grid gap-2">
         <h2 id={titleId} className="style-heading text-xl text-black">
-          Cookies
+          {t.title}
         </h2>
         <p>
-          Usamos lo técnico para que la web funcione y estadísticas anónimas, sin cookies. Con tu permiso, además,
-          medimos las visitas y nuestros anuncios con Google y Meta, y cargamos el mapa de Google Maps. Todos instalan
-          sus propias cookies.{" "}
+          {t.text}{" "}
           <TransitionLink href="/cookies" className="underline">
-            Política de cookies
+            {t.policy}
           </TransitionLink>
         </p>
       </div>
@@ -88,18 +89,16 @@ export function CookieBanner() {
         <ul className="grid gap-3 border-t border-neutral-200 pt-4">
           <li className="flex items-start justify-between gap-4">
             <span>
-              <span className="block text-black">Técnicas</span>
-              <span className="text-xs text-neutral-500">Necesarias para que la web funcione. Siempre activas.</span>
+              <span className="block text-black">{t.technical}</span>
+              <span className="text-xs text-neutral-500">{t.technicalText}</span>
             </span>
-            <span className="style-caption-xs shrink-0 pt-0.5 text-neutral-500">Activas</span>
+            <span className="style-caption-xs shrink-0 pt-0.5 text-neutral-500">{t.active}</span>
           </li>
           <li>
             <label className="flex cursor-pointer items-start justify-between gap-4">
               <span>
-                <span className="block text-black">Analítica y publicidad</span>
-                <span className="text-xs text-neutral-500">
-                  Google Analytics, Google Ads y el píxel de Meta: cuántas visitas y reservas llegan de cada anuncio.
-                </span>
+                <span className="block text-black">{t.measurement}</span>
+                <span className="text-xs text-neutral-500">{t.measurementText}</span>
               </span>
               <input
                 type="checkbox"
@@ -113,8 +112,8 @@ export function CookieBanner() {
           <li>
             <label className="flex cursor-pointer items-start justify-between gap-4">
               <span>
-                <span className="block text-black">Servicios de terceros</span>
-                <span className="text-xs text-neutral-500">Mapa de Google Maps en la página de Ubicación.</span>
+                <span className="block text-black">{t.thirdParty}</span>
+                <span className="text-xs text-neutral-500">{t.thirdPartyText}</span>
               </span>
               <input
                 type="checkbox"
@@ -131,21 +130,21 @@ export function CookieBanner() {
       <div className="flex flex-wrap gap-2">
         {settings ? (
           <button type="button" className={button} onClick={() => decide({ terceros: thirdParty, medicion: measurement }, "guardar")}>
-            Guardar
+            {t.save}
           </button>
         ) : (
           <>
             <button type="button" className={button} onClick={() => decide({ terceros: false, medicion: false }, "rechazar")}>
-              Rechazar
+              {t.reject}
             </button>
             <button type="button" className={button} onClick={() => decide({ terceros: true, medicion: true }, "aceptar")}>
-              Aceptar
+              {t.accept}
             </button>
           </>
         )}
         {!settings && (
           <button type="button" className="w-full pt-1 text-xs underline" onClick={() => setSettings(true)}>
-            Configurar
+            {t.configure}
           </button>
         )}
       </div>

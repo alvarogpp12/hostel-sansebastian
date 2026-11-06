@@ -1,10 +1,15 @@
-const STEPS = ["Fechas", "Habitación", "Tus datos y pago"];
+"use client";
+
+import { getDict } from "@/content/i18n";
+import { useLocale } from "@/i18n/useLocale";
 
 /** Progreso de la reserva: el huésped sabe siempre cuánto le queda */
 export function BookingSteps({ current, lastLabel }: { current: 1 | 2 | 3; lastLabel?: string }) {
+  const t = getDict(useLocale()).steps;
+  const STEPS = t.labels;
   const steps = lastLabel ? [...STEPS.slice(0, -1), lastLabel] : STEPS;
   return (
-    <ol aria-label="Pasos de la reserva" className="grid grid-cols-3 gap-2">
+    <ol aria-label={t.aria} className="grid grid-cols-3 gap-2">
       {steps.map((label, i) => {
         const n = i + 1;
         const state = n < current ? "done" : n === current ? "current" : "todo";

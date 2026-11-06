@@ -6,7 +6,8 @@ import { Frame } from "@/components/ui";
 import { QuickSearch } from "@/components/booking/QuickSearch";
 import type { Media } from "@/content/media";
 import type { IconName } from "@/content/site";
-import { site } from "@/content/site";
+import { getDict } from "@/content/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 
 /*
  * Piezas comunes de todas las páginas, con el mismo lenguaje que la home:
@@ -27,12 +28,14 @@ export function PageHero({
   intro,
   image,
   links,
+  locale = DEFAULT_LOCALE,
 }: {
   eyebrow?: string;
   title: string;
   intro?: string | string[];
   image?: Media;
   links?: { label: string; href: string }[];
+  locale?: Locale;
 }) {
   const paragraphs = intro === undefined ? [] : Array.isArray(intro) ? intro : [intro];
   return (
@@ -53,7 +56,7 @@ export function PageHero({
             </p>
           ))}
           {links && (
-            <nav aria-label="En esta página" className="flex flex-wrap gap-2 pt-1">
+            <nav aria-label={getDict(locale).site.ui.onThisPage} className="flex flex-wrap gap-2 pt-1">
               {links.map((l) => (
                 <TransitionLink
                   key={l.href}
@@ -202,14 +205,15 @@ export function InfoRows({ rows }: { rows: { icon: IconName; title: string; body
 }
 
 /** Cierre de página: reservar sin volver arriba (sustituye al antiguo CTA) */
-export function BookingBand() {
-  const { title, text } = site.cta;
+export function BookingBand({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const t = getDict(locale).site;
+  const { title, text } = t.cta;
   return (
     <section aria-labelledby="reserva-cierre" data-booking-band className="px-w pt-20 lg:pt-32">
       <div className="grid gap-6 rounded-lg bg-black p-5 text-white sm:p-8 lg:gap-10 lg:p-12">
         <div className="grid gap-3 lg:grid-cols-12 lg:items-end lg:gap-w">
           <div className="grid gap-3 lg:col-span-7">
-            <p className="style-caption text-neutral-400">Reserva directa</p>
+            <p className="style-caption text-neutral-400">{t.ui.directBooking}</p>
             <h2 id="reserva-cierre" className="style-heading text-2xl text-balance lg:text-4xl">
               {title}
             </h2>

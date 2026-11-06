@@ -3,7 +3,8 @@ import { Reveal } from "@/components/Reveal";
 import { TransitionLink } from "@/components/TransitionLink";
 import { Frame } from "@/components/ui";
 import { QuickSearch } from "@/components/booking/QuickSearch";
-import { home } from "@/content/home";
+import { getDict } from "@/content/i18n";
+import { DEFAULT_LOCALE, path, type Locale } from "@/i18n/config";
 import { ImageCards, Section, StripList } from "./Page";
 import { RoomRows } from "./RoomRows";
 
@@ -11,8 +12,8 @@ import { RoomRows } from "./RoomRows";
  * Hero del embudo: a la izquierda el titular, a la derecha la bahía y, encima
  * de los dos, el buscador de fechas. Reservar empieza en el primer pantallazo.
  */
-export function BookingHero() {
-  const { h1, title, lead, image, trust } = home.hero;
+export function BookingHero({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const { h1, title, lead, image, trust } = getDict(locale).home.hero;
   return (
     <section className="px-w pt-24 lg:pt-32">
       <div className="grid gap-5 lg:grid-cols-12 lg:gap-w">
@@ -56,8 +57,8 @@ function Check() {
   );
 }
 
-export function HomeRooms() {
-  const { eyebrow, title, text } = home.rooms;
+export function HomeRooms({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const { eyebrow, title, text } = getDict(locale).home.rooms;
   return (
     <Section id="habitaciones" eyebrow={eyebrow} title={title} text={text}>
       {/* El mismo listado que /habitaciones: texto completo y galería de fotos */}
@@ -66,8 +67,8 @@ export function HomeRooms() {
   );
 }
 
-export function HomeFeatures() {
-  const { title, items } = home.features;
+export function HomeFeatures({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const { title, items } = getDict(locale).home.features;
   return (
     <Section id="por-que-elegirnos" title={title}>
       <StripList items={items} />
@@ -75,15 +76,16 @@ export function HomeFeatures() {
   );
 }
 
-export function HomeCity() {
-  const { eyebrow, title, items } = home.city;
+export function HomeCity({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const { eyebrow, title, items } = getDict(locale).home.city;
+  const ui = getDict(locale).site.ui;
   return (
     <Section
       eyebrow={eyebrow}
       title={title}
       aside={
-        <TransitionLink href="/ubicacion" className="flex items-center gap-2 text-sm underline">
-          Ubicación y qué ver
+        <TransitionLink href={path(locale, "location")} className="flex items-center gap-2 text-sm underline">
+          {ui.locationLink}
           <Arrow />
         </TransitionLink>
       }
@@ -93,15 +95,16 @@ export function HomeCity() {
   );
 }
 
-export function HomeFaq() {
-  const { title, items } = home.faq;
+export function HomeFaq({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const { title, items } = getDict(locale).home.faq;
+  const ui = getDict(locale).site.ui;
   return (
     <Section
       id="preguntas-frecuentes"
       title={title}
       aside={
-        <TransitionLink href="/info-practica" className="flex items-center gap-2 text-sm underline">
-          Información práctica
+        <TransitionLink href={path(locale, "practical")} className="flex items-center gap-2 text-sm underline">
+          {ui.practicalLink}
           <Arrow />
         </TransitionLink>
       }

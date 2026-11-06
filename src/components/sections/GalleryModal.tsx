@@ -5,7 +5,9 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type Po
 import { createPortal } from "react-dom";
 import { Arrow, ArrowBack } from "@/components/icons";
 import { useLenis } from "@/components/providers/SmoothScroll";
+import { getDict } from "@/content/i18n";
 import type { Media } from "@/content/media";
+import { useLocale } from "@/i18n/useLocale";
 
 type Props = {
   open: boolean;
@@ -41,6 +43,7 @@ export function GalleryModal({ open, onClose, title, meta, images, startIndex = 
   const closeRef = useRef<HTMLButtonElement>(null);
   const thumbsRef = useRef<HTMLUListElement>(null);
   const swipeX = useRef<number | null>(null);
+  const tg = getDict(useLocale()).gallery;
   const [index, setIndex] = useState(startIndex);
   const mounted = useSyncExternalStore(noop, () => true, () => false);
 
@@ -130,7 +133,7 @@ export function GalleryModal({ open, onClose, title, meta, images, startIndex = 
           ref={closeRef}
           type="button"
           onClick={close}
-          aria-label="Cerrar fotos"
+          aria-label={tg.close}
           className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/25"
         >
           <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
@@ -164,10 +167,10 @@ export function GalleryModal({ open, onClose, title, meta, images, startIndex = 
         </div>
         {count > 1 && (
           <>
-            <button type="button" onClick={() => go(-1)} aria-label="Foto anterior" className={`${navButton} left-3 lg:left-8`}>
+            <button type="button" onClick={() => go(-1)} aria-label={tg.prev} className={`${navButton} left-3 lg:left-8`}>
               <ArrowBack className="size-5" />
             </button>
-            <button type="button" onClick={() => go(1)} aria-label="Foto siguiente" className={`${navButton} right-3 lg:right-8`}>
+            <button type="button" onClick={() => go(1)} aria-label={tg.next} className={`${navButton} right-3 lg:right-8`}>
               <Arrow className="size-5" />
             </button>
           </>
@@ -184,7 +187,7 @@ export function GalleryModal({ open, onClose, title, meta, images, startIndex = 
       {count > 1 && (
         <ul
           ref={thumbsRef}
-          aria-label="Miniaturas"
+          aria-label={tg.thumbs}
           className="flex gap-2 overflow-x-auto px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] [scrollbar-width:none] lg:justify-center lg:px-8 lg:pb-6"
         >
           {images.map((img, i) => (

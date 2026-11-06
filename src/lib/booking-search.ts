@@ -1,3 +1,4 @@
+import { ROUTES, type Locale } from "@/i18n/config";
 /**
  * La búsqueda de la home viaja a /reservar en la URL
  * (/reservar?llegada=2026-10-16&salida=2026-10-18&adultos=2), para que la
@@ -64,12 +65,13 @@ export function parseBookingSearch(get: (key: string) => string | null, today: s
   return { arrival, departure, adults, room };
 }
 
-export function bookingHref(search: Partial<BookingSearch> = {}): string {
+export function bookingHref(search: Partial<BookingSearch> = {}, locale: Locale = "es"): string {
   const params = new URLSearchParams();
   if (search.arrival) params.set(SEARCH_PARAMS.arrival, search.arrival);
   if (search.departure) params.set(SEARCH_PARAMS.departure, search.departure);
   if (search.adults) params.set(SEARCH_PARAMS.adults, String(search.adults));
   if (search.room) params.set(SEARCH_PARAMS.room, search.room);
   const qs = params.toString();
-  return qs ? `/reservar?${qs}` : "/reservar";
+  const base = ROUTES.book[locale];
+  return qs ? `${base}?${qs}` : base;
 }

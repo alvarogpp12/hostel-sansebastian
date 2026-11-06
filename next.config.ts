@@ -37,17 +37,28 @@ const nextConfig: NextConfig = {
     ],
   },
   /**
-   * URLs de la web antigua (buuteeq: /es-es, /en-us, /es-es/habitaciones…), que
-   * Google aún tiene guardadas. Redirección permanente para que no den 404 y
-   * su posicionamiento pase a la web nueva.
+   * URLs de la web antigua (buuteeq: /es-es, /en-us, /de-de/rooms/…), que
+   * Google aún tiene guardadas. Redirección permanente a la página equivalente
+   * en el idioma más cercano, para que no den 404 y su posicionamiento pase a
+   * la web nueva.
    */
   async redirects() {
-    const old = ":lang(es-es|es-ES|en-us|en-US|en-gb|en-GB|fr-fr|fr-FR|de-de|de-DE|it-it|it-IT|pt-pt|pt-PT|eu-es|eu-ES|ca-es|ca-ES|nl-nl|nl-NL)";
+    // Español (y euskera/catalán) → web en español; francés → /fr; inglés y el
+    // resto de idiomas de la web antigua (alemán, italiano, sueco, turco…) → /en.
+    const es = ":lang(es-es|es-ES|eu-es|eu-ES|ca-es|ca-ES)";
+    const fr = ":lang(fr-fr|fr-FR|fr-be|fr-BE|fr-ch|fr-CH)";
+    const other =
+      ":lang(en-us|en-US|en-gb|en-GB|de-de|de-DE|it-it|it-IT|pt-pt|pt-PT|nl-nl|nl-NL|sv-se|sv-SE|tr-tr|tr-TR|da-dk|da-DK|nb-no|nb-NO|fi-fi|fi-FI|pl-pl|pl-PL|ru-ru|ru-RU|ja-jp|ja-JP|zh-cn|zh-CN)";
+    const map = (lang: string, base: string, rooms: string, location: string, book: string) => [
+      { source: `/${lang}/:path(rooms|habitaciones|alojamiento|accommodation)/:rest*`, destination: rooms, permanent: true },
+      { source: `/${lang}/:path(location|ubicacion|localizacion|como-llegar|contact|contacto)`, destination: location, permanent: true },
+      { source: `/${lang}/:path(booking|reservas|reservar|book)`, destination: book, permanent: true },
+      { source: `/${lang}/:path*`, destination: base, permanent: true },
+    ];
     return [
-      { source: `/${old}/:path(rooms|habitaciones|alojamiento|accommodation)`, destination: "/habitaciones", permanent: true },
-      { source: `/${old}/:path(location|ubicacion|localizacion|como-llegar|contact|contacto)`, destination: "/ubicacion", permanent: true },
-      { source: `/${old}/:path(booking|reservas|reservar|book)`, destination: "/reservar", permanent: true },
-      { source: `/${old}/:path*`, destination: "/", permanent: true },
+      ...map(es, "/", "/habitaciones", "/ubicacion", "/reservar"),
+      ...map(fr, "/fr", "/fr/chambres", "/fr/emplacement", "/fr/reserver"),
+      ...map(other, "/en", "/en/rooms", "/en/location", "/en/book"),
     ];
   },
   async headers() {

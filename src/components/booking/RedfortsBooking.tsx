@@ -15,6 +15,9 @@ import { datesNotice } from "@/lib/redforts/dates-notice";
 import type { PublicInventory } from "@/lib/redforts/inventory";
 import { assignGuests, bestOtaSaving, priceSelection, type OfferedOption } from "@/lib/redforts/pricing";
 import { site } from "@/content/site";
+import { getDict, getRooms } from "@/content/i18n";
+import { INTL_LOCALE } from "@/i18n/config";
+import { useLocale } from "@/i18n/useLocale";
 import { bookingRequestMessage, whatsAppUrl } from "@/lib/whatsapp";
 import { AvailabilityCalendar } from "./AvailabilityCalendar";
 import { GalleryModal } from "@/components/sections/GalleryModal";
@@ -43,22 +46,6 @@ import { BookingSteps } from "./BookingSteps";
 
 type Results = { currency: string; promoTotal: number | null; combine: boolean; options: OfferedOption[] };
 
-const FIELD_LABELS: Record<string, string> = {
-  firstnames: "Nombre",
-  middlenames: "Segundo nombre",
-  surname: "Apellido",
-  surname2: "Segundo apellido",
-  address: "Dirección",
-  postalcode: "Código postal",
-  town: "Población",
-  state: "Provincia",
-  country: "País",
-  email: "Email",
-  phone: "Teléfono",
-  phone2: "Otro teléfono",
-  arrival_time: "Hora estimada de llegada",
-  departure_time: "Hora estimada de salida",
-};
 const FIELD_TYPES: Record<string, string> = { email: "email", phone: "tel", phone2: "tel", arrival_time: "time", departure_time: "time" };
 const AUTOCOMPLETE: Record<string, string> = {
   firstnames: "given-name",
@@ -73,22 +60,33 @@ const AUTOCOMPLETE: Record<string, string> = {
 };
 
 /** Habitación de la web que corresponde a un alojamiento de Redforts (booking.accoIds) */
-const roomForAcco = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] === String(accoId));
+const roomForAccoBase = (accoId: number) => rooms.find((r) => booking.accoIds[r.id] === String(accoId));
 
-const dateFmt = new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short", timeZone: "UTC" });
-const fmtDate = (iso: string) => dateFmt.format(new Date(`${iso}T00:00:00Z`));
-const longDateFmt = new Intl.DateTimeFormat("es-ES", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
-const fmtLongDate = (iso: string) => longDateFmt.format(new Date(`${iso}T00:00:00Z`));
-const nightsText = (n: number) => (n === 1 ? "1 noche" : `${n} noches`);
-const peopleText = (adults: number, children: number) =>
-  `${adults === 1 ? "1 adulto" : `${adults} adultos`}${children ? ` y ${children === 1 ? "1 niño" : `${children} niños`}` : ""}`;
+/** Formateador de fechas ISO (día UTC) en el idioma de la página */
+const dateFormatter = (intl: string, opts: Intl.DateTimeFormatOptions) => {
+  const f = new Intl.DateTimeFormat(intl, { ...opts, timeZone: "UTC" });
+  return (iso: string) => f.format(new Date(`${iso}T00:00:00Z`));
+};
 
-/** Tarifa no reembolsable de Redforts (por el nombre: «Tarifa No Reembolsable») */
-const isNonRefundable = (rateNames: string) => /no\s*reembolsable/i.test(rateNames);
-/** Plazo de cancelación gratuita de la tarifa estándar (ver /terminos) */
-const FREE_CANCEL_TEXT = "Cancelación gratis hasta 7 días antes de la llegada";
+/** Tarifa no reembolsable de Redforts (por el nombre, en cualquiera de los idiomas) */
+const isNonRefundable = (rateNames: string) => /no\s*reembolsable|non[-\s]?refundable|non\s*rembours/i.test(rateNames);
 
 export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventory; mode: CheckoutMode }) {
+  const locale = useLocale();
+  const dict = getDict(locale);
+  const t = dict.booking;
+  const intl = INTL_LOCALE[locale];
+  const fmtDate = useMemo(() => dateFormatter(intl, { day: "numeric", month: "short" }), [intl]);
+  const fmtLongDate = useMemo(() => dateFormatter(intl, { weekday: "short", day: "numeric", month: "short" }), [intl]);
+  const nightsText = dict.search.nights;
+  const peopleText = (a: number, c: number) => `${dict.search.adults(a)}${c ? ` ${t.and} ${t.children(c)}` : ""}`;
+  const FIELD_LABELS = t.fields;
+  const localRooms = useMemo(() => getRooms(locale), [locale]);
+  /** Habitación de la web (con los textos del idioma) para un alojamiento de Redforts */
+  const roomForAcco = (accoId: number) => {
+    const base = roomForAccoBase(accoId);
+    return base ? localRooms.find((r) => r.id === base.id) : undefined;
+  };
   const params = useSearchParams();
   // Solo se renderiza en el navegador (useSearchParams bajo Suspense): "hoy" es el del huésped
   const [initial] = useState(() => parseBookingSearch((k) => params.get(k), localToday()));
@@ -142,8 +140,8 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
   const [galleryAcco, setGalleryAcco] = useState<number | null>(null);
 
   const money = useMemo(
-    () => new Intl.NumberFormat("es-ES", { style: "currency", currency: results?.currency ?? "EUR" }),
-    [results?.currency],
+    () => new Intl.NumberFormat(intl, { style: "currency", currency: results?.currency ?? "EUR" }),
+    [results?.currency, intl],
   );
 
   /** Código promocional aplicado («Aplicar» o Enter); el del campo puede estar a medio escribir */
@@ -181,7 +179,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
       if (!res.ok && promoCode) {
         const retry = await query();
         if (retry.res.ok) {
-          rejected = json.errors?.[0] ?? "El código promocional no es válido.";
+          rejected = json.errors?.[0] ?? t.promoInvalid;
           ({ res, json } = retry);
         }
       }
@@ -195,7 +193,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
       const stats = { noches: nightsBetween(arrival, departure), personas: adults + children };
       if (!res.ok) {
         setResults(null);
-        setSearchErrors(json.errors ?? ["No se pudo consultar la disponibilidad."]);
+        setSearchErrors(json.errors ?? [t.searchError]);
         trackEvent("Reserva · error", { paso: "búsqueda", motivo: `HTTP ${res.status}` });
         return;
       }
@@ -219,7 +217,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
       }
     } catch {
       if (id !== requestId.current) return;
-      setSearchErrors(["No se pudo conectar con el sistema de reservas."]);
+      setSearchErrors([t.connError]);
       trackEvent("Reserva · error", { paso: "búsqueda", motivo: "sin conexión" });
     } finally {
       if (id === requestId.current) setSearching(false);
@@ -384,11 +382,11 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
   const requiredFields = inventory.fields.filter((f) => f.required);
   const optionalFields = inventory.fields.filter((f) => !f.required);
   const optionalOpen = showOptional || optionalFields.some((f) => fieldErrors[f.id]);
-  const payLabel = viaWhatsApp ? "Solicitar por WhatsApp" : `${mode === "tpv" ? "Reservar y pagar" : "Pagar"} ${breakdown ? money.format(breakdown.total) : ""}`;
+  const payLabel = viaWhatsApp ? t.requestWhatsApp : `${t.payAndBook} ${breakdown ? money.format(breakdown.total) : ""}`;
 
   return (
     <div className="grid gap-10">
-      <BookingSteps current={step} lastLabel={viaWhatsApp ? "Tus datos y solicitud" : undefined} />
+      <BookingSteps current={step} lastLabel={viaWhatsApp ? dict.steps.whatsappLast : undefined} />
 
       {/* ── 1. Búsqueda ─────────────────────────────────────────────── */}
       {!editingSearch && arrival && departure ? (
@@ -409,11 +407,11 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
               data-evento="Cambiar búsqueda"
               className="shrink-0 rounded-full border border-neutral-300 px-4 py-2 text-xs uppercase hover:bg-neutral-100"
             >
-              Cambiar
+              {t.change}
             </button>
           </div>
           <p aria-live="polite" className="min-h-5 text-xs text-neutral-500">
-            {searching ? "Buscando habitaciones libres…" : null}
+            {searching ? t.searching : null}
           </p>
           {searchErrors.length > 0 && (
             <ul role="alert" className="border border-red-400 p-3 text-xs">
@@ -435,12 +433,12 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
         />
         <div className="grid gap-5">
           <p className="style-heading text-lg">
-            {arrival ? fmtDate(arrival) : "Llegada"} → {departure ? fmtDate(departure) : "Salida"}
+            {arrival ? fmtDate(arrival) : dict.search.arrival} → {departure ? fmtDate(departure) : dict.search.departure}
             {arrival && departure && <span className="font-body text-sm"> · {nightsText(nightsBetween(arrival, departure))}</span>}
           </p>
           <div className={`grid gap-2.5 ${inventory.allowChildren ? "grid-cols-2" : ""}`}>
             <label className="field">
-              <span className="style-caption-xs block !font-light">Adultos</span>
+              <span className="style-caption-xs block !font-light">{t.adultsLabel}</span>
               <select value={adults} onChange={(e) => setAdults(Number(e.target.value))} className="mt-1 w-full bg-transparent outline-none">
                 {Array.from({ length: MAX_ADULTS }, (_, i) => i + 1).map((n) => (
                   <option key={n}>{n}</option>
@@ -449,7 +447,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
             </label>
             {inventory.allowChildren && (
               <label className="field">
-                <span className="style-caption-xs block !font-light">Niños</span>
+                <span className="style-caption-xs block !font-light">{t.childrenLabel}</span>
                 <select value={children} onChange={(e) => setChildren(Number(e.target.value))} className="mt-1 w-full bg-transparent outline-none">
                   {Array.from({ length: 7 }, (_, i) => i).map((n) => (
                     <option key={n}>{n}</option>
@@ -461,7 +459,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
           {showPromo ? (
             <div className="flex items-end gap-2">
               <label className="field flex-1">
-                <span className="style-caption-xs block !font-light">Código promocional</span>
+                <span className="style-caption-xs block !font-light">{t.promo}</span>
                 <input
                   value={promo}
                   onChange={(e) => {
@@ -477,24 +475,24 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 />
               </label>
               <button type="submit" disabled={promo.trim() === appliedPromo || Boolean(promoError)} className="style-button min-h-12 disabled:opacity-40">
-                Aplicar
+                {t.apply}
               </button>
             </div>
           ) : (
             <button type="button" onClick={() => setShowPromo(true)} className="w-fit text-xs underline">
-              ¿Tienes un código promocional?
+              {t.promoAsk}
             </button>
           )}
           {promoError && (
             <p id="promo-error" role="alert" className="-mt-3 text-xs text-red-700">
-              {promoError} Te enseñamos los precios sin descuento.
+              {promoError} {t.promoRejected}
             </p>
           )}
           <p aria-live="polite" className="min-h-5 text-xs text-neutral-500">
             {searching
-              ? "Buscando habitaciones libres…"
+              ? t.searching
               : results && arrival && departure
-                ? "Cambia las fechas o las personas y los precios se actualizan solos."
+                ? t.autoUpdate
                 : null}
           </p>
           {searchErrors.length > 0 && (
@@ -510,10 +508,10 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
 
       {/* ── 2. Opciones ─────────────────────────────────────────────── */}
       {results && (
-        <section ref={resultsRef} aria-label="Habitaciones disponibles" className="grid scroll-mt-24 gap-4">
+        <section ref={resultsRef} aria-label={t.roomsAria} className="grid scroll-mt-24 gap-4">
           {results.options.length === 0 ? (
             <p className="border border-neutral-300 p-4">
-              No hay habitaciones libres para esas fechas. Prueba con otras o escríbenos a{" "}
+              {t.noRooms}{" "}
               <a className="underline" href={`mailto:${site.contact.email}`}>
                 {site.contact.email}
               </a>
@@ -521,7 +519,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
             </p>
           ) : (
             results.combine && (
-              <p className="text-sm text-neutral-600">Ninguna habitación tiene plazas para todo el grupo: combina varias.</p>
+              <p className="text-sm text-neutral-600">{t.combine}</p>
             )
           )}
           {byAcco.map(([accoId, options]) => {
@@ -542,10 +540,10 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                           data-evento="Ver fotos"
                           data-zona={`habitación ${room?.id ?? accoId}`}
                           className="absolute inset-0 flex cursor-zoom-in items-end justify-end p-2"
-                          aria-label={`${site.ui.openGallery}: ${acco?.name ?? room?.name ?? ""}`}
+                          aria-label={`${dict.site.ui.openGallery}: ${room?.name ?? acco?.name ?? ""}`}
                         >
                           <span className="rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium shadow-sm">
-                            {site.ui.openGallery} ({photos.length})
+                            {dict.site.ui.openGallery} ({photos.length})
                           </span>
                         </button>
                       )}
@@ -554,11 +552,11 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 </div>
                 <div className="grid gap-3 p-2">
                   <div className="grid gap-1">
-                    {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-offwhite px-2.5 py-1">Tu elección</span>}
+                    {String(accoId) === preferredAcco && <span className="style-caption-xs w-fit rounded-full bg-offwhite px-2.5 py-1">{t.yourChoice}</span>}
                     {/* Nuestro nombre (el de la home), no el de Redforts: allí dos habitaciones se llaman igual */}
                     <h3 className="style-heading text-lg lg:text-xl">{room?.name ?? acco?.name ?? `Alojamiento ${accoId}`}</h3>
                     {room && (
-                      <ul className="flex flex-wrap gap-1.5 pt-1" aria-label="Características">
+                      <ul className="flex flex-wrap gap-1.5 pt-1" aria-label={t.features}>
                         {room.specs.filter((s) => s.icon === "bed" || s.icon === "shower").map((s) => (
                           <li
                             key={s.text}
@@ -571,11 +569,15 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                         ))}
                       </ul>
                     )}
-                    {acco?.description && <p className="pt-1 text-sm whitespace-pre-line text-neutral-600">{acco.description}</p>}
+                    {/* Texto de Redforts si está en el idioma de la página; si no, el nuestro */}
+                    {(() => {
+                      const text = inventory.lang === locale ? acco?.description : (room?.cardText ?? acco?.description);
+                      return text ? <p className="pt-1 text-sm whitespace-pre-line text-neutral-600">{text}</p> : null;
+                    })()}
                   </div>
                   <ul className="grid gap-2">
                     {options.map((o) => {
-                      const rateNames = [...new Set(o.periods.map((p) => inventory.rates[String(p.rate_id)]?.name ?? "Tarifa"))].join(" + ");
+                      const rateNames = [...new Set(o.periods.map((p) => inventory.rates[String(p.rate_id)]?.name ?? t.rate))].join(" + ");
                       const otherDates = lastSearch && (o.arrival !== lastSearch.arrival || o.departure !== lastSearch.departure);
                       const saving = bestOtaSaving(o);
                       const qty = selection[o.key] ?? 0;
@@ -598,20 +600,20 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                             <span>{rateNames}</span>
                             {nonRefundable ? (
                               <span className="text-xs text-neutral-600">
-                                Sin cancelación
+                                {t.noCancel}
                                 {cheaper > 0 && (
                                   <span className="text-green-700">
                                     {" "}
-                                    · ahorras {money.format(cheaper)} ({Math.round((cheaper / flexible!.price) * 100)} %)
+                                    · {t.youSave} {money.format(cheaper)} ({Math.round((cheaper / flexible!.price) * 100)} %)
                                   </span>
                                 )}
                               </span>
                             ) : (
-                              <span className="text-xs text-green-700">{FREE_CANCEL_TEXT}</span>
+                              <span className="text-xs text-green-700">{t.freeCancel}</span>
                             )}
                             <span className="text-xs text-neutral-500">
-                              Hasta {o.adults + o.children} {o.adults + o.children === 1 ? "persona" : "personas"}
-                              {o.amount <= 2 ? ` · ${o.amount === 1 ? "queda 1" : `quedan ${o.amount}`}` : ""}
+                              {t.upTo(o.adults + o.children)}
+                              {o.amount <= 2 ? ` · ${t.left(o.amount)}` : ""}
                             </span>
                             {otherDates && (
                               <span className="text-xs text-amber-700">
@@ -631,13 +633,13 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                               )}
                               <span className="style-heading text-lg">{money.format(o.price)}</span>
                               <span className="block text-xs text-neutral-500">
-                                {nights === 1 ? "total · 1 noche" : `total · ${nights} noches (${money.format(o.price / nights)}/noche)`}
+                                {t.total(nights, money.format(o.price / nights))}
                               </span>
                               {o.excl_taxes ? <span className="block text-xs text-neutral-500">+ {o.excl_taxes}% impuestos</span> : null}
                             </span>
                             {results.combine ? (
                               <select
-                                aria-label={`Cantidad de ${acco?.name ?? ""} ${rateNames}`}
+                                aria-label={`${t.quantityOf} ${room?.name ?? acco?.name ?? ""} ${rateNames}`}
                                 value={qty}
                                 onChange={(e) => setQty(o, Number(e.target.value))}
                                 className="rounded border border-neutral-300 bg-transparent px-2 py-1"
@@ -657,7 +659,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                                   qty ? "border-black bg-black text-white" : "border-black hover:bg-neutral-100"
                                 }`}
                               >
-                                {qty ? "Elegida" : "Elegir"}
+                                {qty ? t.chosen : t.choose}
                               </button>
                             )}
                           </div>
@@ -679,7 +681,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
             <GalleryModal
               open
               onClose={() => setGalleryAcco(null)}
-              title={inventory.accos[String(galleryAcco)]?.name ?? room.name}
+              title={room.name}
               meta={room.meta}
               images={[room.image, ...room.gallery]}
             />
@@ -696,7 +698,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
         >
           {/* Resumen arriba (en el móvil, antes de los datos): se ve el total desde el principio */}
           <div className="grid content-start gap-3 rounded-xl bg-offwhite p-4 lg:col-start-2 lg:row-start-1">
-            <h2 className="style-heading text-xl">Tu reserva</h2>
+            <h2 className="style-heading text-xl">{t.yourBooking}</h2>
             <ul className="grid gap-1">
               {chosen.map(({ option, quantity }) => {
                 const room = roomForAcco(option.acco_id);
@@ -719,30 +721,30 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
             </p>
             {breakdown.voucher > 0 && (
               <p className="flex justify-between">
-                <span>Descuento</span>
+                <span>{t.discount}</span>
                 <span>−{money.format(breakdown.voucher)}</span>
               </p>
             )}
             {breakdown.taxes > 0 && (
               <p className="flex justify-between">
-                <span>Impuestos</span>
+                <span>{t.taxes}</span>
                 <span>{money.format(breakdown.taxes)}</span>
               </p>
             )}
             <p className="flex items-baseline justify-between border-t border-neutral-300 pt-3">
-              <span className="style-caption-xs">Total</span>
+              <span className="style-caption-xs">{t.totalLabel}</span>
               <span className="style-heading text-2xl">
                 {breakdown.originalSubtotal !== null && <s className="mr-2 text-base text-neutral-500">{money.format(breakdown.originalSubtotal)}</s>}
                 {money.format(breakdown.total)}
               </span>
             </p>
-            {!guestsFit && <p className="text-xs text-red-600">Las habitaciones elegidas no tienen plazas para todo el grupo.</p>}
+            {!guestsFit && <p className="text-xs text-red-600">{t.notFit}</p>}
             {[...new Set(chosen.flatMap((c) => c.option.periods.map((p) => p.rate_id)))].map((rateId) => {
               const rate = inventory.rates[String(rateId)];
               if (!rate?.cancellation && !rate?.payment) return null;
               return (
                 <details key={rateId} className="text-xs text-neutral-600">
-                  <summary className="cursor-pointer underline">Condiciones de la {rate.name}</summary>
+                  <summary className="cursor-pointer underline">{t.conditionsOf} {rate.name}</summary>
                   <div className="grid gap-1 pt-2">
                     {rate.cancellation && <p className="whitespace-pre-line">{rate.cancellation}</p>}
                     {rate.payment && <p className="whitespace-pre-line">{rate.payment}</p>}
@@ -754,9 +756,9 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
 
           {/* Solo lo imprescindible a la vista; lo opcional, detrás de un enlace */}
           <fieldset className="grid grid-cols-2 content-start gap-2 lg:col-start-1 lg:row-span-2 lg:row-start-1">
-            <legend className="style-heading mb-3 text-xl">Tus datos</legend>
+            <legend className="style-heading mb-3 text-xl">{t.yourData}</legend>
             {[...requiredFields, ...(optionalOpen ? optionalFields : [])].map((f) => {
-              const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? "" : " (opcional)"}`;
+              const label = `${FIELD_LABELS[f.id] ?? f.id}${f.required ? "" : ` ${t.optional}`}`;
               const err = fieldErrors[f.id];
               const wide = f.id === "email" || f.id === "phone" || f.id === "country";
               return (
@@ -795,12 +797,12 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
             })}
             {optionalOpen ? (
               <label className="field !py-1.5 col-span-2">
-                <span className="style-caption-xs block !font-light">{inventory.noteText ?? "Comentarios (opcional)"}</span>
+                <span className="style-caption-xs block !font-light">{locale === "es" ? (inventory.noteText ?? t.comments) : t.comments}</span>
                 <textarea value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} rows={2} className="w-full resize-y bg-transparent" />
               </label>
             ) : (
               <button type="button" onClick={() => setShowOptional(true)} className="col-span-2 w-fit pt-1 text-xs underline">
-                Añadir más datos o un comentario (opcional)
+                {t.addMore}
               </button>
             )}
           </fieldset>
@@ -823,13 +825,12 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                   className="style-button min-h-12 w-full justify-center !bg-[#25D366] !text-white disabled:opacity-60"
                 >
                   <WhatsAppGlyph className="size-5" />
-                  Solicitar reserva por WhatsApp
+                  {t.requestWhatsApp}
                 </button>
                 <p className="text-xs text-neutral-500">
-                  Se abre WhatsApp con tu solicitud ya escrita (habitación, fechas y datos): solo tienes que enviarla. Te
-                  confirmamos la disponibilidad por el mismo chat y todavía no se cobra nada. Al solicitar la reserva aceptas las{" "}
-                  <TransitionLink href={site.legalLinks.terms.href} className="underline">
-                    {site.legalLinks.terms.label}
+                  {t.whatsappNote}{" "}
+                  <TransitionLink href={dict.site.legal.terms.href} className="underline">
+                    {dict.site.legal.terms.label}
                   </TransitionLink>
                   .
                 </p>
@@ -837,25 +838,22 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
             ) : (
               <>
                 <button type="submit" disabled={paying || redirecting || !guestsFit} className="style-button min-h-13 w-full justify-center disabled:opacity-60">
-                  {paying || redirecting ? (mode === "tpv" ? "Guardando tu reserva…" : "Comprobando disponibilidad…") : payLabel}
+                  {paying || redirecting ? t.saving : payLabel}
                   <ArrowOut />
                 </button>
                 <p className="text-xs text-neutral-500">
-                  {mode === "tpv"
-                    ? "Pago seguro con tarjeta en la pasarela de Redsys. Antes comprobamos otra vez la disponibilidad y el precio. Tienes 30 minutos para pagar; si no, la reserva se anula sola."
-                    : "Volvemos a comprobar la disponibilidad y el precio antes de cobrar. El pago se hace en Stripe y solo se cobra cuando la reserva queda confirmada."}{" "}
-                  Al reservar aceptas las{" "}
-                  <TransitionLink href={site.legalLinks.terms.href} className="underline">
-                    {site.legalLinks.terms.label}
+                  {mode === "tpv" ? t.tpvNote : null} {t.accept}{" "}
+                  <TransitionLink href={dict.site.legal.terms.href} className="underline">
+                    {dict.site.legal.terms.label}
                   </TransitionLink>
                   .
                 </p>
               </>
             )}
             <p className="text-xs text-neutral-500">
-              Usamos tus datos solo para gestionar tu reserva y, si hace falta, hacer tu factura.{" "}
-              <TransitionLink href="/privacidad" className="underline">
-                Política de privacidad
+              {t.privacy}{" "}
+              <TransitionLink href={dict.site.legal.privacy.href} className="underline">
+                {dict.site.legal.privacy.label}
               </TransitionLink>
               .
             </p>
@@ -874,7 +872,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
                 className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] text-sm text-black disabled:opacity-60"
               >
                 <WhatsAppGlyph className="size-4 text-[#25D366]" />
-                ¿Prefieres reservar por WhatsApp?
+                {t.preferWhatsApp}
               </button>
             )}
           </div>
@@ -892,7 +890,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
         >
           <div className="flex items-center gap-4">
             <p className="flex-1 leading-tight">
-              <span className="style-caption-xs block !font-light text-neutral-500">Total</span>
+              <span className="style-caption-xs block !font-light text-neutral-500">{t.totalLabel}</span>
               <span className="style-heading text-xl">{money.format(breakdown.total)}</span>
             </p>
             <button
@@ -901,7 +899,7 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
               disabled={paying || redirecting || !guestsFit}
               className={`style-button min-h-11 !px-5 disabled:opacity-60 ${viaWhatsApp ? "!bg-[#25D366] !text-white" : ""}`}
             >
-              {viaWhatsApp ? "Solicitar" : "Reservar y pagar"}
+              {viaWhatsApp ? t.requestShort : t.payAndBook}
             </button>
           </div>
         </div>
@@ -912,9 +910,9 @@ export function RedfortsBooking({ inventory, mode }: { inventory: PublicInventor
         <div role="status" aria-live="assertive" className="fixed inset-0 z-[95] grid place-items-center bg-white/95 p-w text-center">
           <div className="grid max-w-xs justify-items-center gap-4">
             <span className="size-10 animate-spin rounded-full border-2 border-neutral-300 border-t-black" aria-hidden />
-            <p className="style-heading text-2xl">Te llevamos al pago seguro</p>
+            <p className="style-heading text-2xl">{t.redirectTitle}</p>
             <p className="text-sm text-neutral-600">
-              Estamos guardando tu habitación. En unos segundos se abre la pasarela de pago con tarjeta (Redsys). No cierres esta ventana.
+              {t.redirectText}
             </p>
           </div>
         </div>

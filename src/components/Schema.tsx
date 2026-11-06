@@ -1,4 +1,5 @@
-import { home } from "@/content/home";
+import { getDict } from "@/content/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 import { rooms } from "@/content/rooms";
 import { site } from "@/content/site";
 
@@ -41,7 +42,7 @@ export function LocalBusinessSchema() {
           name: "Enjoy Comfort",
           alternateName: [site.brand.name, "Pensión Enjoy Comfort"],
           url: `${site.url}/`,
-          inLanguage: "es",
+          inLanguage: ["es", "en", "fr"],
         }}
       />
       <Json
@@ -85,7 +86,8 @@ export function LocalBusinessSchema() {
   );
 }
 
-export function FaqSchema() {
+export function FaqSchema({ locale = DEFAULT_LOCALE }: { locale?: Locale }) {
+  const home = getDict(locale).home;
   return (
     <Json
       data={{

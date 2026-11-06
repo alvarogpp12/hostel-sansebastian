@@ -7,17 +7,22 @@ import { SocialGlyph } from "@/components/icons";
 import { useLenis } from "@/components/providers/SmoothScroll";
 import { Reveal } from "@/components/Reveal";
 import { TransitionLink } from "@/components/TransitionLink";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { getDict } from "@/content/i18n";
 import { site } from "@/content/site";
+import { localeFromPath, path } from "@/i18n/config";
 import { gsap } from "@/lib/gsap";
 
 /** Routes whose first section is a full-bleed dark photo (white header) */
 const DARK_HERO_ROUTES: string[] = [];
 
 /** Donde ya se está reservando, el botón de la cabecera sobra */
-const NO_BOOK_BUTTON_ROUTES = ["/reservar", "/reservar/confirmada", "/mi-reserva"];
+const NO_BOOK_BUTTON_ROUTES = ["/reservar", "/reservar/confirmada", "/mi-reserva", "/en/book", "/fr/reserver"];
 
 export function Header() {
   const pathname = usePathname();
+  const locale = localeFromPath(pathname);
+  const t = getDict(locale).site;
   const lenis = useLenis();
   const dark = DARK_HERO_ROUTES.includes(pathname);
 
@@ -164,7 +169,7 @@ export function Header() {
   return (
     <>
       <a href="#content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:bg-white focus:p-2">
-        {site.ui.skipToContent}
+        {t.ui.skipToContent}
       </a>
 
       <div ref={sloganRef} className={`fixed top-w left-w z-40 flex items-center gap-2 max-lg:hidden ${tone}`}>
@@ -172,13 +177,13 @@ export function Header() {
           <path d="M12 3.5c.9 4.6 3.9 7.6 8.5 8.5-4.6.9-7.6 3.9-8.5 8.5-.9-4.6-3.9-7.6-8.5-8.5 4.6-.9 7.6-3.9 8.5-8.5Z" strokeLinejoin="round" />
         </svg>
         <Reveal as="span" effect="split" delay={0.5} className="style-caption-xs font-medium">
-          {site.brand.slogan}
+          {t.slogan}
         </Reveal>
       </div>
 
       <TransitionLink
         ref={logoRef}
-        href="/"
+        href={path(locale, "home")}
         aria-label={site.brand.name}
         className={`fixed top-6 left-w z-40 lg:top-10 lg:left-1/2 lg:-translate-x-1/2 ${tone}`}
       >
@@ -187,7 +192,7 @@ export function Header() {
 
       <TransitionLink
         ref={altLogoRef}
-        href="/"
+        href={path(locale, "home")}
         aria-label={site.brand.name}
         className="invisible fixed top-5 left-w z-40 lg:top-8"
       >
@@ -200,14 +205,14 @@ export function Header() {
       {/* Reservar siempre a mano, junto al menú (se oculta con el menú abierto) */}
       {showBook && (
         <TransitionLink
-          href="/reservar"
+          href={path(locale, "book")}
           className="style-button fixed top-5 right-[calc(var(--space-w)+5.5rem)] z-50 !px-4 !py-2.5 ring-1 ring-white/30 lg:top-7 lg:right-[calc(var(--space-w)+7.5rem)] [body.has-menu_&]:invisible"
         >
-          Reservar
+          {t.ui.book}
         </TransitionLink>
       )}
 
-      <nav ref={navRef} className="fixed top-6 right-w z-50 isolate lg:top-8" aria-label="Principal">
+      <nav ref={navRef} className="fixed top-6 right-w z-50 isolate lg:top-8" aria-label={t.ui.main}>
         <Reveal
           as="button"
           ref={toggleRef}
@@ -218,7 +223,7 @@ export function Header() {
           aria-controls="site-menu"
           className={`style-caption flex items-center gap-3 rounded-lg px-2 pt-1.5 pb-1 transition-[gap] duration-300 lg:px-4 lg:py-2 lg:hover:gap-4 ${tone}`}
         >
-          {site.ui.menu}
+          {t.ui.menu}
           <svg viewBox="0 0 16 12" className="h-3 w-4" fill="none" stroke="currentColor" strokeWidth="1" aria-hidden="true">
             <line id="line-top" x1="2" y1="1.5" x2="14" y2="1.5" />
             <line id="line-mid-1" x1="2" y1="6" x2="14" y2="6" />
@@ -273,7 +278,7 @@ export function Header() {
             <div data-menu-separator className="h-[0.5px] w-full bg-neutral-500 md:h-auto md:w-[0.5px] md:self-stretch" />
             <div data-menu-nav className="min-w-48 max-md:order-first">
               <ul className="style-caption-xs nested-arrow-animations nested-underline grid gap-4">
-                {site.nav.map((item) => (
+                {t.nav.map((item) => (
                   <li key={item.href}>
                     <TransitionLink href={item.href} aria-current={pathname === item.href ? "page" : undefined}>
                       {item.label}
@@ -281,6 +286,7 @@ export function Header() {
                   </li>
                 ))}
               </ul>
+              <LanguageSwitch className="style-caption-xs mt-6 -ml-2 text-neutral-400" />
             </div>
           </div>
         </div>

@@ -4,8 +4,10 @@ import { useCallback, useState } from "react";
 import { Arrow, Icon } from "@/components/icons";
 import { TransitionLink } from "@/components/TransitionLink";
 import { Frame } from "@/components/ui";
-import { hasPrice, priceLabel, rooms } from "@/content/rooms";
-import { site } from "@/content/site";
+import { getDict, getRooms, priceLabelFor } from "@/content/i18n";
+import { hasPrice } from "@/content/rooms";
+import { path } from "@/i18n/config";
+import { useLocale } from "@/i18n/useLocale";
 import { bookingHref } from "@/lib/booking-search";
 import { GalleryModal } from "./GalleryModal";
 
@@ -24,6 +26,9 @@ export function RoomRows({
   /** Por defecto h2 en /habitaciones y h3 en la home (que ya tiene su h2) */
   headingLevel?: "h2" | "h3";
 }) {
+  const locale = useLocale();
+  const ui = getDict(locale).site.ui;
+  const rooms = getRooms(locale);
   const [openId, setOpenId] = useState<string | null>(null);
   const close = useCallback(() => setOpenId(null), []);
   const Heading = headingLevel ?? (detailed ? "h2" : "h3");
@@ -50,7 +55,7 @@ export function RoomRows({
                       type="button"
                       onClick={() => setOpenId(room.id)}
                       data-evento="Ver fotos"
-                      aria-label={`${site.ui.openGallery}: ${room.name}`}
+                      aria-label={`${ui.openGallery}: ${room.name}`}
                       className="absolute inset-0 cursor-zoom-in"
                     />
                   )}
@@ -63,7 +68,7 @@ export function RoomRows({
                       aria-hidden="true"
                       className="absolute right-3 bottom-3 flex min-h-10 items-center gap-2 rounded-full bg-white/95 px-4 text-xs font-medium shadow-sm transition-colors hover:bg-white"
                     >
-                      {site.ui.openGallery} ({photos.length})
+                      {ui.openGallery} ({photos.length})
                     </button>
                   )}
                 </div>
@@ -83,19 +88,19 @@ export function RoomRows({
                 <div className="flex flex-wrap items-center justify-between gap-4 border-t border-neutral-200 p-5 lg:flex-col lg:flex-nowrap lg:items-stretch lg:justify-center lg:border-t-0 lg:border-l lg:p-7">
                   <p className="grid">
                     <span className="style-heading text-xl whitespace-nowrap lg:text-2xl">
-                      {priceLabel(room)}
-                      {hasPrice(room) && <span className="font-body text-xs tracking-normal">{site.ui.perNight}</span>}
+                      {priceLabelFor(room, locale)}
+                      {hasPrice(room) && <span className="font-body text-xs tracking-normal">{ui.perNight}</span>}
                     </span>
-                    {hasPrice(room) && <span className="text-xs text-neutral-500">Precio final al elegir fechas</span>}
+                    {hasPrice(room) && <span className="text-xs text-neutral-500">{ui.finalPrice}</span>}
                   </p>
                   <div className="grid gap-2 lg:w-full">
-                    <TransitionLink href={bookingHref({ room: room.id })} className="style-button min-h-12 justify-center lg:!w-full">
-                      Reservar esta
+                    <TransitionLink href={bookingHref({ room: room.id }, locale)} className="style-button min-h-12 justify-center lg:!w-full">
+                      {ui.bookThis}
                       <Arrow />
                     </TransitionLink>
                     {!detailed && (
-                      <TransitionLink href={`/habitaciones#${room.id}`} className="text-center text-xs underline max-lg:hidden">
-                        Ver fotos y detalles
+                      <TransitionLink href={`${path(locale, "rooms")}#${room.id}`} className="text-center text-xs underline max-lg:hidden">
+                        {ui.seeDetails}
                       </TransitionLink>
                     )}
                   </div>

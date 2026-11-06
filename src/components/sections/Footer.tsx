@@ -4,7 +4,11 @@ import { useState, type FormEvent } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Arrow, SocialGlyph } from "@/components/icons";
 import { TransitionLink } from "@/components/TransitionLink";
+import { LanguageSwitch } from "@/components/LanguageSwitch";
+import { getDict } from "@/content/i18n";
 import { site } from "@/content/site";
+import { path } from "@/i18n/config";
+import { useLocale } from "@/i18n/useLocale";
 import { trackEvent } from "@/lib/analytics";
 import { openCookieSettings } from "@/lib/consent";
 
@@ -14,6 +18,8 @@ import { openCookieSettings } from "@/lib/consent";
  * Todo visible desde el principio (sin animaciones ligadas al scroll).
  */
 export function Footer() {
+  const locale = useLocale();
+  const t = getDict(locale).site;
   const [status, setStatus] = useState<{ state: "idle" | "sending" | "error"; message?: string }>({ state: "idle" });
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -42,17 +48,17 @@ export function Footer() {
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-w">
           <div className="grid content-start gap-5 lg:col-span-5">
             <Logo variant="full" tone="light" address className="h-20 w-auto lg:h-24" alt={`${site.brand.name}, ${site.legal.addressLine}`} />
-            <p className="max-w-[40ch] text-neutral-300">{site.ui.footerIntro}</p>
-            <TransitionLink href="/reservar" className="style-button min-h-12 !bg-offwhite !text-black">
-              Reservar
+            <p className="max-w-[40ch] text-neutral-300">{t.ui.footerIntro}</p>
+            <TransitionLink href={path(locale, "book")} className="style-button min-h-12 !bg-offwhite !text-black">
+              {t.ui.book}
               <Arrow />
             </TransitionLink>
           </div>
 
-          <nav aria-label={site.ui.footerExplore} className="grid content-start gap-4 lg:col-span-3">
-            <p className={caption}>{site.ui.footerExplore}</p>
+          <nav aria-label={t.ui.footerExplore} className="grid content-start gap-4 lg:col-span-3">
+            <p className={caption}>{t.ui.footerExplore}</p>
             <ul className="grid gap-2">
-              {site.footerNav.map((l) => (
+              {t.footerNav.map((l) => (
                 <li key={l.href}>
                   <TransitionLink href={l.href} className="text-neutral-200 transition-colors hover:text-white">
                     {l.label}
@@ -63,8 +69,8 @@ export function Footer() {
           </nav>
 
           <div className="grid content-start gap-4 lg:col-span-4">
-            <p className={caption}>{site.ui.footerContactTitle}</p>
-            <p className="text-neutral-300">{site.ui.footerContactText}</p>
+            <p className={caption}>{t.ui.footerContactTitle}</p>
+            <p className="text-neutral-300">{t.ui.footerContactText}</p>
             <div className="grid">
               <a className="w-fit text-neutral-200 transition-colors hover:text-white" href={`mailto:${site.contact.email}`}>
                 {site.contact.email}
@@ -149,7 +155,7 @@ export function Footer() {
 
         <div className="flex flex-wrap items-end justify-between gap-4 border-t border-neutral-800 pt-6 text-xs text-neutral-400">
           <ul className="flex flex-wrap gap-x-5 gap-y-2">
-            {site.legalLinks.list.map((l) => (
+            {t.legal.list.map((l) => (
               <li key={l.href}>
                 <TransitionLink href={l.href} className="transition-colors hover:text-white">
                   {l.label}
@@ -158,12 +164,13 @@ export function Footer() {
             ))}
             <li>
               <button type="button" onClick={openCookieSettings} className="transition-colors hover:text-white">
-                Configurar cookies
+                {t.legal.cookieSettings}
               </button>
             </li>
           </ul>
+          <LanguageSwitch className="text-neutral-400" />
           <p>
-            {site.legalLinks.rights}
+            {t.legal.rights}
             {site.credit && (
               <>
                 {" · "}

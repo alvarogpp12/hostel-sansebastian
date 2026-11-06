@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getDict } from "@/content/i18n";
+import { INTL_LOCALE } from "@/i18n/config";
+import { useLocale } from "@/i18n/useLocale";
 
 /**
  * Selector de llegada y salida con la disponibilidad de /calendar_data:
@@ -29,8 +32,6 @@ const todayIso = () => {
   return toIso(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 };
 
-const monthFmt = new Intl.DateTimeFormat("es-ES", { month: "long", year: "numeric", timeZone: "UTC" });
-const weekdayFmt = new Intl.DateTimeFormat("es-ES", { weekday: "narrow", timeZone: "UTC" });
 /** «noviembre de 2026» → «Noviembre de 2026» (con CSS capitalize salía «Noviembre De 2026») */
 const capitalizeFirst = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -58,6 +59,10 @@ export function AvailabilityCalendar({
   departure: string | null;
   onChange: (arrival: string | null, departure: string | null) => void;
 }) {
+  const locale = useLocale();
+  const t = getDict(locale).calendar;
+  const monthFmt = useMemo(() => new Intl.DateTimeFormat(INTL_LOCALE[locale], { month: "long", year: "numeric", timeZone: "UTC" }), [locale]);
+  const weekdayFmt = useMemo(() => new Intl.DateTimeFormat(INTL_LOCALE[locale], { weekday: "narrow", timeZone: "UTC" }), [locale]);
   const [cal, setCal] = useState<CalendarData | null>(null);
   const [error, setError] = useState<string | null>(null);
   // Abre en el mes de la llegada si ya viene elegida (desde la home)
@@ -68,7 +73,7 @@ export function AvailabilityCalendar({
     fetch("/api/redforts/calendar")
       .then(async (r) => {
         const json = await r.json();
-        if (!r.ok) throw new Error(json.errors?.[0] ?? "No se pudo cargar el calendario.");
+        if (!r.ok) throw new Error(json.errors?.[0] ?? t.error);
         return json as CalendarData;
       })
       .then((data) => {
@@ -83,7 +88,7 @@ export function AvailabilityCalendar({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [t.error]);
 
   const weekStart = cal ? (cal.lastWeekendDay + 1) % 7 : 1;
   const today = todayIso();
@@ -123,11 +128,11 @@ export function AvailabilityCalendar({
   return (
     <div className="grid w-full max-w-md gap-3" aria-busy={!cal}>
       <div className="flex items-center justify-between">
-        <button type="button" onClick={() => shift(-1)} disabled={month <= today.slice(0, 7)} className="px-2 py-1 disabled:opacity-30" aria-label="Mes anterior">
+        <button type="button" onClick={() => shift(-1)} disabled={month <= today.slice(0, 7)} className="px-2 py-1 disabled:opacity-30" aria-label={t.prev}>
           ←
         </button>
         <p className="style-caption-xs !font-normal">{capitalizeFirst(monthFmt.format(new Date(toTime(`${month}-01`))))}</p>
-        <button type="button" onClick={() => shift(1)} className="px-2 py-1" aria-label="Mes siguiente">
+        <button type="button" onClick={() => shift(1)} className="px-2 py-1" aria-label={t.next}>
           →
         </button>
       </div>
@@ -166,7 +171,7 @@ export function AvailabilityCalendar({
         })}
       </div>
       <p className="text-xs text-neutral-500">
-        {!cal ? "Cargando disponibilidad…" : choosingDeparture ? "Elige el día de salida." : arrival && departure ? "Toca otro día para cambiar la llegada." : "Elige el día de llegada."}
+        {!cal ? t.loading : choosingDeparture ? t.pickDeparture : arrival && departure ? t.changeArrival : t.pickArrival}
       </p>
     </div>
   );
