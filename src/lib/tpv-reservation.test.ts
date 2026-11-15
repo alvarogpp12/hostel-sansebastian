@@ -90,9 +90,26 @@ describe("startTpvReservation", () => {
     if (!res.ok) expect(res.errors[0]).toMatch(/456/);
   });
 
-  it("un precio distinto del visto no crea la reserva", async () => {
+  it("un precio distinto del visto no crea la reserva y lo deja en los logs", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const res = await startTpvReservation({ ...input, expectedTotal: 120 });
     expect(res).toMatchObject({ ok: false, newTotal: 140 });
     expect(createReservation).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      "[reserva] no se pudo seguir: precio cambiado",
+      expect.objectContaining({ llegada: "2026-11-10", visto: 120, ahora: 140 }),
+    );
+    warn.mockRestore();
+  });
+
+  it("los datos mal rellenados quedan en los logs, sin los valores del huésped", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const res = await startTpvReservation({ ...input, guest: { ...input.guest, email: "no-es-un-email" } });
+    expect(res.ok).toBe(false);
+    const [msg, details] = warn.mock.calls[0];
+    expect(msg).toBe("[reserva] no se pudo seguir: datos del huésped");
+    expect(details).toMatchObject({ campos: { email: "Email no válido" } });
+    expect(JSON.stringify(details)).not.toContain("no-es-un-email");
+    warn.mockRestore();
   });
 });
