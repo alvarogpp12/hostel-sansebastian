@@ -81,20 +81,35 @@ type Prepared = {
 };
 
 /**
+ * Deja en los logs de Vercel por qué no se pudo seguir con una reserva
+ * (datos mal, sin disponibilidad, precio cambiado…), para ver si se pierden
+ * clientes. Sin datos personales: solo campos, motivos, fechas e importes.
+ * En Vercel > Logs, buscar «[reserva] no se pudo seguir».
+ */
+function logStop(reason: string, details: Record<string, unknown>) {
+  console.warn(`[reserva] no se pudo seguir: ${reason}`, details);
+}
+
+/**
  * Común a los dos pagos: valida el formulario, revalida la selección con
  * /availability EN EL SERVIDOR y calcula el importe aquí (nunca se fía del
  * precio del navegador).
  */
 async function prepare(input: unknown): Promise<{ prepared: Prepared } | { result: CheckoutResult; inventory?: InventoryResponse }> {
   const parsed = checkoutSchema.safeParse(input);
-  if (!parsed.success) return { result: { ok: false, errors: parsed.error.issues.map((i) => i.message) } };
+  if (!parsed.success) {
+    logStop("formulario no válido", { campos: parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`) });
+    return { result: { ok: false, errors: parsed.error.issues.map((i) => i.message) } };
+  }
   const { search, selection, guest: rawGuest, notes, consent, expectedTotal } = parsed.data;
 
   const inventory = await getInventory();
   const lang = pickLang(inventory, SITE_LANG);
 
+  const stay = { llegada: search.arrival, salida: search.departure, adultos: search.adults, niños: search.children };
   const checkedGuest = validateGuest(rawGuest, inventory);
   if ("fieldErrors" in checkedGuest) {
+    logStop("datos del huésped", { ...stay, campos: checkedGuest.fieldErrors });
     return { inventory, result: { ok: false, errors: ["Revisa los datos marcados."], fieldErrors: checkedGuest.fieldErrors } };
   }
 
@@ -105,10 +120,14 @@ async function prepare(input: unknown): Promise<{ prepared: Prepared } | { resul
     ...(search.promo ? { promo: search.promo } : {}),
   });
   const resolved = resolveSelection(availability, selection, search.adults, search.children);
-  if ("error" in resolved) return { inventory, result: { ok: false, errors: [resolved.error] } };
+  if ("error" in resolved) {
+    logStop("selección no disponible", { ...stay, motivo: resolved.error, promo: Boolean(search.promo) });
+    return { inventory, result: { ok: false, errors: [resolved.error] } };
+  }
 
   const { total } = resolved.breakdown;
   if (Math.abs(total - expectedTotal) > 0.009) {
+    logStop("precio cambiado", { ...stay, visto: expectedTotal, ahora: total });
     return {
       inventory,
       result: {
@@ -118,7 +137,10 @@ async function prepare(input: unknown): Promise<{ prepared: Prepared } | { resul
       },
     };
   }
-  if (Math.round(total * 100) <= 0) return { inventory, result: { ok: false, errors: ["El importe de la reserva no es válido."] } };
+  if (Math.round(total * 100) <= 0) {
+    logStop("importe no válido", { ...stay, total });
+    return { inventory, result: { ok: false, errors: ["El importe de la reserva no es válido."] } };
+  }
 
   const request: StoredRequest = {
     ...checkedGuest.guest,

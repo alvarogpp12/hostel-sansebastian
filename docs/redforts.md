@@ -72,6 +72,9 @@ pagar ── Server Action startTpvReservation
 - Siempre reserva real (ignora `REDFORTS_TEST_MODE`): con `api_test` no hay
   enlace de pago. Para probar sin cobrar, llegar a la pantalla de pago y no
   pagar.
+- Si no se puede seguir (datos mal rellenados, opción ya no disponible, precio
+  cambiado), queda en Vercel > Logs como `[reserva] no se pudo seguir: <motivo>`
+  con fechas, personas, campos e importes, sin datos personales.
 - Fallo de red o timeout: no se reintenta; se pide al huésped que contacte.
   Revisar en Redforts si la reserva existe (log `[tpv] 🚨 REVISAR`).
 - Modo por entorno: `tpv` en las vistas previas, `whatsapp` en producción
